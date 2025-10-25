@@ -22,9 +22,11 @@ const linkTarget =
     ? "_blank"
     : "_self";
 
-const getPosterUrl = (poster: string | { src: string } | undefined): string | undefined => {
+const getPosterUrl = (
+  poster: string | { src: string } | undefined,
+): string | undefined => {
   if (!poster) return undefined;
-  return typeof poster === 'string' ? poster : poster.src;
+  return typeof poster === "string" ? poster : poster.src;
 };
 ---
 
@@ -72,7 +74,10 @@ const getPosterUrl = (poster: string | { src: string } | undefined): string | un
                 muted
                 playsinline
                 preload="none"
-                poster={getPosterUrl(project.posterImage) || getPosterUrl(project.imageSrc)}
+                poster={
+                  getPosterUrl(project.posterImage) ||
+                  getPosterUrl(project.imageSrc)
+                }
                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 lazy-video"
               >
                 {/* Sources will be added by Intersection Observer */}
@@ -134,33 +139,26 @@ const getPosterUrl = (poster: string | { src: string } | undefined): string | un
           </div>
         </div>
 
-        {
-          /* Skills - show more for minimal if less other content? Or keep consistent */
-        }
         <ul class="flex flex-wrap gap-x-3 gap-y-2 sm:gap-x-4">
           {
-            project.skills.slice(0, isMinimal ? 4 : 3).map(
-              (
-                skill, // Show more skills for minimal?
-              ) => (
-                <li class="flex items-center" title={skill}>
-                  <img
-                    src={`/media/skills/${skill.toLowerCase().replace(/\s+/g, "-")}.svg`}
-                    alt=""
-                    width={isMinimal ? 20 : 24}
-                    height={isMinimal ? 20 : 24}
-                    loading="lazy"
-                    class={`w-4 h-4 sm:w-5 sm:h-5 ${isMinimal ? "opacity-60" : "opacity-75 group-hover:opacity-100"} dark:invert-[.15] transition-opacity`}
-                    aria-hidden="true"
-                  />
-                  {isMinimal && ( // Optionally show skill text for minimal variant
-                    <span class="ml-1.5 text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">
-                      {skill}
-                    </span>
-                  )}
-                </li>
-              ),
-            )
+            project.skills.slice(0, isMinimal ? 4 : 3).map((skill) => (
+              <li class="flex items-center" title={skill}>
+                <img
+                  src={`/media/skills/${skill.toLowerCase().replace(/\s+/g, "-")}.svg`}
+                  alt=""
+                  width={isMinimal ? 20 : 24}
+                  height={isMinimal ? 20 : 24}
+                  loading="lazy"
+                  class={`w-4 h-4 sm:w-5 sm:h-5 ${isMinimal ? "opacity-60" : "opacity-75 group-hover:opacity-100"} dark:invert-[.15] transition-opacity`}
+                  aria-hidden="true"
+                />
+                {isMinimal && ( // Optionally show skill text for minimal variant
+                  <span class="ml-1.5 text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">
+                    {skill}
+                  </span>
+                )}
+              </li>
+            ))
           }
         </ul>
 
@@ -175,7 +173,6 @@ const getPosterUrl = (poster: string | { src: string } | undefined): string | un
 </div>
 
 <script>
-  // Lazy load videos only when they enter viewport
   const lazyVideos = document.querySelectorAll("video.lazy-video");
 
   if ("IntersectionObserver" in window) {

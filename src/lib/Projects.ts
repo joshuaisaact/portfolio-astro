@@ -1,13 +1,9 @@
 import type { Project } from "../components/Projects.astro";
 
-import aigumentPreview from "../assets/projects/aigument-preview.png";
-import atomizepro from "../assets/projects/atomizepro.png";
-import bratquiz from "../assets/projects/bratquiz.png";
+import aigumentPreview from "../assets/projects/aigument-preview.webp";
 import gossPoster from "../assets/projects/goss-poster.png";
 import portfoliowebsite from "../assets/projects/portfoliowebsite.png";
-import streamshuffle from "../assets/projects/streamshuffle.jpg";
-import tapMap from "../assets/projects/TapMap.png";
-import woosterPoster from "../assets/projects/wooster-poster.png";
+import woosterPoster from "../assets/projects/wooster-poster.webp";
 
 export const PROJECTS: Project[] = [
 	{
@@ -199,7 +195,7 @@ It combines LLM technology with robust distributed architecture, comprehensive m
 		slug: "foundations",
 		description:
 			"Led frontend development of a diversity data transparency platform, transforming raw pay gap data into actionable insights. Built and deployed in 24 hours, winning Best in Category at JumpStart Hackathon.",
-		imageSrc: "/media/achievements/foundations-win.jpg",
+		imageSrc: "/media/achievements/foundations-win.webp",
 		imageAlt: "Foundations Platform Preview",
 		skills: ["Nextjs", "React", "TypeScript", "TailwindCSS"],
 		links: [
