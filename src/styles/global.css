@@ -6,6 +6,12 @@
   --color-gray-850: #1a1d29;
 }
 
+body {
+  visibility: visible !important;
+  opacity: 1 !important;
+  transition: opacity 0.2s linear;
+}
+
 :root {
   /* Theme colors */
   --theme-1: #9c6c44; /* Warm muted terracotta */
