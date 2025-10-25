@@ -11,6 +11,17 @@ import "@fontsource-variable/plus-jakarta-sans";
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
 		<title>Joshua Tuddenham</title>
+		<style is:inline>
+			html {
+				background-color: white;
+			}
+			html.dark {
+				background-color: #0d0950;
+			}
+			body {
+				min-height: 100vh;
+			}
+		</style>
 		<script is:inline>
 			const theme = (() => {
 				const localStorageTheme = localStorage?.getItem("theme") ?? "";
