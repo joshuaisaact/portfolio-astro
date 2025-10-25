@@ -2,7 +2,7 @@ import type { Project } from "../components/Projects.astro";
 
 import aigumentPreview from "../assets/projects/aigument-preview.webp";
 import gossPoster from "../assets/projects/goss-poster.png";
-import portfoliowebsite from "../assets/projects/portfoliowebsite.png";
+import portfoliowebsite from "../assets/projects/portfoliowebsite.webp";
 import woosterPoster from "../assets/projects/wooster-poster.webp";
 
 export const PROJECTS: Project[] = [

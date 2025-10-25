@@ -1,0 +1,27 @@
+---
+title: "PyAgent"
+slug: "pyagent"
+projectType: "tool"
+description: "An AI-powered code assistant built with Python and Google's Gemini API. Features file management, code execution, and an agentic loop for completing complex tasks."
+imageSrc: "/media/skills/python.svg"
+imageAlt: "Python Logo"
+links:
+  - type: "github"
+    url: "https://github.com/joshuaisaact/pyagent"
+    label: "View on GitHub"
+skills:
+  - "Python"
+features:
+  - "File system management - list, read, and write files in working directory"
+  - "Python code execution with command-line arguments"
+  - "Agentic loop that iteratively calls functions up to 20 times to complete complex tasks"
+  - "Safety constraints restricting all operations to designated working directory"
+  - "Integration with Google Gemini API for AI-powered task completion"
+  - "30-second timeout on Python execution for safety"
+architecture:
+  backend: "Built with Python using Google Gemini SDK for AI inference. Implements function calling with tools for file operations (get_files_info, get_file_content, write_file) and script execution (run_python_file). Uses UV for package management and environment configuration via .env files."
+---
+
+PyAgent is a learning project that explores building AI-powered code assistants with Python. It leverages Google's Gemini API to create an agent capable of interacting with filesystems and executing Python code to complete complex tasks autonomously.
+
+The project implements an agentic loop that can iteratively use its available tools - file reading, writing, and Python script execution - to accomplish multi-step objectives. Safety is a key consideration, with all operations restricted to a designated working directory and execution timeouts in place.

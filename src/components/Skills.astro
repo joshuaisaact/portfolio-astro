@@ -1,25 +1,9 @@
 ---
-const businessSkills = [
-  {
-    name: "Capital Markets",
-    description:
-      "Deep understanding of fintech and capital markets, with experience in developing analytical tools to support investment strategies.",
-  },
-  {
-    name: "Complex Systems",
-    description:
-      "Proven ability to architect and implement solutions for intricate trading systems and multifaceted business requirements.",
-  },
-  {
-    name: "Enterprise Solutions",
-    description:
-      "Delivering robust, scalable applications for enterprise clients, focusing on performance, security, and integration.",
-  },
-];
-
 const SKILL_FILES = [
   // Core Stack
   "typescript.svg",
+  "go.svg",
+  "python.svg",
   "react.svg",
   "nextjs.svg",
   "nodejs.svg",
@@ -33,13 +17,11 @@ const SKILL_FILES = [
 
   // Backend/Data
   "postgresql.svg",
-  "supabase.svg",
   "drizzle.svg",
 
   // Testing
   "playwright.svg",
   "vitest.svg",
-  "jest.svg",
   "msw.svg",
 
   // DevOps/Infrastructure
@@ -60,6 +42,16 @@ const SKILL_INFO = {
     name: "TypeScript",
     color: "#3178C6",
     url: "https://www.typescriptlang.org/",
+  },
+  "go.svg": {
+    name: "Go",
+    color: "#00ADD8",
+    url: "https://go.dev/",
+  },
+  "python.svg": {
+    name: "Python",
+    color: "#3776AB",
+    url: "https://www.python.org/",
   },
   "react.svg": {
     name: "React",
@@ -112,11 +104,6 @@ const SKILL_INFO = {
     color: "#4169E1",
     url: "https://www.postgresql.org/",
   },
-  "supabase.svg": {
-    name: "Supabase",
-    color: "#3FCF8E",
-    url: "https://supabase.com/",
-  },
   "drizzle.svg": {
     name: "Drizzle",
     color: "#C5F74F",
@@ -133,11 +120,6 @@ const SKILL_INFO = {
     name: "Vitest",
     color: "#6E9F18",
     url: "https://vitest.dev/",
-  },
-  "jest.svg": {
-    name: "Jest",
-    color: "#C21325",
-    url: "https://jestjs.io/",
   },
   "msw.svg": {
     name: "Mock Service Worker",
@@ -178,16 +160,8 @@ const SKILL_INFO = {
 ---
 
  <section aria-label="Skills" class="space-y-6 sm:space-y-8">
-      <div>
-        <p class="text-base sm:text-lg text-gray-700 dark:text-gray-300">
-          My approach to technical challenges is shaped by a diverse background in both early-stage fintech (building behavioural analytics for hedge funds) and rapidly growing enterprise platforms. This blend of experiences gives me a unique perspective on building robust and scalable solutions.        </p>
-      </div>
-
       {/* Technical Skills */}
       <div class="space-y-4 sm:space-y-6">
-        <h3 class="text-lg sm:text-xl font-medium text-gray-900 dark:text-gray-100">
-          Tech Stack
-        </h3>
         <div
           class="flex flex-wrap justify-center gap-3 sm:gap-6 px-2 sm:px-4"
           role="list"
@@ -219,31 +193,6 @@ const SKILL_INFO = {
                   {SKILL_INFO[file].name}
                 </span>
               </a>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div class="space-y-6">
-        <h3 class="text-lg sm:text-xl font-medium text-gray-900 dark:text-gray-100">
-          Additional Experience
-        </h3>
-        <div
-          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"
-          role="list"
-          aria-label="Business experience"
-        >
-          {businessSkills.map((skill) => (
-            <div
-              class="p-4 rounded-lg bg-gray-50 dark:bg-gray-800/50 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              role="listitem"
-            >
-              <h4 class="font-medium text-gray-900 dark:text-gray-100 mb-2">
-                {skill.name}
-              </h4>
-              <p class="text-sm text-gray-600 dark:text-gray-300">
-                {skill.description}
-              </p>
             </div>
           ))}
         </div>

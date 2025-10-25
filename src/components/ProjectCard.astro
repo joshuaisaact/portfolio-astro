@@ -28,21 +28,25 @@ const getPosterUrl = (
   if (!poster) return undefined;
   return typeof poster === "string" ? poster : poster.src;
 };
+
+const isImageMetadata = (
+  src: string | { src: string } | undefined,
+): src is { src: string } => {
+  return typeof src === "object" && src !== null && "src" in src;
+};
 ---
 
 <div class={`relative block h-full ${isMinimal ? "group" : ""}`}>
-  {/* Award badge - maybe only for 'full' variant or if explicitly present */}
   {
-    project.award &&
-      !isMinimal && ( // Example: only show award prominently on full card
-        <div
-          class="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 z-20
+    project.award && !isMinimal && (
+      <div
+        class="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 z-20
           bg-amber-500 text-white rounded-full p-1.5 sm:p-2 shadow-md
           transform transition-transform group-hover:scale-110"
-        >
-          <Trophy class="w-4 h-4 sm:w-5 sm:h-5" />
-        </div>
-      )
+      >
+        <Trophy class="w-4 h-4 sm:w-5 sm:h-5" />
+      </div>
+    )
   }
 
   <a
@@ -82,16 +86,23 @@ const getPosterUrl = (
               >
                 {/* Sources will be added by Intersection Observer */}
               </video>
-            ) : (
+            ) : typeof project.imageSrc === "string" ? (
+              <img
+                src={project.imageSrc}
+                alt={project.imageAlt || project.title}
+                loading="lazy"
+                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            ) : project.imageSrc && isImageMetadata(project.imageSrc) ? (
               <Image
-                src={project.imageSrc!}
+                src={project.imageSrc}
                 alt={project.imageAlt || project.title}
                 width={800}
                 height={600}
                 loading="lazy"
                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
-            )}
+            ) : null}
           </div>
         )
       }

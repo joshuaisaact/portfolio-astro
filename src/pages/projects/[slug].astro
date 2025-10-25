@@ -1,0 +1,208 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import { Trophy, ExternalLink, Github, BookOpen } from 'lucide-astro';
+import Layout from '../../layouts/Layout.astro';
+import Navbar from '../../components/Navbar.astro';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map(project => ({
+    params: { slug: project.data.slug },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+
+// Helper to get image URL
+const getImageUrl = (src: string | { src: string } | undefined): string | undefined => {
+  if (!src) return undefined;
+  return typeof src === 'string' ? src : src.src;
+};
+
+// Link icon mapping
+const getLinkIcon = (type: string) => {
+  switch (type) {
+    case 'github':
+      return Github;
+    case 'live':
+      return ExternalLink;
+    case 'blog':
+    case 'submission':
+      return BookOpen;
+    default:
+      return ExternalLink;
+  }
+};
+---
+
+<Layout>
+  <Navbar />
+  <div class="pb-16">
+      <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-12" aria-labelledby="project-title">
+        <!-- Project media -->
+        {(project.data.videoSrc || project.data.imageSrc) && (
+          <div class="relative aspect-video rounded-xl overflow-hidden shadow-lg mb-8" aria-label="Project preview">
+            {project.data.videoSrc ? (
+              <video
+                src={project.data.videoSrc}
+                autoplay
+                loop
+                muted
+                playsinline
+                poster={getImageUrl(project.data.posterImage) || getImageUrl(project.data.imageSrc)}
+                class="w-full h-full object-cover"
+              >
+                {project.data.videoSrc && (
+                  <source src={project.data.videoSrc} type="video/webm" />
+                )}
+              </video>
+            ) : project.data.imageSrc && (
+              typeof project.data.imageSrc === 'string' ? (
+                <img
+                  src={project.data.imageSrc}
+                  alt={project.data.imageAlt || project.data.title}
+                  class="w-full h-full object-cover"
+                  loading="eager"
+                />
+              ) : (
+                <Image
+                  src={project.data.imageSrc}
+                  alt={project.data.imageAlt || project.data.title}
+                  class="w-full h-full object-cover"
+                  loading="eager"
+                />
+              )
+            )}
+          </div>
+        )}
+
+        <!-- Project header -->
+        <div class="text-center mb-12">
+          <div class="flex items-center justify-center gap-3 mb-6 flex-wrap">
+            <h1
+              class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white"
+              id="project-title"
+            >
+              {project.data.title}
+            </h1>
+            {project.data.award && (
+              <div
+                class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 dark:bg-amber-500/20 rounded-full"
+                aria-label={`Award: ${project.data.award}`}
+              >
+                <Trophy class="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                <span class="text-sm font-medium text-amber-600 dark:text-amber-400">
+                  {project.data.award}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <!-- Project Links -->
+          <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+            {project.data.links.map((link) => {
+              const Icon = getLinkIcon(link.type);
+              return (
+                <a
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-2 px-4 py-2
+                    bg-white dark:bg-gray-800
+                    border border-gray-200 dark:border-gray-700
+                    rounded-lg
+                    text-sm font-medium text-gray-700 dark:text-gray-300
+                    hover:bg-gray-50 dark:hover:bg-gray-700
+                    hover:border-gray-300 dark:hover:border-gray-600
+                    transition-all duration-200"
+                >
+                  <Icon class="w-4 h-4" />
+                  {link.label}
+                </a>
+              );
+            })}
+          </div>
+        </div>
+
+        <!-- Project content -->
+        <div class="prose prose-lg dark:prose-invert max-w-none space-y-8">
+          <!-- Overview -->
+          {project.body && (
+            <div class="text-lg leading-relaxed text-gray-700 dark:text-gray-300" aria-label="Project overview">
+              <p set:html={project.body} />
+            </div>
+          )}
+
+          <!-- Key Features -->
+          {project.data.features && project.data.features.length > 0 && (
+            <div>
+              <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                Key Features
+              </h2>
+              <ul class="space-y-2 text-gray-700 dark:text-gray-300">
+                {project.data.features.map((feature) => (
+                  <li class="flex items-start gap-2">
+                    <span class="text-blue-500 mt-1.5">▸</span>
+                    <span>{feature}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <!-- Technical Architecture -->
+          {project.data.architecture && (
+            <div>
+              <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                Technical Architecture
+              </h2>
+              <div class="space-y-4">
+                {project.data.architecture.frontend && (
+                  <div>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                      Frontend
+                    </h3>
+                    <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                      {project.data.architecture.frontend}
+                    </p>
+                  </div>
+                )}
+                {project.data.architecture.backend && (
+                  <div>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                      Backend
+                    </h3>
+                    <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                      {project.data.architecture.backend}
+                    </p>
+                  </div>
+                )}
+                {project.data.architecture.testing && (
+                  <div>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                      Testing
+                    </h3>
+                    <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                      {project.data.architecture.testing}
+                    </p>
+                  </div>
+                )}
+                {project.data.architecture.infrastructure && (
+                  <div>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                      Infrastructure
+                    </h3>
+                    <p class="text-gray-700 dark:text-gray-300 whitespace-pre-line">
+                      {project.data.architecture.infrastructure}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </article>
+  </div>
+</Layout>

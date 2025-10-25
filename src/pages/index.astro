@@ -6,10 +6,23 @@ import Section from "../components/Section.astro";
 import Skills from "../components/Skills.astro";
 import Welcome from "../components/Welcome.astro";
 import Layout from "../layouts/Layout.astro";
-import { applicationProjects, utilityProjects } from "../lib/Projects";
+import { getCollection } from "astro:content";
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+// Fetch projects from content collection
+const allProjects = await getCollection("projects");
+
+// Separate application projects from utility projects
+const applicationProjects = allProjects
+	.filter((p) => !p.data.projectType || p.data.projectType === "application")
+	.sort((a, b) => (a.data.order ?? 999) - (b.data.order ?? 999))
+	.map((p) => p.data);
+
+const utilityProjects = allProjects
+	.filter((p) =>
+		["tool", "library", "starter"].includes(p.data.projectType || ""),
+	)
+	.sort((a, b) => (a.data.order ?? 999) - (b.data.order ?? 999))
+	.map((p) => p.data);
 ---
 
 <a

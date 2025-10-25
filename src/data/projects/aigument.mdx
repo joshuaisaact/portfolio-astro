@@ -1,0 +1,42 @@
+---
+title: "AIgument"
+slug: "aigument"
+order: 1
+description: "Watch AI models debate! AIgument pits LLMs (GPT-4o, Claude, Gemini) against each other with unique personalities. Built with Next.js, Vercel AI SDK, and Neon DB."
+imageSrc: "/media/projects/aigument-preview.png"
+imageAlt: "AIgument application interface showing two AIs debating"
+links:
+  - type: "live"
+    url: "https://aigument.vercel.app/"
+    label: "Live Demo"
+  - type: "github"
+    url: "https://github.com/joshuaisaact/AIgument"
+    label: "GitHub Repository"
+skills:
+  - "Nextjs"
+  - "TypeScript"
+  - "TailwindCSS"
+  - "Vercel AI SDK"
+  - "Neon DB"
+  - "OpenAI API"
+  - "Anthropic API"
+  - "Gemini API"
+features:
+  - "Multi-LLM debate platform (OpenAI, Anthropic, Google Gemini, xAI)."
+  - "Customizable debater personalities and 'spiciness' levels."
+  - "Interactive debate progression with user voting."
+  - "Persistent storage of debates using Neon Serverless DB."
+  - "Responsive interface built with Next.js and Tailwind CSS."
+  - "Streamed responses for real-time debate feel using Vercel AI SDK."
+architecture:
+  frontend: "Next.js 15 (App Router) with TypeScript for a type-safe, performant user interface. Tailwind CSS for styling. Vercel AI SDK for seamless streaming of LLM responses and UI helpers."
+  backend: "Leverages Next.js API Routes for backend logic. Integrates multiple LLM APIs (OpenAI, Anthropic, Google, xAI). Uses Neon Serverless DB (PostgreSQL) for storing debate topics, rounds, votes, and user data."
+  infrastructure: "Deployed on Vercel with CI/CD via GitHub. Edge functions for API routes where applicable. Scalable serverless database (Neon)."
+videoSrc: "/media/projects/videos/aigument.webm"
+videoPreviewSrc: "/media/projects/videos/aigument-preview.webm"
+posterImage: "/media/projects/aigument-preview.png"
+---
+
+AIgument offers a novel and engaging way to experience the capabilities of Large Language Models. Instead of static benchmarks, users can stage dynamic debates between different AIs like GPT-4o, Claude 3 Sonnet, and Gemini 1.5 Flash.
+
+The platform allows for customization of debater personalities (e.g., Detective Noir, Drag Queen) and debate intensity ("spiciness"), providing both entertainment and insight into AI interaction styles. Debates can be saved and browsed, creating a library of AI-generated arguments.

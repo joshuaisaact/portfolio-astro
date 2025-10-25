@@ -1,0 +1,26 @@
+---
+title: "Go AI Agent Foundation"
+slug: "go-ai-agent-foundation"
+projectType: "tool"
+description: "A foundational Go project for building AI agents that interact with users and utilize tools, defaulting to the Anthropic (Claude) API."
+imageSrc: "/media/skills/go.svg"
+imageAlt: "Go Language Logo"
+links:
+  - type: "github"
+    url: "https://github.com/joshuaisaact/Go-AI-Agent"
+    label: "View on GitHub"
+skills:
+  - "Go"
+features:
+  - "Core agent interaction loop for user input and agent responses."
+  - "Inference engine for LLM communication (Anthropic API integrated)."
+  - "Extensible tool system with clear schema definitions."
+  - "Example tools: file system operations (read_file, list_files, edit_file)."
+  - "ripgrep_search tool for powerful regex searches within files/directories."
+  - "Designed for building command-line interface (CLI) based agents."
+  - "Modular structure (cmd/agent, pkg/agent, pkg/tools) for easy customization."
+architecture:
+  backend: "Written entirely in Go (Golang). Handles API calls to the Anthropic (Claude) API for inference. Manages tool registration, invocation based on LLM output, and response parsing. Main application entry point in cmd/agent/main.go. Core agent logic resides in pkg/agent/. Tool definitions and implementations in pkg/tools/."
+---
+
+This project provides a flexible and extensible foundation for creating AI agents in Go. It handles core agent logic, inference with LLMs (Anthropic's Claude by default), and a system for defining and integrating custom tools. The goal is to accelerate the development of sophisticated AI agents capable of complex task execution directly from the command line.
