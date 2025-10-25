@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+@variant dark (.dark &);
+
+@theme {
+  --color-gray-850: #1a1d29;
+}
+
+:root {
+  /* Theme colors */
+  --theme-1: #9c6c44; /* Warm muted terracotta */
+  --theme-2: #586f7c; /* Steel blue grey */
+  --theme-3: #7c7052; /* Warm taupe */
+  --theme-4: #8c6c7a; /* Muted mauve */
+  --theme-5: #4a7c6a; /* Forest sage */
+  --theme-6: #4a5d7c; /* Deep blue grey */
+  --theme-7: #635d7c; /* Muted purple grey */
+  --theme-8: #4a7c5d; /* Deep sage */
+
+  /* System colors */
+  --color-primary: #3e7256;
+  --color-secondary: #3e4072;
+  --color-tertiary: #723e5a;
+  --color-background: white;
+
+  /* Spacing */
+  --padding-small: 0.5rem;
+  --padding-medium: 1rem;
+  --padding-large: 2rem;
+}
+
+.dark img[src*="github.svg"],
+.dark img[src*="express.svg"],
+.dark img[src*="nodejs.svg"] {
+  filter: invert(1);
+}
+
+html {
+  background-color: white;
+  color: #000;
+}
+
+html.dark {
+  background-color: #0d0950;
+  color: #fff;
+}
+
+.dark .menu {
+  background-color: #fff;
+  color: #000;
+}
+
+.dark .nav-links a:hover,
+.dark .nav-links a:focus {
+  color: #0d0950;
+}
+
+.dark .nav-links a {
+  color: #fff;
+}
+
+.main-gradient {
+  background-image: linear-gradient(to bottom, rgb(249 250 251), rgb(255 255 255), rgb(249 250 251 / 0.8));
+}
+
+.dark .main-gradient {
+  background-image: linear-gradient(to bottom, rgb(17 24 39), rgb(3 7 18), rgb(17 24 39));
+}
+
+.dot-pattern {
+  background-image: radial-gradient(circle at 1px 1px, rgb(0 0 0 / 0.03) 1px, transparent 0);
+  background-size: 24px 24px;
+}
+
+.dark .dot-pattern {
+  background-image: radial-gradient(circle at 1px 1px, rgb(255 255 255 / 0.03) 1px, transparent 0);
+}
+
+.dark {
+  --gradient-from: theme('colors.gray.900');
+  --gradient-via: theme('colors.gray.950');
+  --gradient-to: theme('colors.gray.900');
+  }

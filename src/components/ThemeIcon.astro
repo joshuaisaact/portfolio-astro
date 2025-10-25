@@ -1,0 +1,28 @@
+---
+import { Sun, Moon } from "lucide-astro";
+---
+
+<button
+  id="themeToggle"
+  aria-label="Toggle theme"
+  class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[var(--theme-1)]"
+>
+  <Sun
+    class="w-5 h-5 text-gray-900 cursor-pointer dark:text-gray-200 transition-transform hover:rotate-45 duration-200 hidden dark:block"
+    aria-hidden="true"
+  />
+  <Moon
+    class="w-5 h-5 text-gray-900 cursor-pointer dark:text-gray-200 transition-transform hover:rotate-12 duration-200 block dark:hidden"
+    aria-hidden="true"
+  />
+</button>
+
+<script>
+  const button = document.getElementById("themeToggle");
+
+  button?.addEventListener("click", () => {
+    document.documentElement.classList.toggle("dark");
+    const isDark = document.documentElement.classList.contains("dark");
+    localStorage.setItem("theme", isDark ? "dark" : "light");
+  });
+</script>

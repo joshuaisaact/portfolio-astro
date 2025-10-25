@@ -1,0 +1,23 @@
+---
+const {id, headingId, title} = Astro.props;
+---
+
+   <section
+      id={id}
+      aria-labelledby={headingId}
+      class="relative py-8 sm:py-16 md:py-20 border-t border-gray-200 dark:border-gray-800 px-0 sm:px-4 md:px-8"
+    >
+      <div class="space-y-6 sm:space-y-8">
+       <h2 id={id} class={`relative text-3xl font-semibold sm:text-4xl`}>
+              <span class="relative z-10 bg-gradient-to-b from-gray-900 to-gray-700 bg-clip-text text-transparent dark:from-gray-100 dark:to-gray-300">
+     {title}
+      </span>
+        <span
+        class="absolute inset-0 -z-10 translate-y-1 bg-[radial-gradient(circle_at_1px_1px,rgb(0_0_0_/_0.05)_1px,transparent_0)] [background-size:16px_16px] dark:bg-[radial-gradient(circle_at_1px_1px,rgb(255_255_255_/_0.05)_1px,transparent_0)]"
+        aria-hidden="true"
+      /></h2>
+        <div role="region" aria-label={title}>
+          <slot />
+        </div>
+      </div>
+    </section>

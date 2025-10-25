@@ -1,0 +1,240 @@
+---
+import type { Project } from "./Projects.astro";
+import { Image } from "astro:assets";
+import { Github, Trophy } from "lucide-astro";
+
+interface Props {
+  project: Project;
+  variant?: "full" | "minimal";
+}
+
+const { project, variant = "full" } = Astro.props;
+
+const isMinimal = variant === "minimal";
+
+const cardLinkHref =
+  isMinimal && project.links.find((link) => link.type === "github")
+    ? project.links.find((link) => link.type === "github")!.url
+    : `/projects/${project.slug}`;
+
+const linkTarget =
+  isMinimal && project.links.find((link) => link.type === "github")
+    ? "_blank"
+    : "_self";
+---
+
+<div class={`relative block h-full ${isMinimal ? "group" : ""}`}>
+  {/* Award badge - maybe only for 'full' variant or if explicitly present */}
+  {
+    project.award &&
+      !isMinimal && ( // Example: only show award prominently on full card
+        <div
+          class="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 z-20
+          bg-amber-500 text-white rounded-full p-1.5 sm:p-2 shadow-md
+          transform transition-transform group-hover:scale-110"
+        >
+          <Trophy class="w-4 h-4 sm:w-5 sm:h-5" />
+        </div>
+      )
+  }
+
+  <a
+    href={cardLinkHref}
+    target={linkTarget}
+    rel={linkTarget === "_blank" ? "noopener noreferrer" : undefined}
+    class="block h-full"
+  >
+    <div
+      class={`group
+        relative overflow-hidden
+        bg-gradient-to-b from-white to-gray-50
+        dark:from-gray-800 dark:to-gray-850
+        rounded-lg shadow-sm
+        ring-1 ring-gray-900/[0.05]
+        transition-all duration-300
+        hover:shadow-md hover:-translate-y-0.5 ${isMinimal ? "hover:bg-gray-50 dark:hover:bg-gray-800/60" : ""}`}
+    >
+      {/* Image/Video Section - Conditional based on variant */}
+      {
+        !isMinimal && (project.videoPreviewSrc || project.imageSrc) && (
+          <div class="relative aspect-[3/2] sm:aspect-[4/3] overflow-hidden bg-gray-100 dark:bg-gray-800">
+            {project.videoSrc ? (
+              <video
+                data-video-src={project.videoPreviewSrc || project.videoSrc}
+                data-video-src-mp4={project.videoSrc}
+                autoplay
+                loop
+                muted
+                playsinline
+                preload="none"
+                poster={project.posterImage || project.imageSrc}
+                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 lazy-video"
+              >
+                {/* Sources will be added by Intersection Observer */}
+              </video>
+            ) : (
+              <Image
+                src={project.imageSrc!}
+                alt={project.imageAlt || project.title}
+                width={800}
+                height={600}
+                loading="lazy"
+                class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+              />
+            )}
+          </div>
+        )
+      }
+
+      <div
+        class={`p-4 sm:p-6 space-y-3 sm:space-y-4 ${isMinimal ? "sm:py-5 sm:px-5" : ""}`}
+      >
+        <div class="space-y-2">
+          <div
+            class={`flex ${isMinimal ? "flex-col items-start sm:flex-row sm:items-center sm:justify-between" : "flex-col sm:flex-row sm:items-center"} gap-2`}
+          >
+            <h3
+              class={`text-lg sm:text-xl font-semibold text-gray-900 dark:text-gray-100 ${isMinimal ? "line-clamp-2" : "line-clamp-1"}`}
+            >
+              {project.title}
+            </h3>
+            {/* Award text - smaller for minimal, or integrated differently */}
+            {
+              project.award && isMinimal && (
+                <span class="text-xs text-amber-600 dark:text-amber-400 mt-1 sm:mt-0">
+                  (Hackathon Winner)
+                </span>
+              )
+            }
+            {
+              project.award && !isMinimal && (
+                <div
+                  class="flex items-center gap-1.5 px-2 py-0.5
+                    bg-amber-100 dark:bg-amber-500/20 rounded-full w-fit"
+                >
+                  <Trophy class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-600 dark:text-amber-400" />
+                  <span class="text-xs sm:text-sm font-medium text-amber-600 dark:text-amber-400">
+                    Hackathon Winner
+                  </span>
+                </div>
+              )
+            }
+            {/* GitHub link icon for minimal variant */}
+            {
+              isMinimal &&
+                project.links.find((link) => link.type === "github") && (
+                  <Github class="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-200 transition-colors sm:ml-auto" />
+                )
+            }
+          </div>
+        </div>
+
+        {
+          /* Skills - show more for minimal if less other content? Or keep consistent */
+        }
+        <ul class="flex flex-wrap gap-x-3 gap-y-2 sm:gap-x-4">
+          {
+            project.skills.slice(0, isMinimal ? 4 : 3).map(
+              (
+                skill, // Show more skills for minimal?
+              ) => (
+                <li class="flex items-center" title={skill}>
+                  <img
+                    src={`/media/skills/${skill.toLowerCase().replace(/\s+/g, "-")}.svg`}
+                    alt=""
+                    width={isMinimal ? 20 : 24}
+                    height={isMinimal ? 20 : 24}
+                    loading="lazy"
+                    class={`w-4 h-4 sm:w-5 sm:h-5 ${isMinimal ? "opacity-60" : "opacity-75 group-hover:opacity-100"} dark:invert-[.15] transition-opacity`}
+                    aria-hidden="true"
+                  />
+                  {isMinimal && ( // Optionally show skill text for minimal variant
+                    <span class="ml-1.5 text-xs text-gray-500 dark:text-gray-400 hidden sm:inline">
+                      {skill}
+                    </span>
+                  )}
+                </li>
+              ),
+            )
+          }
+        </ul>
+
+        <p
+          class={`text-sm ${isMinimal ? "text-gray-500 dark:text-gray-400 line-clamp-2 sm:line-clamp-3" : "text-gray-600 dark:text-gray-300 line-clamp-3"}`}
+        >
+          {project.description}
+        </p>
+      </div>
+    </div>
+  </a>
+</div>
+
+<script>
+  // Lazy load videos only when they enter viewport
+  const lazyVideos = document.querySelectorAll("video.lazy-video");
+
+  if ("IntersectionObserver" in window) {
+    const videoObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const video = entry.target as HTMLVideoElement;
+          const webmSrc = video.dataset.videoSrc;
+          const mp4Src = video.dataset.videoSrcMp4;
+
+          // Only add sources if not already added
+          if (webmSrc && !video.querySelector("source")) {
+            // Add WebM source (better compression)
+            const sourceWebm = document.createElement("source");
+            sourceWebm.src = webmSrc;
+            sourceWebm.type = "video/webm";
+            video.appendChild(sourceWebm);
+
+            // Add MP4 source (fallback)
+            if (mp4Src) {
+              const sourceMp4 = document.createElement("source");
+              sourceMp4.src = mp4Src;
+              sourceMp4.type = "video/mp4";
+              video.appendChild(sourceMp4);
+            }
+
+            // Load and play the video
+            video.load();
+            video.play().catch(() => {
+              // Autoplay failed (e.g., browser policy), that's ok
+            });
+          }
+
+          // Stop observing this video
+          videoObserver.unobserve(video);
+        }
+      });
+    });
+
+    lazyVideos.forEach((video) => {
+      videoObserver.observe(video);
+    });
+  } else {
+    // Fallback for browsers without IntersectionObserver
+    lazyVideos.forEach((video) => {
+      const videoEl = video as HTMLVideoElement;
+      const webmSrc = videoEl.dataset.videoSrc;
+      const mp4Src = videoEl.dataset.videoSrcMp4;
+
+      if (webmSrc) {
+        const sourceWebm = document.createElement("source");
+        sourceWebm.src = webmSrc;
+        sourceWebm.type = "video/webm";
+        videoEl.appendChild(sourceWebm);
+
+        if (mp4Src) {
+          const sourceMp4 = document.createElement("source");
+          sourceMp4.src = mp4Src;
+          sourceMp4.type = "video/mp4";
+          videoEl.appendChild(sourceMp4);
+        }
+
+        videoEl.load();
+      }
+    });
+  }
+</script>

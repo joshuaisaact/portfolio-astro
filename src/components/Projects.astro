@@ -1,0 +1,72 @@
+---
+import ProjectCard from "./ProjectCard.astro";
+
+export interface Project {
+  title: string;
+  slug: string;
+  description: string;
+  imageSrc?: string;
+  imageAlt?: string;
+  links: ProjectLink[];
+  videoSrc?: string;
+  videoPreviewSrc?: string;
+  posterImage?: string;
+  award?: string;
+  skills: string[];
+  overview: string;
+  features: string[];
+  architecture?: {
+    frontend?: string;
+    backend?: string;
+    infrastructure?: string;
+    testing?: string;
+  };
+  projectType?: "application" | "tool" | "library" | "starter";
+}
+
+export interface ProjectLink {
+  type: string;
+  url: string;
+  label: string;
+}
+
+interface Props {
+  projects: Project[];
+  projectType?: "application" | "tool";
+  cardType?: "full" | "minimal";
+}
+
+const { projects, projectType, cardType = "full" } = Astro.props;
+---
+
+<section aria-label="Projects Section" class="space-y-6 sm:space-y-8">
+  <div>
+    <p
+      class="text-base sm:text-lg text-gray-700 dark:text-gray-300 leading-relaxed"
+    >
+      {
+        projectType === "application" &&
+          `I'm passionate about building and continuously exploring new technologies. This section highlights some of my recent user-facing applications, from AI-powered platforms to award-winning hackathon entries.`
+      }
+      {
+        projectType === "tool" &&
+          `Beyond full applications, I also enjoy creating tools and starter kits
+      that streamline development and explore specific technologies. Here are
+      some of my contributions to the developer ecosystem.`
+      }
+    </p>
+  </div>
+  <div
+    class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8"
+    role="list"
+    aria-label="Project list"
+  >
+    {
+      projects.map((project) => (
+        <div role="listitem" class="w-full">
+          <ProjectCard project={project} variant={cardType} />
+        </div>
+      ))
+    }
+  </div>
+</section>
