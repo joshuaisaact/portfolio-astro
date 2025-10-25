@@ -1,6 +1,5 @@
 import type { Project } from "../components/Projects.astro";
 
-// Import optimized project images
 import aigumentPreview from "../assets/projects/aigument-preview.png";
 import atomizepro from "../assets/projects/atomizepro.png";
 import bratquiz from "../assets/projects/bratquiz.png";

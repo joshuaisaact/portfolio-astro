@@ -22,7 +22,6 @@ const linkTarget =
     ? "_blank"
     : "_self";
 
-// Helper to get poster URL from ImageMetadata or string
 const getPosterUrl = (poster: string | { src: string } | undefined): string | undefined => {
   if (!poster) return undefined;
   return typeof poster === 'string' ? poster : poster.src;
