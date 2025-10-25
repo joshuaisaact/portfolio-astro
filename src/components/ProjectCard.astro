@@ -21,6 +21,12 @@ const linkTarget =
   isMinimal && project.links.find((link) => link.type === "github")
     ? "_blank"
     : "_self";
+
+// Helper to get poster URL from ImageMetadata or string
+const getPosterUrl = (poster: string | { src: string } | undefined): string | undefined => {
+  if (!poster) return undefined;
+  return typeof poster === 'string' ? poster : poster.src;
+};
 ---
 
 <div class={`relative block h-full ${isMinimal ? "group" : ""}`}>
@@ -67,7 +73,7 @@ const linkTarget =
                 muted
                 playsinline
                 preload="none"
-                poster={project.posterImage || project.imageSrc}
+                poster={getPosterUrl(project.posterImage) || getPosterUrl(project.imageSrc)}
                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 lazy-video"
               >
                 {/* Sources will be added by Intersection Observer */}
@@ -79,7 +85,7 @@ const linkTarget =
                 width={800}
                 height={600}
                 loading="lazy"
-                class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105"
+                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
             )}
           </div>

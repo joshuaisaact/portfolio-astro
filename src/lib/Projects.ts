@@ -1,12 +1,22 @@
 import type { Project } from "../components/Projects.astro";
 
+// Import optimized project images
+import aigumentPreview from "../assets/projects/aigument-preview.png";
+import atomizepro from "../assets/projects/atomizepro.png";
+import bratquiz from "../assets/projects/bratquiz.png";
+import gossPoster from "../assets/projects/goss-poster.png";
+import portfoliowebsite from "../assets/projects/portfoliowebsite.png";
+import streamshuffle from "../assets/projects/streamshuffle.jpg";
+import tapMap from "../assets/projects/TapMap.png";
+import woosterPoster from "../assets/projects/wooster-poster.png";
+
 export const PROJECTS: Project[] = [
 	{
 		title: "AIgument",
 		slug: "aigument",
 		description:
 			"Watch AI models debate! AIgument pits LLMs (GPT-4o, Claude, Gemini) against each other with unique personalities. Built with Next.js, Vercel AI SDK, and Neon DB.",
-		imageSrc: "/media/projects/aigument-preview.png",
+		imageSrc: aigumentPreview,
 		imageAlt: "AIgument application interface showing two AIs debating",
 		links: [
 			{
@@ -52,7 +62,7 @@ export const PROJECTS: Project[] = [
 		},
 		videoSrc: "/media/projects/videos/aigument.webm",
 		videoPreviewSrc: "/media/projects/videos/aigument-preview.webm",
-		posterImage: "/media/projects/aigument-preview.png",
+		posterImage: aigumentPreview,
 	},
 	{
 		title: "JoshDesk",
@@ -111,7 +121,7 @@ export const PROJECTS: Project[] = [
 		slug: "wooster",
 		description:
 			"Full-stack AI travel planner built with React/TypeScript and Node.js. Features custom itinerary generation, production-grade auth, and automated CI/CD. Live at trywooster.live",
-		imageSrc: "/media/projects/wooster-poster.png",
+		imageSrc: woosterPoster,
 		imageAlt: "Wooster logo",
 		links: [
 			{
@@ -183,7 +193,7 @@ It combines LLM technology with robust distributed architecture, comprehensive m
 		},
 		videoSrc: "/media/projects/videos/wooster.webm",
 		videoPreviewSrc: "/media/projects/videos/wooster-preview.webm",
-		posterImage: "/media/projects/wooster-poster.png",
+		posterImage: woosterPoster,
 	},
 	{
 		title: "Foundations",
@@ -248,7 +258,7 @@ It combines LLM technology with robust distributed architecture, comprehensive m
 		slug: "goss",
 		description:
 			"Architected a robust real-time social platform featuring WebSocket notifications, social graph management, and file handling. Built with Next.js, TypeScript, and Supabase.",
-		imageSrc: "/media/projects/goss-poster.png",
+		imageSrc: gossPoster,
 		imageAlt: "Goss logo",
 		links: [
 			{
@@ -295,14 +305,14 @@ components, focusing on creating a scalable backend while ensuring a smooth user
 		},
 		videoSrc: "/media/projects/videos/goss3.webm",
 		videoPreviewSrc: "/media/projects/videos/goss-preview.webm",
-		posterImage: "/media/projects/goss-poster.png",
+		posterImage: gossPoster,
 	},
 	{
 		title: "Portfolio Website",
 		slug: "portfolio-website",
 		description:
 			"A modern, accessible portfolio built with Next.js 15, featuring responsive design and smooth animations.",
-		imageSrc: "/media/projects/portfoliowebsite.png",
+		imageSrc: portfoliowebsite,
 		imageAlt: "Portfolio Website",
 		links: [
 			{
