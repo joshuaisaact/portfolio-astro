@@ -8,6 +8,7 @@ tags: ["AI", "LLM", "Creativity", "Architecture", "Yoga", "Product Development",
 import AILazinessDomains from '../../components/blog-articles/AILazinessDomains.astro';
 import SolutionCards from '../../components/blog-articles/SolutionCards.astro';
 import YogaDataStructure from '../../components/blog-articles/YogaDataStructure.astro';
+import MockMayaChat from '../../components/react/MockMayaChat';
 
 *Why teaching an AI yoga instructor to be creative reveals fundamental problems with intelligent content generation*
 
@@ -18,6 +19,12 @@ It started innocently enough. My wife went on a month-long trip to India to trai
 Naturally, I did what any reasonable developer would do: I built her a personalized AI yoga instructor.
 
 I created Maya—a warm, empathetic AI yoga companion who could understand what users needed and generate personalized sessions. Maya was brilliant. She could create custom sessions when someone said they were stressed, or design energizing sequences for morning practice.
+
+## Meet Maya in Action
+
+Here's what chatting with Maya actually looks like. Click "Play Demo" to see her in action:
+
+<MockMayaChat scenario="working-well" client:visible />
 
 *Want to try Maya yourself? Check out the live project at [joshdesk.live](https://joshdesk.live)*
 
@@ -52,6 +59,12 @@ This seemed straightforward until I realized the implications:
 The obvious answer is "yes"—why recreate what already exists? But this immediately raises a more troubling question:
 
 **What happens when AI gets good at reusing content?**
+
+But here's where it gets interesting. Watch what happens when Maya gets really good at her job:
+
+<MockMayaChat scenario="too-good" client:visible />
+
+Notice how in the second demo, Maya keeps finding existing sequences but never creates anything new? This is the creativity paradox in action.
 
 ## The Creativity vs. Efficiency Dilemma
 
