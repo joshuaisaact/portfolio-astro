@@ -27,20 +27,31 @@ This is a migration of my personal portfolio from Next.js to Astro, focusing on 
 │   ├── media/           # Skills icons, navigation icons, project assets
 │   └── videos/          # Project demo videos
 ├── src/
-│   ├── assets/          # Profile picture and other assets
+│   ├── assets/          # Optimized images (projects, blog)
 │   ├── components/      # Reusable Astro components
+│   │   ├── Blog.astro
+│   │   ├── BlogCard.astro
+│   │   ├── Contact.astro
+│   │   ├── Figure.astro
 │   │   ├── Navbar.astro
 │   │   ├── ProjectCard.astro
 │   │   ├── Projects.astro
-│   │   ├── Skills.astro
+│   │   ├── Section.astro
 │   │   ├── ThemeIcon.astro
 │   │   └── Welcome.astro
+│   ├── content.config.ts # Content collections configuration
+│   ├── data/
+│   │   ├── blog/        # Blog posts (MDX)
+│   │   └── projects/    # Project metadata (MDX)
 │   ├── layouts/
 │   │   └── Layout.astro # Base layout with theme support
-│   ├── lib/
-│   │   └── Projects.ts  # Project data and metadata
 │   ├── pages/
-│   │   └── index.astro  # Homepage
+│   │   ├── blog/
+│   │   │   ├── [slug].astro  # Blog post page
+│   │   │   └── index.astro   # Blog listing
+│   │   ├── projects/
+│   │   │   └── [slug].astro  # Project detail page
+│   │   └── index.astro       # Homepage
 │   └── styles/
 │       └── global.css   # Global styles and Tailwind config
 └── package.json
@@ -48,12 +59,13 @@ This is a migration of my personal portfolio from Next.js to Astro, focusing on 
 
 ## Features
 
-- Dark/light theme toggle
-- Responsive design
-- Project showcase with interactive cards
-- Skills section with tech stack icons
-- Optimized images and videos
-- SEO-friendly metadata
+- Dark/light theme toggle with system preference detection
+- Responsive design optimized for all screen sizes
+- Project showcase with interactive cards and lazy-loaded videos
+- Blog system with MDX support and content collections
+- Optimized images through Astro's image pipeline
+- SEO-friendly metadata and Open Graph tags
+- Accessible navigation and skip links
 
 ## Commands
 
