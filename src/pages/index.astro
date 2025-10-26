@@ -8,10 +8,8 @@ import Welcome from "../components/Welcome.astro";
 import Layout from "../layouts/Layout.astro";
 import { getCollection } from "astro:content";
 
-// Fetch projects from content collection
 const allProjects = await getCollection("projects");
 
-// Separate application projects from utility projects
 const applicationProjects = allProjects
   .filter((p) => !p.data.projectType || p.data.projectType === "application")
   .sort((a, b) => (a.data.order ?? 999) - (b.data.order ?? 999))

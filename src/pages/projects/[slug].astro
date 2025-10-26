@@ -37,9 +37,16 @@ const getLinkIcon = (type: string) => {
       return ExternalLink;
   }
 };
+
+const pageTitle = `${project.data.title} | Josh Tuddenham`;
+const canonicalURL = `https://joshtuddenham.dev/projects/${project.data.slug}`;
 ---
 
-<Layout>
+<Layout
+  title={pageTitle}
+  description={project.data.description}
+  canonicalURL={canonicalURL}
+>
   <Navbar />
   <div class="pb-16">
     <article

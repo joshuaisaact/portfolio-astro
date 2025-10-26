@@ -21,9 +21,16 @@ const formattedDate = new Date(post.data.date).toLocaleDateString("en-GB", {
   month: "long",
   day: "numeric",
 });
+
+const pageTitle = `${post.data.title} | Josh Tuddenham`;
+const canonicalURL = `https://joshtuddenham.dev/blog/${post.id}`;
 ---
 
-<Layout>
+<Layout
+  title={pageTitle}
+  description={post.data.excerpt}
+  canonicalURL={canonicalURL}
+>
   <Navbar />
   <div class="pb-16">
     <article class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-12">
