@@ -76,19 +76,36 @@ const formattedDate = new Date(post.data.date).toLocaleDateString("en-GB", {
         </div>
 
         {
-          post.data.featured_image && (
+          (post.data.featured_image || post.data.featured_video) && (
             <div
-              class="relative overflow-hidden rounded-lg mb-8 aspect-video"
+              class:list={[
+                "relative overflow-hidden rounded-lg mb-8",
+                post.data.featured_video
+                  ? "aspect-square bg-black flex items-center justify-center"
+                  : "aspect-video",
+              ]}
               aria-hidden="true"
             >
-              <Image
-                src={post.data.featured_image}
-                alt={post.data.title}
-                width={1200}
-                height={675}
-                class="w-full h-full object-contain"
-                loading="eager"
-              />
+              {post.data.featured_video ? (
+                <video
+                  src={post.data.featured_video}
+                  autoplay
+                  loop
+                  muted
+                  playsinline
+                  class="max-w-full max-h-full object-contain"
+                  aria-label={`Video for ${post.data.title}`}
+                />
+              ) : post.data.featured_image ? (
+                <Image
+                  src={post.data.featured_image}
+                  alt={post.data.title}
+                  width={1200}
+                  height={675}
+                  class="w-full h-full object-contain"
+                  loading="eager"
+                />
+              ) : null}
             </div>
           )
         }
