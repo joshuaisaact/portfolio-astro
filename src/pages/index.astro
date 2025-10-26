@@ -1,9 +1,9 @@
 ---
+import Blog from "../components/Blog.astro";
 import Contact from "../components/Contact.astro";
 import Navbar from "../components/Navbar.astro";
 import Projects from "../components/Projects.astro";
 import Section from "../components/Section.astro";
-import Skills from "../components/Skills.astro";
 import Welcome from "../components/Welcome.astro";
 import Layout from "../layouts/Layout.astro";
 import { getCollection } from "astro:content";
@@ -35,9 +35,6 @@ const utilityProjects = allProjects
 <Layout>
 	<Navbar />
 	<Welcome />
-	<Section id="skills" title="Skills">
-		<Skills />
-	</Section>
 	<Section id="projects" title="Featured Applications">
 		<Projects projects={applicationProjects} projectType="application" />
 	</Section>
@@ -49,7 +46,7 @@ const utilityProjects = allProjects
 		/>
 	</Section>
 	<Section id="blog" title="Blog">
-		<!-- <Blog /> -->
+		<Blog />
 	</Section>
 	<Section id="contact" title="Contact">
 		<Contact />

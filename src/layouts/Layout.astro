@@ -1,16 +1,39 @@
 ---
 import "../styles/global.css";
-import "@fontsource-variable/plus-jakarta-sans";
+import "@fontsource-variable/manrope";
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en-GB">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+		<!-- Favicons -->
+		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
+		<link rel="icon" type="image/png" sizes="32x32" href="/icon.png" />
+		<link rel="icon" type="image/png" sizes="512x512" href="/icon.png" />
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-icon.png" />
+
 		<meta name="generator" content={Astro.generator} />
-		<title>Joshua Tuddenham</title>
+
+		<!-- Primary Meta Tags -->
+		<title>Joshua Tuddenham | Full-Stack Engineer</title>
+		<meta name="title" content="Joshua Tuddenham | Full-Stack Engineer" />
+		<meta name="description" content="Full-stack engineer specializing in modern web technologies. View my latest projects and blog posts." />
+
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="https://joshtuddenham.dev/" />
+		<meta property="og:title" content="Joshua Tuddenham | Full-Stack Engineer" />
+		<meta property="og:description" content="Full-stack engineer specializing in modern web technologies. View my latest projects and blog posts." />
+		<meta property="og:locale" content="en_GB" />
+
+		<!-- Twitter -->
+		<meta property="twitter:card" content="summary_large_image" />
+		<meta property="twitter:url" content="https://joshtuddenham.dev/" />
+		<meta property="twitter:title" content="Joshua Tuddenham | Full-Stack Engineer" />
+		<meta property="twitter:description" content="Full-stack engineer specializing in modern web technologies. View my latest projects and blog posts." />
 		<style is:inline>
 			html {
 				background-color: white;
@@ -44,17 +67,10 @@ import "@fontsource-variable/plus-jakarta-sans";
 			window.localStorage.setItem("theme", theme);
 		</script>
 	</head>
-	<body
-		class="font-plus-jakarta min-h-screen bg-gradient-to-b from-gray-50 via-white to-gray-50/80 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900"
-	>
-		<div
-			class="fixed inset-0 bg-[radial-gradient(circle_at_1px_1px,rgb(0_0_0_/_0.03)_1px,transparent_0)] [background-size:24px_24px] dark:bg-[radial-gradient(circle_at_1px_1px,rgb(255_255_255_/_0.03)_1px,transparent_0)] pointer-events-none"
-			aria-hidden="true"
-		>
-		</div>
+	<body class="font-manrope min-h-screen">
 		<main
 			id="main-content"
-			class="relative z-10 mx-auto max-w-7xl px-2 sm:px-4 lg:px-8"
+			class="mx-auto max-w-7xl px-2 sm:px-4 lg:px-8"
 			role="main"
 		>
 			<slot />

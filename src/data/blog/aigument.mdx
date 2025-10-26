@@ -1,0 +1,363 @@
+---
+title: "AIgument: The Art of AI Disagreement – Developing a Language Model Debate Platform"
+date: "2025-05-13"
+featured_image: "./aigument-preview.png"
+excerpt: "Beyond bland AI responses: I built a full-stack debate platform where language models adopt vibrant personalities and argue with adjustable intensity."
+tags: ["AI", "LLM", "Next.js", "Vercel", "AI SDK", "Frontend", "Backend", "TypeScript"]
+---
+
+import Figure from '../../components/Figure.astro';
+import diagramImg from './diagram.png';
+import agentsImg from './agents.png';
+import drakeImg from './drake.png';
+import spicinessImg from './spiciness.png';
+
+Ever feel like [AI benchmarks](https://livebench.ai/#/) are… well, a bit gamed? Like LLMs are trained to ace specific tests rather than truly think or argue? I certainly did. So, instead of developing another analytics dashboard, I decided to build something designed to put these powerful models in a real bind: a head-to-head, no-holds-barred debate. Welcome to AIgument.
+
+But what's the point if the verbal fireworks just disappear into the digital ether? As the old saying (probably) goes: "If two LLMs have an argument in a serverless forest and only the developer is there to read it, did it really happen?" I wanted these clashes to be shareable and memorable.
+
+This project wasn't just about seeing who could craft the most eloquent prose; it was an exploration of how far I could push a Next.js application without resorting to a separate backend. I wanted to test the boundaries of what's possible within a unified codebase, diving deep into the [Vercel AI SDK](https://ai-sdk.dev/), work with my first edge database using [Neon](https://neon.tech/), and discover that even the most logical AI models can benefit from a little… or a _lot_ of personality.
+
+## The Premise: Beyond Benchmarks (And Into The Social Sphere)
+
+My core idea was simple but ambitious: if LLMs are supposed to be so intelligent, why not let them have a proper debate on a topic of the user's choice? I wanted to see how they'd handle constructing a coherent argument, responding to counter-arguments, and maintaining a stance without just agreeing or summarising. It felt like a more organic, less "benchmarked" way to evaluate their capabilities.
+
+My goals for the build were:
+
+1. **Full-Stack Next.js**: Leverage Next.js's API routes and server actions to handle the "backend" logic without needing a separate Express or Go server.
+2. **Vercel AI SDK**: Simplify interactions with various LLMs using a unified interface.
+3. **Real-time Interaction**: Make it easy for anyone to set up, watch, and _share_ a debate.
+4. **Intuitive UI/UX**: Ensuring the setup and viewing process was intuitive and frictionless.
+5. **Persistent Debates with Neon**: My first (very brief) foray into edge databases, using Neon (a serverless PostgreSQL) to store and retrieve debates, making them shareable.
+
+
+## The Core Engine: Orchestrating Arguments & Archiving Clashes
+
+At the heart of AIgument is a sequential debate flow: Debater 1 makes an argument, then Debater 2 responds, and so on. This meant managing state effectively on the client side and ensuring the LLM interactions were robust.
+
+<Figure
+  src={diagramImg}
+  alt="Diagram of the AIgument debate flow"
+  title="What happens when you ask a developer to 'make it visual'"
+/>
+
+One significant hurdle: each LLM provider implements text streaming with its own unique, nightmarish boilerplate. Google alone has multiple Gemini APIs, each with different requirements—making the fast-moving landscape particularly challenging.
+
+This is where the [Vercel AI SDK](https://ai-sdk.dev/) became a lifesaver, abstracting away the differences between OpenAI, Anthropic, Google, and xAI models. It's an open-source abstraction layer maintained by Vercel, who are about as 'open source' as the House of Lords is 'democratically elected'.
+
+The streamText function in the SDK was key for those live "looks like the AI is typing" responses:
+
+```typescript
+// Snippet from useDebateStreaming.ts
+// ...
+const result = streamText({
+    model: modelProviderInstance,
+    prompt: systemPrompt, // The core prompt guiding the debate
+    experimental_transform: smoothStream(), // For a smoother typing effect
+    onError: (event) => {
+        console.error(`[useDebateStreaming] streamText error:`, event.error);
+        setError(
+            new DebateError(
+                event.error instanceof Error ? event.error.message : "Stream error",
+                "STREAM_ERROR",
+            ),
+        );
+    },
+});
+
+for await (const textPart of result.textStream) {
+    accumulatedText += textPart;
+    setStreamingText(accumulatedText); // Update UI as text streams
+}
+onResponseComplete(accumulatedText); // Final content for state management
+// ...
+```
+
+This allowed me to build the useDebateStreaming hook, which fetches responses from the LLMs and updates the UI in real-time. The useDebateState hook then manages the full history of arguments, ensuring each debater knows what the previous one said.
+
+Yes, the eagle-eyed among you will have noticed that essentially, all this is doing is combining an LLM call with a for loop. Welcome to the future of AI development, where the most complex code is a for loop.
+
+<Figure
+  src={agentsImg}
+  alt="Surreal meme showing turtles stacked on top of each other supporting Earth, with text reading 'AI AGENTS? FOR LOOPS ALL THE WAY DOWN'"
+  title="When your colleague asks how your AI architecture works"
+/>
+
+One early challenge was the **system prompt**. Crafting a prompt that consistently guided the LLMs to stay on topic, adopt a pro/con stance, and build upon previous arguments without just summarizing or getting repetitive was a delicate dance. It involved specifying the debate topic, the debater's position (PRO or CON), and providing the previousArguments as context:
+
+```typescript
+const DEBATE_PROMPTS = {
+  getSystemPrompt: (
+    topic: string,
+    position: "PRO" | "CON",
+    previousArguments: string,
+    personalityId: PersonalityId,
+    spiciness: SpicinessLevel,
+    roundNumber: number
+  ) => {
+    const personalityPrompt = PERSONALITY_CONFIGS[personalityId].prompt;
+    const spicinessModifier = SPICINESS_CONFIGS[spiciness].modifier; // This is a multiplier for the spiciness of the debate. Yes I did use Nando's as a reference.
+
+    return `You are an AI debater. Your goal is to argue ${position} the following topic: "${topic}".
+    ${personalityPrompt}
+    ${spicinessModifier}
+    It is Round ${roundNumber}. Here are the previous arguments:
+    ${previousArguments}
+
+    Now, present your argument for this round, building on your previous points and responding to the opponent's. Be concise but impactful.`;
+  }
+};
+```
+
+This getSystemPrompt function became the backbone of the entire debate.
+
+## Making it Stick: Neon for Persistence
+
+To make debates shareable, I needed to store them. Enter [Neon](https://neon.tech/), a serverless PostgreSQL provider that markets itself as an "edge" database. Did I need the low-latency, globally distributed architecture for my modest side project? Absolutely not. Was I itching to play with shiny new tech instead of setting up a boring old traditional database? You bet.
+
+Setting it up was surprisingly straightforward (almost disappointing, really - I was prepared for at least one existential crisis). I defined a simple schema for debates and debate_messages, then used Next.js server actions to handle database operations. The whole thing took less time than I spent agonizing over which personality types to include.
+
+Here's a peek at the saveDebate server action:
+
+```typescript
+// lib/actions/debate.ts (simplified)
+import { db } from '../db/client'; // Neon client
+import { v4 as uuidv4 } from 'uuid';
+
+export async function saveDebate({ /* params */ }) {
+  const debateId = uuidv4();
+  try {
+    await db`
+      INSERT INTO debates (id, topic, pro_model, con_model, pro_personality, con_personality, spiciness)
+      VALUES (${debateId}, ${topic}, ${proModel}, ${conModel}, ${proPersonality}, ${conPersonality}, ${spiciness})
+    `;
+    for (const message of messages) {
+      await db`
+        INSERT INTO debate_messages (debate_id, role, content)
+        VALUES (${debateId}, ${message.role}, ${message.content})
+      `;
+    }
+    return debateId;
+  } catch (error) { /* ... error handling ... */ }
+}
+```
+
+This allowed users to save their masterpieces (or trainwrecks) and share them via a unique URL (/debate/[id]), pulling the data using getDebate(id). My first edge DB experience, and definitely not my last!
+
+## The Missing Ingredient: PERSONALITY, DARLING!
+
+My first few debates were… a bit dry. The LLMs were logical, articulate, and utterly devoid of character. They sounded like a Wikipedia entry arguing with another Wikipedia entry. "This isn't a debate," I thought, "it's a joint research paper written by two algorithms trying desperately not to offend each other."
+
+Then it hit me: LLMs are _excellent_ at role-playing! Remember all the prompt engineering tips you read which start: "You are a [insert role here]"? Why not give them distinct personalities? This was my "aha!" moment, immediately followed by my "why didn't I think of this sooner, you absolute muppet" moment.
+
+I quickly added a "Personality Selector" (PersonalitySelector.tsx) to the setup, allowing users to choose from pre-defined personas. An "Eccentric Aristocrat" debating a Ken Loach-inspired "Kitchen Sink Realist" about universal basic income creates an interesting class dynamic. Or perhaps "Chef Catastrophe" (my shameless Gordon Ramsay clone) screaming "IT'S RAAAW!" while a "Passive Aggressor" responds with a painfully polite "Oh, I'm sure you didn't mean to be quite so... forceful." The personalities added a layer of social dynamics that standard LLM debates simply lacked.
+
+<Figure
+  src={drakeImg}
+  alt="Drake meme with top panel showing Drake rejecting bland LLM debates, bottom panel showing Drake approving personality-driven AI arguments"
+  title="From dry discourse to digital theatre"
+/>
+
+This single change transformed the entire experience. Debates became entertaining, unpredictable, and genuinely funny. The "Pirate" would drop "Ahoy!" and "shiver me timbers," while the "Noir Detective" would ponder the "dark alleys of truth." But the real star, for me, was the "Sassy Drag Queen":
+
+```typescript
+drag_queen: {
+  name: "Sassy Drag Queen",
+  description: "Serving wit, shade, and flawless arguments.",
+  tone: "Confident, theatrical, shady, uses hyperbole",
+  style: "Uses drag slang ('the tea', 'read', 'shade', 'werk', 'honey'), witty comebacks, rhetorical questions",
+  humor: "Cutting, observational, shady, campy",
+  intensity_level: 4,
+  specific_instructions: [
+    "Address opponent as 'honey', 'sweetie', or 'Miss Thing'.",
+    "Dismiss weak points with dramatic flair and a metaphorical hair flip.",
+    "Refer to your own arguments as 'serving looks' or 'the gospel truth'."
+  ],
+  catchphrases: ["Sweetie, please.", "The library is open.", "Where is the lie?", "Not today, Satan.", "Ok, werk.", "The shade of it all!", "Girl, bye."]
+}
+```
+
+Suddenly, the LLM wasn't just arguing; it was _performing_. It would address its opponent as "honey," dismiss weak points with a "metaphorical hair flip," and declare its arguments "the gospel truth." The library was officially OPEN, darling.
+
+Implementing this involved a PersonalityConfig interface that defined the name, description (for the UI), tone, style, humor, intensity_level, and crucially, specific_instructions and catchphrases that get injected into the system prompt.
+
+I ordered the personalities in the selector for comedic effect. It starts with more "Professional" types like "Standard Debater" or "Alfred the Butler," moves through "The Cynics" (like "Grumpy Old Timer" or "Kitchen Sink Realist"), then "The Performers" (hello, "Sassy Drag Queen," "Shakespearean Actor," "Chef Catastrophe"), into "The Enthusiasts" ("Slick Salesperson," "Pirate"), and finally "The Outliers" ("Conspiracy Theorist," "Absurdist Disruptor," "Emo Teen"). Browsing them became part of the fun.
+
+## Turning Up the Heat: The Spiciness Selector
+
+Just having a personality wasn't quite enough. A "Sassy Drag Queen" might be mild mannered or an absolute firebrand. I needed a way to control the _intensity_ of the debate. Enter the "Spiciness Selector":
+
+<Figure
+  src={spicinessImg}
+  alt="Screenshot of the AIgument Spiciness Selector UI with icons like lemon, flame etc."
+  title="How hot do you like your AI debates? From Lemon & Herb to Extra Hot."
+/>
+
+With this, users can pick from "Lemon & Herb" (Calm and Professional) all the way to "Extra Hot" (Chaotic Roast Battle). Each level has defined modifiers for argument approach, humor application, and response style:
+
+```typescript
+// constants/spiciness.ts (excerpt for Extra Hot)
+"extra-hot": {
+  name: "Extra Hot",
+  Icon: Flame, // We use multiple flames in the UI for effect!
+  level_descriptor: "Chaotic Roast Battle",
+  argument_modifier: "Embrace absurdity, personal jabs (SFW!), and dramatic flair. Logic is secondary...",
+  humor_modifier: "Go for maximum snark, bordering on a roast...",
+  response_style: "Ruthlessly mock, derail, or ignore opponent's points...",
+}
+```
+
+These spicinessConfig modifiers are injected directly into the system prompt, dynamically altering how the chosen personality behaves. An "Alfred the Butler" at "Extra Hot" is a very different (and hilarious) experience to one at "Lemon & Herb."
+
+
+Beyond the code structure, the real art lay in the prompt engineering, injecting specific instructions into the system prompt based on the chosen personality (as seen in the getSystemPrompt snippet above). But I took it a step further: I made the DebaterResponse component dynamically apply different font styles based on the selected personality, giving a subtle visual cue to the debater's persona:
+
+```typescript
+// Snippet from DebaterResponse.tsx
+const getFontClass = (personality: PersonalityId) => {
+    switch (personality) {
+      case 'alfred_butler': // etc.
+        return 'font-professional';
+      case 'pirate':
+        return 'font-pirate';
+      case 'noir_detective':
+        return 'font-noir';
+      // ... other personalities
+      default:
+        return 'font-sans';
+    }
+};
+
+// In the JSX render:
+<div
+  className={`text-gray-800 dark:text-gray-200 leading-relaxed whitespace-pre-wrap ${getFontClass(personality)}`}
+  dangerouslySetInnerHTML={{ __html: formatText(String(children)) }}
+/>
+```
+
+## Lowering the Barrier: Demo Mode & Starter Arguments
+
+A big hurdle for apps like this is the API key requirement. Not everyone has them, or wants to dig them out just to try something. This led to "Demo Mode."
+
+With a toggle, users can opt into a mode that uses a pre-configured, free-tier model (Gemini 2.5 Flash via a dedicated API route) for both debaters, no keys required. This instantly makes the app accessible to anyone curious.
+
+And what if you can't think of a debate topic? Sometimes the best arguments are the silliest. So, I added a "random topic" button, populated with classics like:
+
+- "Are Jaffa Cakes biscuits or cakes?"
+- "Is water wet?"
+- "Is a cucumber just a courgette with impostor syndrome?"
+- "Would Pat Butcher win in a thumb war against a slightly motivated orangutan?"
+- "Should we replace the concept of money with a system where we exchange increasingly elaborate compliments?"
+
+It's amazing how passionately a "Sassy Drag Queen" will argue about cucumber identity issues when set to "Extra Hot."
+
+## The Grand Unified Prompt Theory
+
+All these elements – topic, stance, previous arguments, personality, and spiciness – culminate in one master system prompt. It's a bit of a beast, but here's the core structure that guides the LLMs:
+
+```typescript
+// DEBATE_PROMPTS.getSystemPrompt (simplified structure)
+ getSystemPrompt: (
+    topic: string,
+    position: 'PRO' | 'CON',
+    previousArguments: string,
+    personalityId: PersonalityId = 'standard',
+    spiciness: SpicinessLevel = 'medium',
+    roundNumber: number = 1
+  ) => {
+    const personalityConfig = PERSONALITY_CONFIGS[personalityId];
+    const spicinessConfig = SPICINESS_CONFIGS[spiciness];
+    // Intensity still ramps slightly with rounds, but base is set by spiciness
+    const intensityDescriptor = spicinessConfig.level_descriptor;
+
+    // Determine the goal instruction based on potential override
+    const goalInstruction = personalityConfig.goal_override
+      ? personalityConfig.goal_override // Use override if present
+      : `Goal: Win the argument using the personality and intensity described below. Outshine your opponent!`; // Default goal
+
+    // Core Debater Role
+    const coreInstructions = `
+**Your Role:** You are a debater arguing about: "${topic}".
+**Your Stance:** You are arguing passionately for the **${position}** position.
+**Debate Style:** This is a **${intensityDescriptor}** debate.
+**Round:** ${roundNumber}
+**${goalInstruction}**
+    `;
+
+    // Format optional lists for the prompt
+    const specificInstructionsList = personalityConfig.specific_instructions ? `\n    *   **Specific Directives:** ${personalityConfig.specific_instructions.map(instr => `\n        *   ${instr}`).join('')}` : '';
+    const catchphrasesList = personalityConfig.catchphrases ? `\n    *   **Optional Phrases (use sparingly & only if fitting):** ${personalityConfig.catchphrases.join(', ')}` : '';
+
+    // Personality & Style Instructions
+    const personalityInstructions = `
+**Your Assigned Personality: ${personalityConfig.name}**
+*   **Base Tone:** ${personalityConfig.tone}
+*   **Base Style:** ${personalityConfig.style}
+*   **Base Humor:** ${personalityConfig.humor}${specificInstructionsList}${catchphrasesList}
+
+**Intensity & Application (${spiciness}):**
+*   **Argument Approach:** ${spicinessConfig.argument_modifier}
+*   **Humor Application:** ${spicinessConfig.humor_modifier}
+*   **Response Style:** ${spicinessConfig.response_style}
+*   **Key Tactics:**
+    *   Support points with *some* reasoning (even if flimsy at higher intensity).
+    *   Keep it engaging and dynamic, matching the personality and intensity.
+    *   Be relatively concise (under 150 words ideally).
+    *   Address the opponent's *latest* points directly (in character, matching response style).
+    *   Introduce *new* angles or examples if possible; **avoid repeating arguments you've already made.**
+    *   **Avoid excessive repetition of the same catchphrases or stylistic mannerisms.**
+    *   Maintain your ${position} stance consistently.
+    `;
+
+    // Context & Task
+    let contextInstructions;
+    if (previousArguments) {
+      contextInstructions = `
+**Previous Arguments (Opponent might be included):**
+---
+${previousArguments}
+---
+**Your Task:** Respond to the opponent's *latest* arguments in the style of **${personalityConfig.name}**, applying the **${intensityDescriptor}** intensity. **Introduce a fresh perspective, counter-argument, or example.** Refute, mock, or engage based on your assigned response style. **Do not just repeat your previous points.**
+      `;
+    } else {
+      // Opening Round
+      const openingLines = [
+        `Deliver your opening argument for the ${position} position as **${personalityConfig.name}** in this **${intensityDescriptor}** debate. Start with a bold claim in character!`, `Kick off the debate for the ${position} side in the persona of **${personalityConfig.name}**, matching the **${intensityDescriptor}** level. Open with a witty, character-fitting observation.`, `Present your initial case for ${position}, embodying **${personalityConfig.name}** at a **${intensityDescriptor}** intensity. Begin by humorously outlining your main points or challenging an assumption.`, `It's your turn to open for the ${position} stance as **${personalityConfig.name}**, setting the **${intensityDescriptor}** tone. Start with a surprising or funny anecdote relevant to the character.`
+      ];
+      const randomIndex = Math.floor(Math.random() * openingLines.length);
+      contextInstructions = `
+**Your Task:** ${openingLines[randomIndex]}
+      `;
+    }
+
+    // Final Prompt Assembly
+    return `${coreInstructions}
+${personalityInstructions}
+${contextInstructions}
+**REMEMBER:** Embody the **${personalityConfig.name}** personality at the **${intensityDescriptor}** level. Be funny, stick to your stance (${position}), avoid repeating arguments AND stylistic phrases, and keep it under 150 words. **Crucially, AVOID overly polite or deferential language ('my dear opponent', 'with all due respect', 'friend', etc.) especially at higher intensity levels (Hot, Extra Hot). Match the specified tone and response style DIRECTLY.** Now, debate!`;
+  }
+};
+```
+
+The prompt explicitly tells the LLM its role, stance, the debate's intensity, its assigned personality with detailed traits, how spiciness modifies that personality, and the immediate task (respond or open). Critically, it also reminds the LLM to avoid repetition and stay concise. This level of detailed instruction was key to getting consistently engaging and characterful responses.
+
+## Under the Hood: Key Learnings
+
+AIgument gave me a great opportunity to consolidate skills and explore new tech:
+
+- **Vercel AI SDK as a Universal Adapter**: Invaluable for managing multiple LLM providers.
+- **Full-Stack Next.js (No Separate Backend)**: API Routes and Server Actions handled all logic - massively simplifying deployment.
+- **Neon as an Edge Database**:  My first experience with serverless PostgreSQL at the edge. Storing debates for sharing was surprisingly easy with Neon's DX and Next.js integration. It just worked.
+- **Client-Side API Key Management**: A crucial privacy decision.
+- **Thinking About User Onboarding**: Adding Demo Mode and example topics significantly improved accessibility.
+
+## What I Actually Learned
+
+- **Prompt Engineering is Iterative & Nuanced**: Crafting effective prompts for complex, multi-turn, persona-driven interactions is an art. The "final" prompt above went through dozens of iterations.
+- **LLMs + Personality + Spice = Pure Entertainment**: Their ability to embody roles, modified by intensity, is astounding. Watching a "Chef Catastrophe" LLM scream "IT'S RAAAW!" at another LLM's argument is pure gold.
+- **Vercel AI SDK & Neon Simplify Complexity**: These tools abstract away a lot of underlying challenges, letting developers focus on the application logic and user experience.
+- **Side Projects Are the Best Teachers**: What began as a simple debate app became a practical playground for prompt engineering, state management with streaming responses, and personality design. Discovering exactly how much "Noir Detective" personality an LLM can handle before it stops making actual arguments and just describes rain-slicked streets for three paragraphs is both educational and surprisingly entertaining.
+
+---
+
+*Ready to pit your favorite LLMs (and their new alter-egos) against each other? Head over to [AIgument](https://aigument.vercel.app/) and start a debate! And yes, you can share it.*

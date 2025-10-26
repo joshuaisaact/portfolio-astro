@@ -6,12 +6,12 @@ export interface Project {
   title: string;
   slug: string;
   description: string;
-  imageSrc?: string | ImageMetadata;
+  imageSrc?: ImageMetadata;
   imageAlt?: string;
   links: ProjectLink[];
   videoSrc?: string;
   videoPreviewSrc?: string;
-  posterImage?: string | ImageMetadata;
+  posterImage?: ImageMetadata;
   award?: string;
   skills: string[];
   overview?: string;
@@ -47,7 +47,7 @@ const { projects, projectType, cardType = "full" } = Astro.props;
     >
       {
         projectType === "application" &&
-          `I'm passionate about building and continuously exploring new technologies. This section highlights some of my recent user-facing applications, from AI-powered platforms to award-winning hackathon entries.`
+          `When I'm not shipping features at work, I like to build things that solve problems I find interesting. From AI debate platforms to tools that make hybrid work less annoying. Some of these have even won hackathons.`
       }
       {
         projectType === "tool" &&

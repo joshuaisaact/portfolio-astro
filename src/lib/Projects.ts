@@ -64,7 +64,7 @@ export const PROJECTS: Project[] = [
 		slug: "joshdesk",
 		description:
 			"A Slack app for hybrid team coordination that simplifies office attendance tracking. Features 4-week scheduling, automatic status updates, and smart reminders. Built with TypeScript and Bun, deployed on DigitalOcean.",
-		imageSrc: "/media/projects/videos/joshdesk.mp4", // You'll need to add this image
+		imageSrc: "/media/projects/videos/joshdesk.mp4",
 		imageAlt: "JoshDesk Slack app interface",
 		links: [
 			{
@@ -376,15 +376,15 @@ components, focusing on creating a scalable backend while ensuring a smooth user
 	{
 		title: "Go AI Agent Foundation",
 		slug: "go-ai-agent-foundation",
-		projectType: "tool", // or 'library'
+		projectType: "tool",
 		description:
 			"A foundational Go project for building AI agents that interact with users and utilize tools, defaulting to the Anthropic (Claude) API.",
-		imageSrc: "/media/skills/go.svg", // Path to your Go Gopher SVG or similar
+		imageSrc: "/media/skills/go.svg",
 		imageAlt: "Go Language Logo",
 		links: [
 			{
 				type: "github",
-				url: "https://github.com/joshuaisaact/Go-AI-Agent", // Ensure this is the correct repo name
+				url: "https://github.com/joshuaisaact/Go-AI-Agent",
 				label: "View on GitHub",
 			},
 		],

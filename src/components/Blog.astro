@@ -1,0 +1,88 @@
+---
+import BlogCard from "./BlogCard.astro";
+import { getCollection } from "astro:content";
+
+const allPosts = await getCollection("blog");
+
+const sortedPosts = allPosts.sort(
+  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
+);
+
+// Pagination settings
+const postsPerPage = 6;
+const currentPage = 1; // This will be dynamic when you add pagination routing
+const totalPages = Math.ceil(sortedPosts.length / postsPerPage);
+
+// Get paginated posts
+const paginatedPosts = sortedPosts.slice(
+  (currentPage - 1) * postsPerPage,
+  currentPage * postsPerPage,
+);
+
+// Helper to create page URLs
+const createPageURL = (page: number) => `/?page=${page}#blog`;
+---
+
+<section id="blog" aria-label="Blog" class="space-y-6 sm:space-y-8">
+  <p
+    class="text-base sm:text-lg text-gray-700 dark:text-gray-300 leading-relaxed"
+  >
+    Deep dives into technical challenges I&apos;ve tackled, from teaching an AI
+    dog new tricks to wrestling with WebSockets. These posts explore the reality
+    of software development - accidental rabbit holes and JSON-induced
+    existential crisis.
+  </p>
+
+  <div
+    class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8"
+    role="list"
+    aria-label="Article list"
+  >
+    {
+      paginatedPosts.map((post) => (
+        <BlogCard slug={post.id} role="listitem" metadata={post.data} />
+      ))
+    }
+  </div>
+
+  {
+    totalPages > 1 && (
+      <nav
+        class="flex justify-center gap-2 mt-8"
+        aria-label="Blog posts pagination"
+      >
+        <a
+          href={createPageURL(Math.max(currentPage - 1, 1))}
+          class={`px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 ${
+            currentPage === 1 ? "pointer-events-none opacity-50" : ""
+          }`}
+          aria-label="Previous page"
+          aria-disabled={currentPage === 1}
+        >
+          Previous
+        </a>
+
+        <span class="flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          Page {currentPage} of {totalPages}
+        </span>
+
+        <a
+          href={createPageURL(Math.min(currentPage + 1, totalPages))}
+          class={`px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 ${
+            currentPage === totalPages ? "pointer-events-none opacity-50" : ""
+          }`}
+          aria-label="Next page"
+          aria-disabled={currentPage === totalPages}
+        >
+          Next
+        </a>
+      </nav>
+    )
+  }
+
+  <div class="text-center mt-8">
+    <a href="/blog" class="text-blue-600 dark:text-blue-400 hover:underline">
+      View All Posts
+    </a>
+  </div>
+</section>

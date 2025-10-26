@@ -1,0 +1,264 @@
+---
+title: "Maya: A Multi-Agent Architecture for Conversational AI"
+date: "2025-08-26"
+featured_image: "./maya-orchestration.jpg"
+excerpt: "How I evolved my AI yoga instructor from a 2000-token monolithic prompt to an orchestrated system of specialized agents - and why separation of concerns might be the most underrated pattern in AI development."
+tags: ["AI", "Multi-Agent", "Architecture", "LLM", "TypeScript", "Orchestration", "Gemini"]
+---
+
+*How separating concerns across specialized AI agents creates a more reliable, maintainable, and intelligent yoga companion*
+
+## A Quick Disclaimer
+
+I'm not yet an AI architecture expert - just a developer who needed to solve a real problem. Building [Maya](https://joshdesk.live) (my AI yoga instructor) taught me that multi-agent systems aren't as intimidating as they seem. I made plenty of mistakes along the way, discovered some approaches that actually work, and learned why separating concerns might be the most underrated pattern in AI development.
+
+The one resource that saved me from complete chaos was [this excellent post on building multi-agent systems](https://blog.sshh.io/p/building-multi-agent-systems) - absolutely invaluable if you're venturing down this path.
+
+## The Problem with Monolithic AI Prompts
+
+When you first start working with LLMs, the temptation is to create one mega-prompt that does everything. Mine grew to over 2000 tokens of instructions: "You are a yoga instructor who can search poses, create sequences, understand anatomy, be warm and encouraging, don't forget to validate input, oh and also remember to..."
+
+It was unmaintainable, unreliable, and worst of all - the AI would forget what it was supposed to do halfway through conversations. Classic schoolboy error.
+
+## Different Approaches to AI Architecture
+
+As I searched for solutions, I discovered there are several ways developers are tackling AI complexity:
+
+1. **The Monolith** - One prompt to rule them all. Everything in a single, massive prompt. Simple to start, nightmare to maintain. Where most of us begin (and quickly regret).
+
+2. **Tool-Calling Agent** - One agent, many capabilities. Single agent that can call different functions. What OpenAI's Assistants API and most tutorials demonstrate. Good for straightforward use cases.
+
+3. **Orchestrated Specialists** - Separate agents for separate concerns. Intent recognition separated from response generation. Each agent optimized for its specific task. What Maya evolved into.
+
+4. **Agent Frameworks** - Pre-built team coordination. Langchain, LangGraph. Agents that delegate to other agents. Powerful but sometimes overkill.
+
+The approach I landed on (orchestrated specialists) emerged from necessity. I needed something more maintainable than a monolith but didn't need the complexity of full agent frameworks. Plus, given how rapidly AI models evolve, heavy abstraction layers often become technical debt. When the underlying models improve every few months, frameworks built around their limitations quickly become obsolete. It turns out this middle ground - understanding exactly what each agent does without layers of abstraction - is exactly right for many real-world applications.
+
+## The Architecture: Specialized Agents in Harmony
+
+Maya now operates as an orchestrated system of specialized agents, each with a focused responsibility:
+
+```typescript
+// The conductor: Main orchestration service
+export async function handleMessage(
+  message: string,
+  context?: { recentMessages?: string[] },
+  userId?: string
+): Promise<MayaResponse> {
+  // 1. Intent Agent: What does the user want?
+  const intent = await analyzeIntent(message);
+
+  // 2. Tool Agents: Execute the appropriate action
+  const data = await executeAction(intent);
+
+  // 3. Response Agent: Generate conversational response
+  const response = await generateResponse({ userMessage, action, data });
+
+  // 4. Suggestions Agent: Create contextual follow-ups
+  const suggestions = await generateSuggestions(message, response, action);
+
+  return { response, suggestions, data };
+}
+```
+
+Maya's architecture draws inspiration from the [call center pattern](https://blog.sshh.io/p/building-multi-agent-systems) from Shrivu's blog (using an intent agent to route requests to appropriate specialists) but extends it with sequential processing where each agent builds on the previous one's output.
+
+## The Intent Agent: Understanding Before Acting
+
+The most critical agent is the intent analyzer. Rather than having one prompt try to both understand AND respond, this agent has one job: figure out what the user actually wants.
+
+```typescript
+const INTENT_ANALYSIS_SCHEMA = {
+  type: Type.OBJECT,
+  properties: {
+    action: {
+      type: Type.STRING,
+      enum: ["create_sequence", "search_poses", "search_sequences",
+             "search_classes", "general_chat"],
+      description: "The primary intent of the user message"
+    },
+    params: {
+      type: Type.OBJECT,
+      properties: {
+        name: { type: Type.STRING },
+        sequenceType: { type: Type.STRING, enum: SEQUENCE_TYPES },
+        difficulty: { type: Type.STRING, enum: DIFFICULTY_LEVELS },
+        targetDurationMinutes: { type: Type.NUMBER },
+        intensity: { type: Type.STRING, enum: INTENSITY_LEVELS },
+        focusAreas: { type: Type.ARRAY, items: { type: Type.STRING, enum: FOCUS_AREAS } }
+      }
+    },
+    searchParams: {
+      type: Type.OBJECT,
+      properties: {
+        nameSearch: { type: Type.STRING },
+        difficulty: { type: Type.STRING, enum: DIFFICULTY_LEVELS },
+        poseType: { type: Type.STRING, enum: POSE_TYPES },
+        // ... other search parameters
+      }
+    }
+  }
+};
+```
+
+and the prompt is structured like this:
+
+```typescript
+const INTENT_PROMPT = `Analyze this yoga-related message and determine the user's intent.
+
+User message: "${message}"
+
+Determine ONE of these intents:
+1. create_sequence - User wants to CREATE/MAKE/BUILD a NEW sequence
+2. search_poses - User asking about specific poses
+3. search_sequences - User looking for existing sequences
+4. search_classes - User looking for yoga classes
+5. general_chat - General conversation or questions
+
+Important distinctions:
+- "make me a new sequence" = create_sequence
+- "show me sequences" = search_sequences
+- "what sequences do you have" = search_sequences
+- "create a flow for hamstrings" = create_sequence
+- "find hip opening poses" = search_poses
+
+Return JSON matching the schema...`;
+```
+
+By using structured output schemas, the intent agent reliably categorizes requests and extracts parameters. Interestingly, even with constrained JSON output, including concrete examples in the prompt significantly improved classification accuracy - the model benefits from seeing the distinction between "make me a sequence" (create) versus "show me sequences" (search).
+
+## Separation of Concerns: Each Agent Does One Thing Well
+
+### Intent Agent
+Classifies user intent and extracts parameters
+- Input: Raw user message
+- Output: Structured intent with typed parameters
+- Prompt size: ~500 tokens
+
+### Search Agents
+Query the database with extracted parameters
+- Input: Typed search parameters
+- Output: Database results
+- No AI involved - pure database operations
+
+### Response Agent
+Generates Maya's conversational response
+- Input: User message + action taken + data found
+- Output: 2-3 sentence warm response
+- Prompt size: ~300 tokens
+
+### Suggestions Agent
+Creates contextual follow-ups
+- Input: User message + Maya's response + context
+- Output: 4 natural follow-up suggestions
+- Prompt size: ~200 tokens
+
+### Generation Agent
+Creates new yoga sequences
+- Input: Sequence parameters
+- Output: Complete sequence with poses, transitions, and cues
+- Uses function calling to search pose database first
+- Prompt size: ~800 tokens
+
+## The Power of Orchestration
+
+The magic happens in the orchestration layer. Instead of one AI agent trying to juggle everything, I have a simple coordinator that:
+
+1. Routes requests to the appropriate specialist
+2. Passes context between agents
+3. Handles errors gracefully
+4. Maintains conversation state
+
+```typescript
+switch (intent.action) {
+  case 'create_sequence':
+    responseData.shouldGenerateSequence = true;
+    responseData.sequenceParams = intent.params;
+    break;
+
+  case 'search_poses':
+    const poseResults = await searchPoses(intent.searchParams);
+    responseData.foundPoses = poseResults.poses;
+    usedDatabase = true;
+    break;
+
+  case 'search_sequences':
+    const sequenceResults = await searchSequences(intent.searchParams, userId);
+    responseData.foundSequences = sequenceResults.sequences;
+    usedDatabase = true;
+    break;
+
+  // ... other cases
+}
+```
+
+## Validation: The Unsung Hero
+
+One challenge with AI-generated content is ensuring it uses real data. After the Generation Agent creates a sequence, I run a validation step to ensure every pose actually exists in our database:
+
+```typescript
+export async function validateSequencePoses(
+  aiPoses: AIPoseInput[],
+  databasePoses: FormattedPoseData[],
+) {
+  const databasePoseNames = new Set(databasePoses.map(p => p.nameEn));
+  const validatedPoses = [];
+  const invalidPoses = [];
+
+  for (const aiPose of aiPoses) {
+    if (databasePoseNames.has(aiPose.nameEn)) {
+      validatedPoses.push(/* validated pose */);
+    } else {
+      invalidPoses.push(aiPose.nameEn);
+    }
+  }
+
+  if (validatedPoses.length < 3) {
+    throw new AIResponseError(
+      `Only ${validatedPoses.length} valid poses found (minimum 3 required)`
+    );
+  }
+
+  return validatedPoses;
+}
+```
+
+This validation layer prevents the AI from hallucinating poses that sound plausible but don't exist in our curated database. You might wonder why I didn't use enums to constrain the AI's choices in the first place - with 300+ poses in the database, I hit a practical limitation: Gemini's enum constraints become unreliable beyond 80-100 values (not to mention the input token cost).
+
+So instead, the Generation Agent uses function calling to search the database first, then I validate its output as a safety net. It's not an agent, just good defensive programming against AI creativity.
+
+## Results
+
+While I didn't rigorously benchmark everything, the improvements were clear:
+- Responses feel faster since agents can work in parallel
+- Token usage is definitely lower with smaller, focused prompts
+- Intent classification works reliably (no more "I don't understand" loops)
+- Changes are isolated - I can update Maya's personality without breaking search
+- Debugging is straightforward - errors point to specific agents
+
+## Key Learnings
+
+1. **Structured outputs are crucial**: Using TypeScript types and JSON schemas eliminates parsing errors
+2. **Specialization beats generalization**: Five focused agents outperform one generalist - particularly given smaller context windows.
+3. **Orchestration is simple**: The coordinator doesn't need to be complex - just reliable
+4. **Validation prevents hallucination**: Always verify AI output against your source of truth
+5. **Small prompts are manageable prompts**: 300-token prompts are easier to debug than 2000-token monsters
+
+## What's Next?
+
+The multi-agent pattern opens up exciting possibilities:
+- **Memory Agent**: Track user preferences and progress over time
+- **Recommendation Agent**: Suggest practices based on history and goals
+- **Personalization Agent**: Adapt Maya's personality to user preferences
+
+The beauty of this architecture is that adding new capabilities doesn't mean rewriting everything - just add another specialized agent to the orchestra.
+
+## The Real Takeaway
+
+Building with multiple specialized agents instead of one mega-prompt isn't just about better performance - it's about maintaining your sanity. When your AI starts suggesting "Downward Facing Elephant" as a real pose, you'll know exactly which 300-token prompt to fix instead of searching through a 2000-token monster.
+
+Is this the right way to build AI systems? Honestly, I have no idea. But it works, it's maintainable, and most importantly - I can actually understand what's happening when things go wrong.
+
+---
+
+*Maya is live at joshdesk.live. Built with Bun, Elysia, Google's Gemini, and a lot of careful orchestration.*

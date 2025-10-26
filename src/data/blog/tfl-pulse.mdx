@@ -1,0 +1,469 @@
+---
+title: "Building a Live London Underground Tracker: Learning Go From Scratch"
+date: "2025-01-06"
+featured_image: "./gopher.webp"
+excerpt: "How I learned Go by building a real-time London Underground tracker, featuring concurrent polling, WebSockets, and lots of debugging."
+tags: ["Go", "Backend", "APIs", "WebSockets", "Concurrency", "Learning"]
+---
+
+import Figure from '../../components/Figure.astro';
+import drakeEnumImg from './drake-enum.png';
+import tflMvpImg from './tfl-pulse-mvp.webp';
+
+Building real-time systems is challenging enough in familiar languages. Building one while learning Go from scratch? That's either brave or foolish - probably both. Here's how I went from zero Go knowledge to a functioning London Underground tracker in a few days.
+
+## The Origin Story
+
+Let's start with a confession: before Christmas 2024, I'd never written or read a line of anything other than Javascript (minus the odd bit of Python here or there). I wanted to learn a second language, something more backend-focused, and after looking around, I figured that Go was the most appealing.
+
+I started with Maximiliano Firtman's brilliant 8 hour course on Frontend Masters ["The Basics Of Go"](https://frontendmasters.com/courses/go-basics/).
+
+This introduced me to the fundamentals of the language at a pretty rapid clip. But as a kinesthetic learner, I needed an actual project to sink my metaphorical teeth into, to solidify this learning and build on it. No more tutorials, no more watching videos - just pick something interesting and figure it out.
+
+I needed a project that would:
+
+1. Help me practise the concepts I'd just seen
+2. Use concurrency in a meaningful way (Go's big selling point)
+3. Be complicated enough to be interesting
+4. Maybe even be useful to someone (big maybe)
+
+I'd originally thought about making yet another finance dashboard. No offence to finance dashboard makers (you're doing the lord's work), but every single portfolio seems to have one, and it's neither interesting or original. Plus, realistically I'd probably get paid to do that, so a personal project should be something I'd almost certainly not get paid to do.
+
+But I did want something with real-time updates, where I could feed transformed data to a frontend using websockets.
+
+I stumbled upon the extremely generous (500 polls a minute) free ["Transport For London API"](https://api-portal.tfl.gov.uk/) and that's when it all landed into place - I'd build something tentatively called "TfL Pulse", which would be a live map of the London Underground, showing all the trains currently on it.
+
+Or, I'd fail and learn a load trying to do it.
+
+## Learning By Doing
+
+After the basic course, I started with Grafana's excellent article ["How I Write HTTP Services in Go After 13 Years"](https://grafana.com/blog/2024/02/09/how-i-write-http-services-in-go-after-13-years/). This gave me a solid foundation for structuring the service:
+
+- Clean separation of concerns
+- Good error handling patterns
+- Proper context management
+- Service-based architecture
+
+One of the first big lessons was how to structure a production-ready main function. Instead of throwing everything into main(), the article suggested a pattern that enables:
+
+- Proper error handling
+- Clean resource management
+- Graceful shutdown
+- Easy testing
+
+Here's the core structure I implemented:
+
+```go
+func run(ctx context.Context, w io.Writer, args []string, getenv func(string) string) error {
+    // Create a new context that will be cancelled when the program receives an interrupt signal
+    ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
+    defer cancel()  // Clean up resources when we're done
+
+    // Environment setup
+    if err := godotenv.Load(); err != nil {
+        return fmt.Errorf("error loading .env file: %w", err)
+    }
+
+    apiKey := getenv("TFL_API_KEY")
+    if apiKey == "" {
+        return fmt.Errorf("TFL_API_KEY environment variable is required")
+    }
+
+    // Initialize services
+    client := tfl.NewClient(apiKey)
+    mux := http.NewServeMux()
+    addRoutes(mux, client)
+
+    // Create HTTP server
+    httpServer := &http.Server{
+        Addr:    ":8080",
+        Handler: mux,
+    }
+
+    // Start server in background
+    go func() {
+        log.Printf("Server active and listening on %s\n", httpServer.Addr)
+        if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+            fmt.Fprintf(os.Stderr, "error listening and serving: %s\n", err)
+        }
+    }()
+
+    // Wait for interrupt signal
+    <-ctx.Done()
+
+    // Graceful shutdown
+    shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 10*time.Second)
+    defer shutdownCancel()
+
+    if err := httpServer.Shutdown(shutdownCtx); err != nil {
+        return fmt.Errorf("error shutting down http server: %w", err)
+    }
+
+    return nil
+}
+
+func main() {
+    ctx := context.Background()
+    if err := run(ctx, os.Stdout, os.Args, os.Getenv); err != nil {
+        fmt.Fprintf(os.Stderr, "%s\n", err)
+        os.Exit(1)
+    }
+}
+```
+
+This structure taught me several important Go concepts:
+
+1. Context management for graceful shutdown
+2. Error wrapping with fmt.Errorf
+3. Dependency injection (passing getenv function)
+4. Goroutines for background tasks
+5. Proper resource cleanup with defer
+
+But reading about patterns is one thing - implementing them while learning a new language is another entirely. Every new feature meant learning multiple Go concepts.
+
+### API Endpoints
+
+```go
+func addRoutes(mux *http.ServeMux, client *tfl.Client) {
+   mux.HandleFunc("/api/victoria", handleVictoria(client))  // Essential Raw prediction data
+   mux.HandleFunc("/api/trains", handleTrains(client))      // Processed train locations
+   mux.HandleFunc("/ws", hub.handleWebSocket)               // WebSocket updates
+}
+```
+
+The TfL API provides incredibly detailed prediction data. Here's a single prediction for one train:
+
+```json
+{
+  "$type": "Tfl.Api.Presentation.Entities.Prediction, Tfl.Api.Presentation.Entities",
+  "id": "434712427",
+  "operationType": 1,
+  "vehicleId": "237",
+  "naptanId": "940GZZLUVIC",
+  "stationName": "Victoria Underground Station",
+  "platformName": "Southbound - Platform 4",
+  "direction": "inbound",
+  "destinationNaptanId": "940GZZLUBXN",
+  "destinationName": "Brixton Underground Station",
+  "timestamp": "2025-01-01T23:19:46.9465405Z",
+  "timeToStation": 1417,
+  "currentLocation": "Between Walthamstow Central and Blackhorse Road",
+  "towards": "Brixton",
+  "expectedArrival": "2025-01-01T23:43:23Z",
+  "timing": {
+    "$type": "Tfl.Api.Presentation.Entities.PredictionTiming, Tfl.Api.Presentation.Entities",
+    "countdownServerAdjustment": "00:00:00",
+    "read": "2025-01-01T23:20:12.722Z",
+    "sent": "2025-01-01T23:19:46Z"
+  }
+}
+```
+
+For the MVP, I needed to strip this down to just the essential fields. In Go, this meant defining a clean struct to receive just what I needed. Luckily, there are online tools that'll automatically convert raw JSON to Go structs - this one being my favourite: [convert JSON to Go struct](https://mholt.github.io/json-to-go/).
+
+I ended up with a struct that looked like this:
+
+```go
+type Prediction struct {
+    VehicleID       string    `json:"vehicleId"`
+    StationName     string    `json:"stationName"`
+    PlatformName    string    `json:"platformName"`
+    TimeToStation   int       `json:"timeToStation"`
+    CurrentLocation string    `json:"currentLocation"`
+    Towards         string    `json:"towards"`
+    Timestamp       time.Time `json:"timestamp"`
+}
+```
+
+This automatically extracts just the fields I cared about during JSON unmarshaling. Then, I processed these predictions into an even simpler in-memory train state:
+
+```go
+type TrainInfo struct {
+    Location   Location
+    Direction  string
+    TimeToNext int
+}
+
+type Location struct {
+    StationID     string
+    IsBetween     bool
+    PrevStationID string
+    State         TrainState
+}
+```
+
+## 99 Problems and Enums Are One
+
+The Location struct includes a TrainState, which was one of my first encounters with Go's take on enums and string serialization:
+
+```go
+type TrainState int
+
+const (
+    Unknown     TrainState = iota // Default state when location can't be determined
+    AtStation                     // Train is stopped at a station
+    AtPlatform                    // Train is stopped at the platform
+    Between                       // Train is between stations
+    Approaching                   // Train is approaching next station
+    Left                         // Train has just left a station
+    Departed                     // Train has just departed a station
+)
+```
+
+This pattern using `iota` and constants sort of looks like an enum, but it lacks many features you might expect out of the box. Want to automatically convert to and from strings? You'll need to write that yourself. Want to ensure a function only accepts valid states? Well, any integer will do! Want to iterate over all possible values? You can, but you'll need to either maintain a slice of all values manually or use reflection - neither of which is as straightforward as a native enum would provide.
+
+This means you end up writing boilerplate code that other languages handle automatically:
+
+```go
+var stateStrings = map[TrainState]string{
+    Unknown:     "UNKNOWN",
+    AtStation:   "AT_STATION",
+    AtPlatform:  "AT_PLATFORM",
+    Between:     "BETWEEN",
+    Approaching: "APPROACHING",
+    Left:        "LEFT",
+    Departed:    "DEPARTED",
+}
+
+func (s TrainState) String() string {
+    if str, ok := stateStrings[s]; ok {
+        return str
+    }
+    return fmt.Sprintf("INVALID_STATE(%d)", s)
+}
+```
+
+The tradeoff is simplicity - Go's creators argue that this approach is more straightforward and requires less compiler magic. But coming from TypeScript where enums are proper types with built-in validation and utilities, this feels like unnecessary manual work.
+
+<Figure
+  src={drakeEnumImg}
+  alt="Drake meme showing rejection of proper enums in favor of Go's verbose iota approach"
+  title="The Go way of doing enums™"
+/>
+
+## Tracking Train States
+
+The real magic happens in DetectState, which parses TfL's text descriptions:
+
+```go
+func DetectState(location string) TrainState {
+    switch {
+    case strings.HasPrefix(location, "At "):
+        return AtStation
+    case strings.HasPrefix(location, "Between "):
+        return Between
+    case strings.HasPrefix(location, "Approaching "):
+        return Approaching
+    // ... and so on
+    default:
+        return Unknown
+    }
+}
+```
+
+The result is a clean, minimal representation of each train:
+
+```json
+{
+  "223": {
+    "Location": {
+      "StationID": "Warren Street Underground Station",
+      "IsBetween": false,
+      "PrevStationID": "",
+      "State": "AT_STATION"
+    },
+    "Direction": "Walthamstow Central",
+    "TimeToNext": 33
+  }
+}
+```
+
+This transformation taught me several Go concepts:
+
+- Struct tags for JSON mapping
+- Custom type definitions
+- Go's time.Time handling
+- The power of selective data modeling
+
+Most importantly, it showed how Go's type system can help transform complex API responses into clean, usable data structures perfect for my needs.
+
+Each endpoint taught me something new:
+
+- /api/victoria: Basic HTTP handling and JSON marshaling
+- /api/trains: Working with custom types and data processing
+- /ws: WebSocket management and concurrent connections
+
+## Concurrent Polling
+
+```go
+func (p *Poller) Start(ctx context.Context) {
+    ticker := time.NewTicker(6 * time.Second)
+    defer ticker.Stop()
+
+    // Do an initial poll immediately
+    p.poll()
+
+    for {
+        select {
+        case <-ctx.Done():
+            return
+        case <-ticker.C:
+            p.poll()
+        }
+    }
+}
+```
+
+This little piece of code taught me about:
+
+- Goroutines
+- Channels
+- Context management
+- Timers
+- Graceful shutdown
+
+## WebSocket Broadcasting: A Tale of Concurrency
+
+My first attempt at the WebSocket hub was delightfully naive:
+
+```go
+type Hub struct {
+    clients map[*Client]bool
+    poller *Poller
+}
+
+func (h *Hub) broadcastTrains() {
+    trains := h.poller.GetTrains()
+    data, err := json.Marshal(trains)
+    if err != nil {
+        log.Printf("Error marshaling trains: %v", err)
+        return
+    }
+
+    for client := range h.clients {
+        // Send updates to each client
+        client.send <- data
+    }
+}
+```
+
+This worked perfectly... until it didn't. Even with just the Victoria line, the first time two browsers connected simultaneously, I got the dreaded:
+
+```
+panic: concurrent map iteration and map write
+```
+
+What happened? While my broadcastTrains function was iterating over the clients map, another goroutine tried to add or remove a client. Maps in Go aren't thread-safe, and I had concurrent access from:
+
+1. The broadcast loop reading from the map
+2. The connection handler adding new clients
+3. The disconnect handler removing clients
+
+This was my first introduction to the concept of [Mutexes](https://gobyexample.com/mutexes), a common approach to handling the [readers-writers problem](https://en.wikipedia.org/wiki/Readers%E2%80%93writers_problem). As Javascript is a single-threaded language with an event loop, I'd never encountered this problem before!
+
+Go also comes with the concept of both reader and writer mutexes (sync.RWMutex). This is perfect for my use case because:
+
+- Many goroutines can read the clients map simultaneously (broadcasting to clients)
+- Only one goroutine should write to it at a time (adding/removing clients)
+
+Here's what the actual solution looks like:
+
+```go
+type Hub struct {
+    clients map[*Client]bool
+    mu      sync.RWMutex    // Protects clients map
+    poller  *Poller
+}
+
+func (h *Hub) registerClient(client *Client) {
+    h.mu.Lock()
+    h.clients[client] = true
+    h.mu.Unlock()
+}
+
+func (h *Hub) unregisterClient(client *Client) {
+    h.mu.Lock()
+    if _, ok := h.clients[client]; ok {
+        delete(h.clients, client)
+        close(client.send)
+    }
+    h.mu.Unlock()
+}
+
+func (h *Hub) broadcastTrains() {
+    trains := h.poller.GetTrains()
+    data, err := json.Marshal(trains)
+    if err != nil {
+        log.Printf("Error marshaling trains: %v", err)
+        return
+    }
+
+    // Use RLock() for reads since multiple goroutines can read simultaneously
+    h.mu.RLock()
+    for client := range h.clients {
+        select {
+        case client.send <- data:
+            // Message sent successfully
+        default:
+            // Client's send buffer is full, remove them
+            h.mu.RUnlock()            // Release read lock before acquiring write lock
+            h.unregisterClient(client)
+            h.mu.RLock()              // Reacquire read lock to continue iteration
+        }
+    }
+    h.mu.RUnlock()
+}
+```
+
+Here I learned about:
+
+- Mutex locks
+- Maps with pointer keys
+- JSON handling
+- Concurrent writes
+
+## The Current State
+
+Currently, the system:
+
+- Polls TfL's API every 6 seconds (well under their 500 requests/minute limit)
+- Processes raw prediction data into usable train locations
+- Maintains WebSocket connections with all clients
+- Broadcasts real-time updates
+
+I then quickly scaffolded a single page frontend in Next just to display this polling data, connecting to the backend via Websocket.
+
+Here's the MMVP up and running:
+
+<Figure
+  src={tflMvpImg}
+  alt="TfL Pulse MVP showing the Victoria Line with live train positions"
+  title="The current MVP: Live train positions on the Victoria Line. Not pretty, but functional!"
+/>
+
+The three endpoints serve different purposes:
+
+- /api/victoria returns raw prediction data (mostly for debugging)
+- /api/trains gives the current processed state of all trains
+- /ws provides real-time updates via WebSocket
+
+## What I Actually Learned
+
+- Go's concurrency model is powerful but takes time to understand properly
+- HTTP services need careful error handling and context management
+- WebSockets require thoughtful connection management
+- Strong typing is your friend, especially in a new language
+- The standard library is incredibly capable
+
+## Looking Forward
+
+The next big challenge is making this data actually useful. Right now I'm basically just reporting what TfL tells me, but there's a lot more that could be done:
+
+- Building a proper frontend visualization of the line
+- Adding a live map view of train positions
+- Improving the position calculations (real trains don't teleport between stations!)
+- Making it actually useful for commuters beyond "hey look, trains!"
+
+But most importantly, this project taught me that jumping into the deep end with a new language - while occasionally frustrating - is an incredibly effective way to learn. Documentation and tutorials are great, but nothing beats the experience of debugging your first concurrent map panic at 12AM.
+
+*Coming up next: Building a proper frontend for TfL Pulse, because raw JSON isn't exactly commuter-friendly...*
