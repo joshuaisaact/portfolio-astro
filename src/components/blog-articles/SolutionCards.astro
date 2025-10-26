@@ -1,0 +1,178 @@
+---
+import {
+  Search,
+  Puzzle,
+  Lightbulb,
+  Clock,
+  Heart,
+  TriangleAlert,
+} from "lucide-astro";
+
+interface Solution {
+  id: number;
+  title: string;
+  description: string;
+  approach: string;
+  problem: string;
+  icon: any;
+  gradient: string;
+}
+
+const solutions: Solution[] = [
+  {
+    id: 1,
+    title: "Smart Reuse Logic",
+    description: "Be selective about when to reuse content",
+    approach:
+      "Only reuse existing sequences if they match 80%+ of what the user is asking for—duration, difficulty, focus area, etc. Otherwise, create something fresh.",
+    problem:
+      "Defining '80% match' is surprisingly complex, and AI tends to be generous with its matching criteria. Who watches the watchers?",
+    icon: Search,
+    gradient: "from-blue-500 to-cyan-500",
+  },
+  {
+    id: 2,
+    title: "Templated Customization",
+    description: "Start with structure, add personal touches",
+    approach:
+      "Use existing sequences as templates and modify them for individual users—adjusting duration, swapping poses, or changing the focus area while keeping the core structure intact.",
+    problem:
+      "This could create endless minor variations of the same content, cluttering the database with sequences that are 95% identical but not meaningfully different.",
+    icon: Puzzle,
+    gradient: "from-purple-500 to-pink-500",
+  },
+  {
+    id: 3,
+    title: "Forced Creativity Rules",
+    description: "Build innovation into the system requirements",
+    approach:
+      "Set hard rules that require creativity, such as only reusing content for exact matches, or always customizing at least 3 elements of any existing sequence.",
+    problem:
+      "Artificial constraints often produce artificial-feeling results. When creativity is mandated rather than inspired, the output tends to feel mechanical and inauthentic.",
+    icon: Lightbulb,
+    gradient: "from-amber-500 to-orange-500",
+  },
+  {
+    id: 4,
+    title: "Time-Based Freshness",
+    description: "Ensure content doesn't get stale over time",
+    approach:
+      "Force novelty by creating new content regularly, or only allowing reuse of sequences that are older than a set timeframe (for example, more than 30 days old).",
+    problem:
+      "Arbitrary time limits don't guarantee quality or relevance. Just because something is new doesn't mean it's better. Fresh doesn't equal good.",
+    icon: Clock,
+    gradient: "from-green-500 to-emerald-500",
+  },
+  {
+    id: 5,
+    title: "Contextual Creativity",
+    description: "Match the solution to the emotional need",
+    approach:
+      "Leverage existing sequences for standard requests like 'morning flow' or 'hip openers', but create custom content when users share emotional context or highly specific needs.",
+    problem:
+      "Defining these boundaries is complex, and edge cases abound. Where exactly do you draw the line between 'standard' and 'specific'?",
+    icon: Heart,
+    gradient: "from-rose-500 to-red-500",
+  },
+];
+---
+
+<div class="my-12">
+  <div class="grid gap-8 md:gap-6">
+    {
+      solutions.map((solution, index) => (
+        <div
+          class="solution-card opacity-0"
+          data-direction={index % 2 === 0 ? "left" : "right"}
+        >
+          <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden group">
+            {/* Header */}
+            <div class="p-6 border-b border-gray-100 dark:border-gray-700">
+              <div class="flex items-start space-x-4">
+                <div
+                  class={`w-12 h-12 rounded-xl bg-linear-to-r ${solution.gradient} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300`}
+                >
+                  <solution.icon class="w-6 h-6 text-white" />
+                </div>
+                <div class="flex-1">
+                  <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 mt-0">
+                    {solution.title}
+                  </h3>
+                  <p class="text-gray-600 dark:text-gray-300 text-sm leading-relaxed m-0">
+                    {solution.description}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div class="p-6 space-y-6">
+              {/* Approach */}
+              <div>
+                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center mt-0">
+                  <span class="w-2 h-2 bg-green-500 rounded-full mr-2" />
+                  The Approach
+                </h4>
+                <p class="text-gray-700 dark:text-gray-300 leading-relaxed m-0">
+                  {solution.approach}
+                </p>
+              </div>
+
+              {/* Problem */}
+              <div>
+                <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center mt-0">
+                  <TriangleAlert class="w-4 h-4 text-amber-500 mr-2" />
+                  The Problem
+                </h4>
+                <p class="text-gray-600 dark:text-gray-400 leading-relaxed m-0">
+                  {solution.problem}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .solution-card {
+    transition:
+      opacity 0.6s ease-out,
+      transform 0.6s ease-out;
+  }
+
+  .solution-card[data-direction="left"] {
+    transform: translateX(-48px);
+  }
+
+  .solution-card[data-direction="right"] {
+    transform: translateX(48px);
+  }
+
+  .solution-card.visible {
+    opacity: 1;
+    transform: translateX(0);
+  }
+</style>
+
+<script>
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: "0px 0px -20% 0px",
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add("visible");
+      }
+    });
+  }, observerOptions);
+
+  // Observe all solution cards
+  document.querySelectorAll(".solution-card").forEach((card) => {
+    observer.observe(card);
+  });
+</script>

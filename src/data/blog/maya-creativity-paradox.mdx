@@ -5,6 +5,9 @@ featured_image: "./maya-preview.png"
 excerpt: "My journey building an AI yoga instructor revealed a core tension in modern AI: the battle between creative exploration and algorithmic efficiency. This is the story of that paradox."
 tags: ["AI", "LLM", "Creativity", "Architecture", "Yoga", "Product Development", "AI Philosophy"]
 ---
+import AILazinessDomains from '../../components/blog-articles/AILazinessDomains.astro';
+import SolutionCards from '../../components/blog-articles/SolutionCards.astro';
+import YogaDataStructure from '../../components/blog-articles/YogaDataStructure.astro';
 
 *Why teaching an AI yoga instructor to be creative reveals fundamental problems with intelligent content generation*
 
@@ -32,15 +35,11 @@ Back to the drawing board.
 
 ## The Rebuild: Understanding Structure
 
-Two weeks later, I had completely rewritten the data model. Instead of treating yoga as individual poses, I structured it hierarchically:
+Two weeks later, I had completely rewritten the data model.
 
-**Poses** → The atomic units (Downward Dog, Warrior II, etc.)
-**Sequences** → Meaningful combinations of poses (Sun Salutation A, Hip Opening Flow)
-**Classes** → Complete practices combining multiple sequences
+<YogaDataStructure />
 
-This mirrors how yoga actually works. You don't randomly combine poses; you combine meaningful sequences that have been developed and refined over time.
-
-Maya got smarter too. Instead of just creating sessions from scratch, she could now search through proper sequences, understand traditional flows, and suggest existing practices.
+Maya got smarter too. Instead of just creating sessions from scratch, the agent could now search through proper sequences, understand traditional flows, and suggest existing practices.
 
 ## When Success Creates New Problems
 
@@ -84,46 +83,13 @@ The fundamental question becomes: **How do you build AI systems that remain crea
 
 I've considered several approaches to this problem:
 
-### 1. Forced Creativity Quotas
-**The Idea**: Require Maya to create X% new content vs. reusing existing sequences.
-
-**Pros**: Guarantees novelty, prevents pure optimization toward reuse.
-
-**Cons**: Arbitrary thresholds feel inelegant. Forces creativity when it might not be needed.
-
-### 2. Context-Aware Decision Making
-**The Idea**: Let Maya decide based on user context whether to create or reuse.
-
-**Pros**: Flexible, user-centric approach. Allows for nuanced decisions.
-
-**Cons**: Doesn't solve the underlying bias toward efficiency. Requires complex decision logic.
-
-### 3. Multi-Agent Architecture
-**The Idea**: One agent optimizes for efficiency, another for creativity, a third arbitrates.
-
-**Pros**: Separates concerns, allows specialized optimization.
-
-**Cons**: Adds complexity. Who decides which agent "wins"?
-
-### 4. Creativity Metrics
-**The Idea**: Develop metrics that reward novelty alongside quality.
-
-**Pros**: Makes creativity measurable and optimizable.
-
-**Cons**: Can you really measure creativity? Risk of optimizing for novelty over usefulness.
+<SolutionCards />
 
 ## The Meta Problem: Preventing AI Laziness
 
 The more I've worked on this, the more I've realized we're dealing with a fundamental architectural question in AI systems: How do you prevent intelligence from becoming conservative?
 
-This isn't just about Maya and yoga sequences. It's about:
-
-- **AI code assistants** that suggest the same patterns repeatedly
-- **Content generation tools** that produce increasingly homogeneous output
-- **Recommendation systems** that create echo chambers
-- **Design AI** that converges on "safe" aesthetics
-
-In each case, the system becomes better at its job by learning what works—and in the process, becomes less willing to try what might not work.
+<AILazinessDomains />
 
 ## The Broader Implications
 

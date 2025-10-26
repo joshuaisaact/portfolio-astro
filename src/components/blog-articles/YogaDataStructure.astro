@@ -1,0 +1,341 @@
+---
+import {
+  List,
+  GraduationCap,
+  TriangleAlert,
+  CircleCheck,
+  Sparkles,
+  User,
+} from "lucide-astro";
+
+interface DataNode {
+  id: string;
+  label: string;
+  description: string;
+  count?: string;
+  icon: any;
+  gradient: string;
+}
+
+const oldStructureNodes: DataNode[] = [
+  {
+    id: "old-poses",
+    label: "Poses",
+    description: "Individual yoga positions",
+    count: "~200",
+    icon: User,
+    gradient: "from-slate-500 to-slate-600",
+  },
+  {
+    id: "old-sessions",
+    label: "AI Sessions",
+    description: "Random combinations",
+    count: "∞",
+    icon: Sparkles,
+    gradient: "from-pink-500 to-purple-600",
+  },
+];
+
+const newStructureNodes: DataNode[] = [
+  {
+    id: "new-poses",
+    label: "Poses",
+    description: "Individual yoga positions",
+    count: "~200",
+    icon: User,
+    gradient: "from-blue-500 to-blue-600",
+  },
+  {
+    id: "sequences",
+    label: "Sequences",
+    description: "Structured flows (Sun Salutation, etc.)",
+    count: "~50",
+    icon: List,
+    gradient: "from-emerald-500 to-emerald-600",
+  },
+  {
+    id: "classes",
+    label: "Classes",
+    description: "Combinations of sequences",
+    count: "~20",
+    icon: GraduationCap,
+    gradient: "from-purple-500 to-purple-600",
+  },
+];
+
+const legacyNode: DataNode = {
+  id: "legacy-sessions",
+  label: "Sessions",
+  description: "Legacy AI-generated (deprecated)",
+  count: "legacy",
+  icon: Sparkles,
+  gradient: "from-gray-400 to-gray-500",
+};
+---
+
+<div class="my-12 not-prose">
+  <div class="space-y-10">
+    <!-- Original Approach -->
+    <div
+      class="bg-white dark:bg-gray-900/50 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
+    >
+      <!-- Header -->
+      <div
+        class="p-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50"
+      >
+        <div class="text-center">
+          <h4
+            class="text-2xl font-semibold text-gray-900 dark:text-white mb-3 mt-0"
+          >
+            Original Approach
+          </h4>
+          <div
+            class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-800"
+          >
+            <TriangleAlert class="w-4 h-4 mr-2" />
+            Before Refactor
+          </div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="p-8">
+        <div class="max-w-md mx-auto space-y-4">
+          {
+            oldStructureNodes.map((node, index) => (
+              <>
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600 shadow-sm p-5 hover:shadow-md transition-all duration-200 group">
+                  <div class="flex items-start space-x-4">
+                    <div
+                      class={`w-12 h-12 rounded-xl bg-gradient-to-br ${node.gradient} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-md`}
+                    >
+                      <node.icon class="w-6 h-6 text-white" />
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center justify-between mb-2">
+                        <h5 class="text-lg font-semibold text-gray-900 dark:text-white mt-0 mb-0">
+                          {node.label}
+                        </h5>
+                        <span class="text-sm font-semibold text-gray-500 dark:text-gray-400 ml-2">
+                          {node.count}
+                        </span>
+                      </div>
+                      <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed m-0">
+                        {node.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                {index < oldStructureNodes.length - 1 && (
+                  <div class="flex justify-center my-1">
+                    <svg
+                      width="24"
+                      height="40"
+                      class="text-gray-400 dark:text-gray-600"
+                    >
+                      <defs>
+                        <marker
+                          id="old-v-dashed-arrow"
+                          markerWidth="6"
+                          markerHeight="4"
+                          refX="6"
+                          refY="2"
+                          orient="auto"
+                        >
+                          <polygon points="0 0, 6 2, 0 4" fill="currentColor" />
+                        </marker>
+                      </defs>
+                      <line
+                        x1="12"
+                        y1="0"
+                        x2="12"
+                        y2="34"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        stroke-dasharray="8,6"
+                        marker-end="url(#old-v-dashed-arrow)"
+                      />
+                    </svg>
+                  </div>
+                )}
+              </>
+            ))
+          }
+        </div>
+
+        <!-- Status indicator -->
+        <div class="text-center mt-10">
+          <div
+            class="inline-flex items-center px-5 py-3 rounded-xl font-medium bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-300"
+          >
+            <TriangleAlert
+              class="w-5 h-5 mr-3 text-red-600 dark:text-red-400"
+            />
+            No yoga flow logic - poses randomly combined
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rebuilt Architecture -->
+    <div
+      class="bg-white dark:bg-gray-900/50 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
+    >
+      <!-- Header -->
+      <div
+        class="p-6 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50"
+      >
+        <div class="text-center">
+          <h4
+            class="text-2xl font-semibold text-gray-900 dark:text-white mb-3 mt-0"
+          >
+            Rebuilt Architecture
+          </h4>
+          <div
+            class="inline-flex items-center px-4 py-2 rounded-full text-sm font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border border-green-200 dark:border-green-800"
+          >
+            <CircleCheck class="w-4 h-4 mr-2" />
+            After Refactor
+          </div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="p-8">
+        <div class="max-w-md mx-auto space-y-4">
+          {
+            newStructureNodes.map((node, index) => (
+              <>
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600 shadow-sm p-5 hover:shadow-md transition-all duration-200 group">
+                  <div class="flex items-start space-x-4">
+                    <div
+                      class={`w-12 h-12 rounded-xl bg-gradient-to-br ${node.gradient} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-md`}
+                    >
+                      <node.icon class="w-6 h-6 text-white" />
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center justify-between mb-2">
+                        <h5 class="text-lg font-semibold text-gray-900 dark:text-white mt-0 mb-0">
+                          {node.label}
+                        </h5>
+                        <span class="text-sm font-semibold text-gray-500 dark:text-gray-400 ml-2">
+                          {node.count}
+                        </span>
+                      </div>
+                      <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed m-0">
+                        {node.description}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                {index < newStructureNodes.length - 1 && (
+                  <div class="flex justify-center my-1">
+                    <svg
+                      width="24"
+                      height="40"
+                      class="text-gray-400 dark:text-gray-600"
+                    >
+                      <defs>
+                        <marker
+                          id="new-v-solid-arrow"
+                          markerWidth="6"
+                          markerHeight="4"
+                          refX="6"
+                          refY="2"
+                          orient="auto"
+                        >
+                          <polygon points="0 0, 6 2, 0 4" fill="currentColor" />
+                        </marker>
+                      </defs>
+                      <line
+                        x1="12"
+                        y1="0"
+                        x2="12"
+                        y2="34"
+                        stroke="currentColor"
+                        stroke-width="2.5"
+                        marker-end="url(#new-v-solid-arrow)"
+                      />
+                    </svg>
+                  </div>
+                )}
+              </>
+            ))
+          }
+        </div>
+
+        <!-- Legacy node -->
+        <div class="mt-10 pt-8 border-t border-gray-200 dark:border-gray-700">
+          <div class="text-center mb-5">
+            <h5
+              class="text-base font-semibold text-gray-600 dark:text-gray-400 mb-2 mt-0"
+            >
+              Legacy Data Type
+            </h5>
+          </div>
+          <div class="max-w-md mx-auto opacity-80">
+            <div
+              class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600 shadow-sm p-5 hover:shadow-md transition-all duration-200 group"
+            >
+              <div class="flex items-start space-x-4">
+                <div
+                  class={`w-12 h-12 rounded-xl bg-gradient-to-br ${legacyNode.gradient} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-md`}
+                >
+                  <legacyNode.icon class="w-6 h-6 text-white" />
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="flex items-center justify-between mb-2">
+                    <h6
+                      class="text-lg font-semibold text-gray-900 dark:text-white mt-0 mb-0"
+                    >
+                      {legacyNode.label}
+                    </h6>
+                    <span
+                      class="text-sm font-semibold text-gray-500 dark:text-gray-400 ml-2"
+                    >
+                      {legacyNode.count}
+                    </span>
+                  </div>
+                  <p
+                    class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed m-0"
+                  >
+                    {legacyNode.description}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p class="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
+            Kept for backwards compatibility
+          </p>
+        </div>
+
+        <!-- Status indicator -->
+        <div class="text-center mt-10">
+          <div
+            class="inline-flex items-center px-5 py-3 rounded-xl font-medium bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-300"
+          >
+            <CircleCheck
+              class="w-5 h-5 mr-3 text-green-600 dark:text-green-400"
+            />
+            Respects traditional yoga sequencing and structure
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="bg-gradient-to-r from-blue-50 to-indigo-50 mt-3 dark:from-blue-900/30 dark:to-indigo-900/30 rounded-2xl p-8 border border-blue-200 dark:border-blue-800"
+  >
+    <div class="text-blue-900 dark:text-blue-100">
+      <p class="text-base leading-relaxed dark:text-blue-200">
+        The new structure respects traditional yoga sequencing—poses flow into
+        established sequences (like Sun Salutation A), sequences combine into
+        balanced classes. The legacy AI sessions were kept for backwards
+        compatibility but are being phased out in favor of the structured
+        approach.
+      </p>
+    </div>
+  </div>
+</div>
