@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import "@fontsource-variable/manrope";
+import { ClientRouter } from "astro:transitions";
 ---
 
 <!doctype html>
@@ -43,6 +44,9 @@ import "@fontsource-variable/manrope";
 		<meta property="twitter:url" content="https://joshtuddenham.dev/" />
 		<meta property="twitter:title" content="Joshua Tuddenham | Full-Stack Engineer" />
 		<meta property="twitter:description" content="Full-stack engineer specializing in modern web technologies. View my latest projects and blog posts." />
+
+		<ClientRouter />
+
 		<style is:inline>
 			html {
 				background-color: white;
