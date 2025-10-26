@@ -6,92 +6,101 @@ import { ClientRouter } from "astro:transitions";
 
 <!doctype html>
 <html lang="en-GB">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-		<!-- Preload critical font -->
-		<link
-			rel="preload"
-			href="/_astro/manrope-latin-wght-normal.DHIcAJRg.woff2"
-			as="font"
-			type="font/woff2"
-			crossorigin
-		/>
+    <!-- Preload critical font -->
+    <link
+      rel="preload"
+      href="/_astro/manrope-latin-wght-normal.DHIcAJRg.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
 
-		<!-- Favicons -->
-		<link rel="icon" type="image/x-icon" href="/favicon.ico" />
-		<link rel="icon" type="image/png" sizes="32x32" href="/icon.png" />
-		<link rel="icon" type="image/png" sizes="512x512" href="/icon.png" />
-		<link rel="apple-touch-icon" sizes="180x180" href="/apple-icon.png" />
+    <!-- Favicons -->
+    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icon.png" />
+    <link rel="icon" type="image/png" sizes="512x512" href="/icon.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-icon.png" />
 
-		<meta name="generator" content={Astro.generator} />
+    <meta name="generator" content={Astro.generator} />
 
-		<!-- Primary Meta Tags -->
-		<title>Joshua Tuddenham | Full-Stack Engineer</title>
-		<meta name="title" content="Joshua Tuddenham | Full-Stack Engineer" />
-		<meta name="description" content="Full-stack engineer specializing in modern web technologies. View my latest projects and blog posts." />
+    <!-- Primary Meta Tags -->
+    <title>Joshua Tuddenham | Full-Stack Engineer</title>
+    <meta name="title" content="Joshua Tuddenham | Full-Stack Engineer" />
+    <meta
+      name="description"
+      content="Full-stack engineer specializing in modern web technologies. View my latest projects and blog posts."
+    />
 
-		<!-- Open Graph / Facebook -->
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content="https://joshtuddenham.dev/" />
-		<meta property="og:title" content="Joshua Tuddenham | Full-Stack Engineer" />
-		<meta property="og:description" content="Full-stack engineer specializing in modern web technologies. View my latest projects and blog posts." />
-		<meta property="og:locale" content="en_GB" />
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://joshtuddenham.dev/" />
+    <meta
+      property="og:title"
+      content="Joshua Tuddenham | Full-Stack Engineer"
+    />
+    <meta
+      property="og:description"
+      content="Full-stack engineer specializing in modern web technologies. View my latest projects and blog posts."
+    />
+    <meta property="og:locale" content="en_GB" />
 
-		<!-- Twitter -->
-		<meta property="twitter:card" content="summary_large_image" />
-		<meta property="twitter:url" content="https://joshtuddenham.dev/" />
-		<meta property="twitter:title" content="Joshua Tuddenham | Full-Stack Engineer" />
-		<meta property="twitter:description" content="Full-stack engineer specializing in modern web technologies. View my latest projects and blog posts." />
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://joshtuddenham.dev/" />
+    <meta
+      property="twitter:title"
+      content="Joshua Tuddenham | Full-Stack Engineer"
+    />
+    <meta
+      property="twitter:description"
+      content="Full-stack engineer specializing in modern web technologies. View my latest projects and blog posts."
+    />
 
-		<ClientRouter />
+    <ClientRouter />
 
-		<style is:inline>
-			html {
-				background-color: white;
-			}
-			html.dark {
-				background-color: #111827;
-			}
-			body {
-				visibility: hidden;
-				opacity: 0;
-			}
-		</style>
-		<script is:inline>
-			function applyTheme() {
-				const theme = (() => {
-					const localStorageTheme = localStorage?.getItem("theme") ?? "";
-					if (["dark", "light"].includes(localStorageTheme)) {
-						return localStorageTheme;
-					}
-					if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-						return "dark";
-					}
-					return "light";
-				})();
+    <style is:inline>
+      html {
+        background-color: white;
+      }
+      html.dark {
+        background-color: #111827;
+      }
+      body {
+        visibility: hidden;
+        opacity: 0;
+      }
+    </style>
+    <script is:inline>
+      function applyTheme() {
+        const theme = (() => {
+          const localStorageTheme = localStorage?.getItem("theme") ?? "";
+          if (["dark", "light"].includes(localStorageTheme)) {
+            return localStorageTheme;
+          }
+          if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+            return "dark";
+          }
+          return "light";
+        })();
 
-				if (theme === "light") {
-					document.documentElement.classList.remove("dark");
-				} else {
-					document.documentElement.classList.add("dark");
-				}
+        if (theme === "light") {
+          document.documentElement.classList.remove("dark");
+        } else {
+          document.documentElement.classList.add("dark");
+        }
 
-				window.localStorage.setItem("theme", theme);
-			}
+        window.localStorage.setItem("theme", theme);
+      }
 
-			applyTheme();
-			document.addEventListener("astro:after-swap", applyTheme);
-		</script>
-	</head>
-	<body class="font-manrope min-h-screen">
-		<main
-			id="main-content"
-			class="mx-auto max-w-7xl px-2 sm:px-4 lg:px-8"
-			role="main"
-		>
-			<slot />
-		</main>
-	</body>
+      applyTheme();
+      document.addEventListener("astro:after-swap", applyTheme);
+    </script>
+  </head>
+  <body class="font-manrope min-h-screen">
+    <slot />
+  </body>
 </html>

@@ -13,81 +13,75 @@ const socialLinks = [
     href: "https://www.linkedin.com/in/joshuatuddenham/",
     icon: "/media/nav/linkedin-original.svg",
     label: "LinkedIn",
-    id: "linkedin",
   },
   {
     href: "https://github.com/joshuaisaact",
     icon: "/media/nav/github.svg",
     label: "GitHub",
-    id: "github",
   },
   {
     href: "https://bsky.app/profile/joshtuddenham.tech",
     icon: "/media/nav/bluesky.svg",
     label: "Bluesky",
-    id: "bluesky",
   },
 ];
 ---
 
-<header class="sticky top-0 z-[50] w-full backdrop-blur-lg" transition:persist>
-  <div
-    class="border-b border-gray-200 bg-white/80 dark:border-gray-800/50 dark:bg-gray-900/80"
-  >
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-      <nav class="flex h-14 items-center justify-between">
-        <a
-          href="/"
-          class="text-lg font-medium tracking-tight text-gray-900 transition-colors hover:text-gray-600 dark:text-gray-100 dark:hover:text-gray-300 sm:text-xl"
-        >
-          Joshua Tuddenham
-        </a>
+<header
+  class="sticky top-0 z-50 w-full backdrop-blur-lg border-b border-gray-200 bg-white/80 dark:border-gray-800/50 dark:bg-gray-900/80"
+  transition:persist
+>
+  <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <nav class="flex h-14 items-center justify-between">
+      <a
+        href="/"
+        class="text-lg font-medium tracking-tight text-gray-900 transition-colors hover:text-gray-600 dark:text-gray-100 dark:hover:text-gray-300 sm:text-xl"
+      >
+        Joshua Tuddenham
+      </a>
 
-        {/* Desktop navigation */}
-        <ul class="hidden items-center gap-8 md:flex">
-          {
-            navLinks.map(({ href, label }) => (
-              <li>
-                <a
-                  href={href}
-                  class="text-gray-600 transition-colors hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100"
-                >
-                  {label}
-                </a>
-              </li>
-            ))
-          }
-        </ul>
-
-        {/* Social links & theme toggle */}
-        <div class="hidden items-center gap-6 md:flex">
-          {
-            socialLinks.map(({ href, icon, label, id }) => (
+      {/* Desktop navigation */}
+      <ul class="hidden items-center gap-8 md:flex">
+        {
+          navLinks.map(({ href, label }) => (
+            <li>
               <a
                 href={href}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="transition-opacity hover:opacity-70"
+                class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100 transition-colors"
               >
-                <Image
-                  src={icon}
-                  alt={label}
-                  width={20}
-                  height={20}
-                  loading="eager"
-                  class={`${
-                    id === "github" ? "dark:invert" : ""
-                  } opacity-80 transition-opacity hover:opacity-100`}
-                />
+                {label}
               </a>
-            ))
-          }
-          <ThemeIcon />
-        </div>
+            </li>
+          ))
+        }
+      </ul>
 
-        {/* Mobile menu component */}
-        <!-- <MobileMenu navLinks={navLinks} socialLinks={socialLinks} /> -->
-      </nav>
-    </div>
+      {/* Social links & theme toggle */}
+      <div class="hidden items-center gap-6 md:flex">
+        {
+          socialLinks.map(({ href, icon, label }) => (
+            <a
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="opacity-80 hover:opacity-100 transition-opacity"
+            >
+              <Image
+                src={icon}
+                alt={label}
+                width={20}
+                height={20}
+                loading="eager"
+                class={label === "GitHub" ? "dark:invert" : ""}
+              />
+            </a>
+          ))
+        }
+        <ThemeIcon />
+      </div>
+
+      {/* Mobile menu component */}
+      <!-- <MobileMenu navLinks={navLinks} socialLinks={socialLinks} /> -->
+    </nav>
   </div>
 </header>

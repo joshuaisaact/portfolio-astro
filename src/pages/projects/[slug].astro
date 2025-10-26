@@ -1,13 +1,13 @@
 ---
-import { getCollection } from 'astro:content';
-import { Image } from 'astro:assets';
-import { Trophy, ExternalLink, Github, BookOpen } from 'lucide-astro';
-import Layout from '../../layouts/Layout.astro';
-import Navbar from '../../components/Navbar.astro';
+import { getCollection } from "astro:content";
+import { Image } from "astro:assets";
+import { Trophy, ExternalLink, Github, BookOpen } from "lucide-astro";
+import Layout from "../../layouts/Layout.astro";
+import Navbar from "../../components/Navbar.astro";
 
 export async function getStaticPaths() {
-  const projects = await getCollection('projects');
-  return projects.map(project => ({
+  const projects = await getCollection("projects");
+  return projects.map((project) => ({
     params: { slug: project.data.slug },
     props: { project },
   }));
@@ -16,20 +16,22 @@ export async function getStaticPaths() {
 const { project } = Astro.props;
 
 // Helper to get image URL
-const getImageUrl = (src: string | { src: string } | undefined): string | undefined => {
+const getImageUrl = (
+  src: string | { src: string } | undefined,
+): string | undefined => {
   if (!src) return undefined;
-  return typeof src === 'string' ? src : src.src;
+  return typeof src === "string" ? src : src.src;
 };
 
 // Link icon mapping
 const getLinkIcon = (type: string) => {
   switch (type) {
-    case 'github':
+    case "github":
       return Github;
-    case 'live':
+    case "live":
       return ExternalLink;
-    case 'blog':
-    case 'submission':
+    case "blog":
+    case "submission":
       return BookOpen;
     default:
       return ExternalLink;
@@ -40,26 +42,41 @@ const getLinkIcon = (type: string) => {
 <Layout>
   <Navbar />
   <div class="pb-16">
-      <article class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-12" aria-labelledby="project-title">
-        <!-- Project media -->
-        {(project.data.videoSrc || project.data.imageSrc) && (
-          <div class="relative aspect-video rounded-xl overflow-hidden shadow-lg mb-8" aria-label="Project preview">
+    <article
+      class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pt-12"
+      aria-labelledby="project-title"
+    >
+      <!-- Project media -->
+      {
+        (project.data.videoSrc || project.data.imageSrc) && (
+          <div
+            class="relative aspect-video rounded-xl overflow-hidden shadow-lg mb-8"
+            aria-label="Project preview"
+          >
             {project.data.videoSrc ? (
               <video
-                src={project.data.videoSrc}
                 autoplay
                 loop
                 muted
                 playsinline
-                poster={getImageUrl(project.data.posterImage) || getImageUrl(project.data.imageSrc)}
+                preload="auto"
+                poster={
+                  getImageUrl(project.data.posterImage) ||
+                  getImageUrl(project.data.imageSrc)
+                }
                 class="w-full h-full object-cover"
               >
+                <source
+                  src={project.data.videoPreviewSrc || project.data.videoSrc}
+                  type="video/webm"
+                />
                 {project.data.videoSrc && (
-                  <source src={project.data.videoSrc} type="video/webm" />
+                  <source src={project.data.videoSrc} type="video/mp4" />
                 )}
               </video>
-            ) : project.data.imageSrc && (
-              typeof project.data.imageSrc === 'string' ? (
+            ) : (
+              project.data.imageSrc &&
+              (typeof project.data.imageSrc === "string" ? (
                 <img
                   src={project.data.imageSrc}
                   alt={project.data.imageAlt || project.data.title}
@@ -73,21 +90,23 @@ const getLinkIcon = (type: string) => {
                   class="w-full h-full object-cover"
                   loading="eager"
                 />
-              )
+              ))
             )}
           </div>
-        )}
+        )
+      }
 
-        <!-- Project header -->
-        <div class="text-center mb-12">
-          <div class="flex items-center justify-center gap-3 mb-6 flex-wrap">
-            <h1
-              class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white"
-              id="project-title"
-            >
-              {project.data.title}
-            </h1>
-            {project.data.award && (
+      <!-- Project header -->
+      <div class="text-center mb-12">
+        <div class="flex items-center justify-center gap-3 mb-6 flex-wrap">
+          <h1
+            class="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white"
+            id="project-title"
+          >
+            {project.data.title}
+          </h1>
+          {
+            project.data.award && (
               <div
                 class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-100 dark:bg-amber-500/20 rounded-full"
                 aria-label={`Award: ${project.data.award}`}
@@ -97,12 +116,14 @@ const getLinkIcon = (type: string) => {
                   {project.data.award}
                 </span>
               </div>
-            )}
-          </div>
+            )
+          }
+        </div>
 
-          <!-- Project Links -->
-          <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
-            {project.data.links.map((link) => {
+        <!-- Project Links -->
+        <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+          {
+            project.data.links.map((link) => {
               const Icon = getLinkIcon(link.type);
               return (
                 <a
@@ -122,21 +143,28 @@ const getLinkIcon = (type: string) => {
                   {link.label}
                 </a>
               );
-            })}
-          </div>
+            })
+          }
         </div>
+      </div>
 
-        <!-- Project content -->
-        <div class="prose prose-lg dark:prose-invert max-w-none space-y-8">
-          <!-- Overview -->
-          {project.body && (
-            <div class="text-lg leading-relaxed text-gray-700 dark:text-gray-300" aria-label="Project overview">
+      <!-- Project content -->
+      <div class="prose prose-lg dark:prose-invert max-w-none space-y-8">
+        <!-- Overview -->
+        {
+          project.body && (
+            <div
+              class="text-lg leading-relaxed text-gray-700 dark:text-gray-300"
+              aria-label="Project overview"
+            >
               <p set:html={project.body} />
             </div>
-          )}
+          )
+        }
 
-          <!-- Key Features -->
-          {project.data.features && project.data.features.length > 0 && (
+        <!-- Key Features -->
+        {
+          project.data.features && project.data.features.length > 0 && (
             <div>
               <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                 Key Features
@@ -150,10 +178,12 @@ const getLinkIcon = (type: string) => {
                 ))}
               </ul>
             </div>
-          )}
+          )
+        }
 
-          <!-- Technical Architecture -->
-          {project.data.architecture && (
+        <!-- Technical Architecture -->
+        {
+          project.data.architecture && (
             <div>
               <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">
                 Technical Architecture
@@ -201,8 +231,9 @@ const getLinkIcon = (type: string) => {
                 )}
               </div>
             </div>
-          )}
-        </div>
-      </article>
+          )
+        }
+      </div>
+    </article>
   </div>
 </Layout>

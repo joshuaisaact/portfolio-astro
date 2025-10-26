@@ -13,42 +13,48 @@ const allProjects = await getCollection("projects");
 
 // Separate application projects from utility projects
 const applicationProjects = allProjects
-	.filter((p) => !p.data.projectType || p.data.projectType === "application")
-	.sort((a, b) => (a.data.order ?? 999) - (b.data.order ?? 999))
-	.map((p) => p.data);
+  .filter((p) => !p.data.projectType || p.data.projectType === "application")
+  .sort((a, b) => (a.data.order ?? 999) - (b.data.order ?? 999))
+  .map((p) => p.data);
 
 const utilityProjects = allProjects
-	.filter((p) =>
-		["tool", "library", "starter"].includes(p.data.projectType || ""),
-	)
-	.sort((a, b) => (a.data.order ?? 999) - (b.data.order ?? 999))
-	.map((p) => p.data);
+  .filter((p) =>
+    ["tool", "library", "starter"].includes(p.data.projectType || ""),
+  )
+  .sort((a, b) => (a.data.order ?? 999) - (b.data.order ?? 999))
+  .map((p) => p.data);
 ---
 
 <a
-	href="#main-content"
-	class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-white dark:focus:bg-gray-900 focus:text-blue-600"
+  href="#main-content"
+  class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-white dark:focus:bg-gray-900 focus:text-blue-600"
 >
-	Skip to main content
+  Skip to main content
 </a>
 
 <Layout>
-	<Navbar />
-	<Welcome />
-	<Section id="projects" title="Featured Applications">
-		<Projects projects={applicationProjects} projectType="application" />
-	</Section>
-	<Section id="dev-tools" title="Developer Tools & Utilities" cardType="full">
-		<Projects
-			projects={utilityProjects}
-			projectType="tool"
-			cardType="minimal"
-		/>
-	</Section>
-	<Section id="blog" title="Blog">
-		<Blog />
-	</Section>
-	<Section id="contact" title="Contact">
-		<Contact />
-	</Section>
+  <Navbar />
+  <main
+    id="main-content"
+    class="mx-auto max-w-7xl px-2 sm:px-4 lg:px-8"
+    role="main"
+  >
+    <Welcome />
+    <Section id="projects" title="Featured Applications">
+      <Projects projects={applicationProjects} projectType="application" />
+    </Section>
+    <Section id="dev-tools" title="Developer Tools & Utilities" cardType="full">
+      <Projects
+        projects={utilityProjects}
+        projectType="tool"
+        cardType="minimal"
+      />
+    </Section>
+    <Section id="blog" title="Blog">
+      <Blog />
+    </Section>
+    <Section id="contact" title="Contact">
+      <Contact />
+    </Section>
+  </main>
 </Layout>

@@ -1,25 +1,25 @@
 ---
-import Layout from '../../layouts/Layout.astro';
-import Navbar from '../../components/Navbar.astro';
-import BlogCard from '../../components/BlogCard.astro';
-import { getCollection } from 'astro:content';
+import Layout from "../../layouts/Layout.astro";
+import Navbar from "../../components/Navbar.astro";
+import BlogCard from "../../components/BlogCard.astro";
+import { getCollection } from "astro:content";
 
 // Get all blog posts
-const allPosts = await getCollection('blog');
+const allPosts = await getCollection("blog");
 
 // Sort by date (newest first)
 const sortedPosts = allPosts.sort(
-  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime()
+  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
 );
 
 // Pagination
 const postsPerPage = 9;
 const url = new URL(Astro.request.url);
-const currentPage = parseInt(url.searchParams.get('page') || '1');
+const currentPage = parseInt(url.searchParams.get("page") || "1");
 const totalPages = Math.ceil(sortedPosts.length / postsPerPage);
 const paginatedPosts = sortedPosts.slice(
   (currentPage - 1) * postsPerPage,
-  currentPage * postsPerPage
+  currentPage * postsPerPage,
 );
 
 // Helper to create page URLs
@@ -29,17 +29,17 @@ const createPageURL = (page: number) => {
 ---
 
 <Layout>
+  <!-- Skip to main content -->
+  <a
+    href="#main-content"
+    class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-white dark:focus:bg-gray-900 focus:text-blue-600"
+  >
+    Skip to main content
+  </a>
+
   <Navbar />
 
   <div class="min-h-screen">
-    <!-- Skip to main content -->
-    <a
-      href="#main-content"
-      class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-white dark:focus:bg-gray-900 focus:text-blue-600"
-    >
-      Skip to main content
-    </a>
-
     <main
       id="main-content"
       class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16"
@@ -57,52 +57,56 @@ const createPageURL = (page: number) => {
         </p>
       </div>
 
-
       <!-- Blog Grid -->
       <div
         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12"
         role="list"
         aria-label="Blog posts"
       >
-        {paginatedPosts.map((post) => (
-          <BlogCard slug={post.id} metadata={post.data} />
-        ))}
+        {
+          paginatedPosts.map((post, index) => (
+            <BlogCard slug={post.id} metadata={post.data} index={index} />
+          ))
+        }
       </div>
 
-
       <!-- Pagination -->
-      {totalPages > 1 && (
-        <nav
-          class="flex justify-center gap-2 mt-12"
-          aria-label="Blog posts pagination"
-        >
-          <a
-            href={createPageURL(Math.max(currentPage - 1, 1))}
-            class={`px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 ${
-              currentPage === 1 ? 'pointer-events-none opacity-50' : ''
-            }`}
-            aria-label="Previous page"
-            aria-disabled={currentPage === 1}
+      {
+        totalPages > 1 && (
+          <nav
+            class="flex justify-center gap-2 mt-12"
+            aria-label="Blog posts pagination"
           >
-            Previous
-          </a>
+            <a
+              href={createPageURL(Math.max(currentPage - 1, 1))}
+              class={`px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 ${
+                currentPage === 1 ? "pointer-events-none opacity-50" : ""
+              }`}
+              aria-label="Previous page"
+              aria-disabled={currentPage === 1}
+            >
+              Previous
+            </a>
 
-          <span class="flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">
-            Page {currentPage} of {totalPages}
-          </span>
+            <span class="flex items-center px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+              Page {currentPage} of {totalPages}
+            </span>
 
-          <a
-            href={createPageURL(Math.min(currentPage + 1, totalPages))}
-            class={`px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 ${
-              currentPage === totalPages ? 'pointer-events-none opacity-50' : ''
-            }`}
-            aria-label="Next page"
-            aria-disabled={currentPage === totalPages}
-          >
-            Next
-          </a>
-        </nav>
-      )}
+            <a
+              href={createPageURL(Math.min(currentPage + 1, totalPages))}
+              class={`px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 dark:hover:bg-gray-700 ${
+                currentPage === totalPages
+                  ? "pointer-events-none opacity-50"
+                  : ""
+              }`}
+              aria-label="Next page"
+              aria-disabled={currentPage === totalPages}
+            >
+              Next
+            </a>
+          </nav>
+        )
+      }
     </main>
   </div>
 </Layout>
