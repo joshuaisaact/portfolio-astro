@@ -8,18 +8,15 @@ const sortedPosts = allPosts.sort(
   (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
 );
 
-// Pagination settings
 const postsPerPage = 6;
-const currentPage = 1; // This will be dynamic when you add pagination routing
+const currentPage = 1;
 const totalPages = Math.ceil(sortedPosts.length / postsPerPage);
 
-// Get paginated posts
 const paginatedPosts = sortedPosts.slice(
   (currentPage - 1) * postsPerPage,
   currentPage * postsPerPage,
 );
 
-// Helper to create page URLs
 const createPageURL = (page: number) => `/?page=${page}#blog`;
 ---
 

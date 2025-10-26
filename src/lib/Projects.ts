@@ -4,6 +4,9 @@ import aigumentPreview from "../assets/projects/aigument-preview.webp";
 import gossPoster from "../assets/projects/goss-poster.png";
 import portfoliowebsite from "../assets/projects/portfoliowebsite.webp";
 import woosterPoster from "../assets/projects/wooster-poster.webp";
+import joshdeskPoster from "../assets/projects/joshdesk-poster.png";
+import foundationsWin from "../assets/projects/foundations-win.webp";
+import goLogo from "../assets/projects/go.svg";
 
 export const PROJECTS: Project[] = [
 	{
@@ -64,7 +67,7 @@ export const PROJECTS: Project[] = [
 		slug: "joshdesk",
 		description:
 			"A Slack app for hybrid team coordination that simplifies office attendance tracking. Features 4-week scheduling, automatic status updates, and smart reminders. Built with TypeScript and Bun, deployed on DigitalOcean.",
-		imageSrc: "/media/projects/videos/joshdesk.mp4",
+		imageSrc: joshdeskPoster,
 		imageAlt: "JoshDesk Slack app interface",
 		links: [
 			{
@@ -109,7 +112,7 @@ export const PROJECTS: Project[] = [
 		},
 		videoSrc: "/media/projects/videos/joshdesk.mp4", // Add if you have a video
 		videoPreviewSrc: "/media/projects/videos/joshdesk.mp4", // Add if you have a preview video
-		posterImage: "/media/projects/joshdesk-poster.png", // Add if you have a poster image
+		posterImage: joshdeskPoster,
 	},
 	{
 		title: "Wooster",
@@ -195,7 +198,7 @@ It combines LLM technology with robust distributed architecture, comprehensive m
 		slug: "foundations",
 		description:
 			"Led frontend development of a diversity data transparency platform, transforming raw pay gap data into actionable insights. Built and deployed in 24 hours, winning Best in Category at JumpStart Hackathon.",
-		imageSrc: "/media/achievements/foundations-win.webp",
+		imageSrc: foundationsWin,
 		imageAlt: "Foundations Platform Preview",
 		skills: ["Nextjs", "React", "TypeScript", "TailwindCSS"],
 		links: [
@@ -247,60 +250,6 @@ It combines LLM technology with robust distributed architecture, comprehensive m
 		},
 		videoSrc: "/media/projects/videos/foundations.webm",
 		videoPreviewSrc: "/media/projects/videos/foundations.webm",
-	},
-	{
-		title: "Goss",
-		slug: "goss",
-		description:
-			"Architected a robust real-time social platform featuring WebSocket notifications, social graph management, and file handling. Built with Next.js, TypeScript, and Supabase.",
-		imageSrc: gossPoster,
-		imageAlt: "Goss logo",
-		links: [
-			{
-				type: "github",
-				url: "https://github.com/joshuaisaact/Goss",
-				label: "View Code",
-			},
-		],
-		skills: [
-			"Nextjs",
-			"TypeScript",
-			"Supabase",
-			"TanStack-Query",
-			"TailwindCSS",
-		],
-		overview: `I took on the technical challenge of building a voice-first social platform that
-required real-time capabilities and complex data relationships. I led the development of key infrastructure
-components, focusing on creating a scalable backend while ensuring a smooth user experience.
-
-      The project showcases my ability to architect complex systems, from implementing real-time WebSocket
-      notifications to designing efficient database schemas for social relationships. Working within a team
-      environment, I delivered enterprise-grade features that formed the backbone of the platform.`,
-		features: [
-			"Real-time notification system using WebSockets and Supabase Realtime for instant updates",
-			"Custom social graph implementation with bidirectional friend connections in PostgreSQL",
-			"RESTful API layer with optimistic updates for responsive friend operations",
-			"Secure file upload system integrated with Supabase storage",
-			"Robust authentication flow with multiple providers",
-			"WebSocket connection management with automatic reconnection handling",
-		],
-		architecture: {
-			frontend: `Integrated the backend services with the team's Next.js/React frontend.
-      Implemented Tanstack Query for efficient state management and optimistic updates, significantly improving perceived performance.
-        Built reusable hooks for WebSocket management and real-time data synchronization.`,
-
-			backend: `Architected and implemented a real-time notification system using WebSockets and Supabase
-        Realtime, ensuring reliable message delivery across multiple client sessions.
-        Designed an efficient social graph schema in PostgreSQL, optimizing friend relationship queries and management.
-        Built RESTful APIs with comprehensive validation and error handling.`,
-
-			infrastructure: `Implemented a secure authentication flow using Supabase, supporting multiple providers and session management.
-      Built a scalable file upload system with proper access controls and storage optimization.
-  Set up WebSocket infrastructure with connection pooling and automatic recovery.`,
-		},
-		videoSrc: "/media/projects/videos/goss3.webm",
-		videoPreviewSrc: "/media/projects/videos/goss-preview.webm",
-		posterImage: gossPoster,
 	},
 	{
 		title: "Portfolio Website",
@@ -379,7 +328,7 @@ components, focusing on creating a scalable backend while ensuring a smooth user
 		projectType: "tool",
 		description:
 			"A foundational Go project for building AI agents that interact with users and utilize tools, defaulting to the Anthropic (Claude) API.",
-		imageSrc: "/media/skills/go.svg",
+		imageSrc: goLogo,
 		imageAlt: "Go Language Logo",
 		links: [
 			{

@@ -1,12 +1,13 @@
 ---
 import { Image } from "astro:assets";
+import type { ImageMetadata } from "astro";
 
 interface Props {
   slug: string;
   metadata: {
     title: string;
     date: string;
-    featured_image: string;
+    featured_image: ImageMetadata;
     excerpt: string;
     tags: string[];
   };
@@ -14,7 +15,6 @@ interface Props {
 
 const { slug, metadata } = Astro.props;
 
-// Format date helper
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   return date.toLocaleDateString("en-US", {
