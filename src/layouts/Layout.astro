@@ -9,8 +9,8 @@ import { ClientRouter } from "astro:transitions";
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
 
-    <!-- Preload critical font -->
     <link
       rel="preload"
       href="/_astro/manrope-latin-wght-normal.DHIcAJRg.woff2"
@@ -34,10 +34,28 @@ import { ClientRouter } from "astro:transitions";
       name="description"
       content="Full-stack engineer specializing in modern web technologies. View my latest projects and blog posts."
     />
+    <meta name="author" content="Josh Tuddenham" />
+    <meta
+      name="keywords"
+      content="Full-Stack Engineer, Software Developer, React, TypeScript, Node.js, Enterprise Software, Capital Markets Technology, Web Development, JavaScript, Next.js, Astro"
+    />
+    <link rel="canonical" href="https://joshtuddenham.dev/" />
+    <meta
+      name="theme-color"
+      content="#ffffff"
+      media="(prefers-color-scheme: light)"
+    />
+    <meta
+      name="theme-color"
+      content="#111827"
+      media="(prefers-color-scheme: dark)"
+    />
+    <meta name="robots" content="index, follow" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://joshtuddenham.dev/" />
+    <meta property="og:site_name" content="Josh Tuddenham" />
     <meta
       property="og:title"
       content="Joshua Tuddenham | Full-Stack Engineer"
@@ -46,6 +64,13 @@ import { ClientRouter } from "astro:transitions";
       property="og:description"
       content="Full-stack engineer specializing in modern web technologies. View my latest projects and blog posts."
     />
+    <meta
+      property="og:image"
+      content="https://joshtuddenham.dev/og-image.jpg"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Josh Tuddenham Portfolio" />
     <meta property="og:locale" content="en_GB" />
 
     <!-- Twitter -->
@@ -58,6 +83,10 @@ import { ClientRouter } from "astro:transitions";
     <meta
       property="twitter:description"
       content="Full-stack engineer specializing in modern web technologies. View my latest projects and blog posts."
+    />
+    <meta
+      property="twitter:image"
+      content="https://joshtuddenham.dev/og-image.jpg"
     />
 
     <ClientRouter />
