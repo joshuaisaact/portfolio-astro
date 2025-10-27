@@ -1,6 +1,6 @@
 ---
 import type { Project } from "./Projects.astro";
-import { Image } from "astro:assets";
+import { Image, getImage } from "astro:assets";
 import { Github, Trophy } from "lucide-astro";
 
 interface Props {
@@ -17,11 +17,21 @@ const cardLinkHref =
   isMinimal && githubLink ? githubLink.url : `/projects/${project.slug}`;
 const linkTarget = isMinimal && githubLink ? "_blank" : "_self";
 
-const getPosterUrl = (
+const getPosterUrl = async (
   poster: ImageMetadata | undefined,
-): string | undefined => {
-  return poster?.src;
+): Promise<string | undefined> => {
+  if (!poster) return undefined;
+  const optimizedImage = await getImage({
+    src: poster,
+    width: 560,
+    format: "webp",
+  });
+  return optimizedImage.src;
 };
+
+const posterUrl = project.videoSrc
+  ? await getPosterUrl(project.posterImage || project.imageSrc)
+  : undefined;
 ---
 
 <div class="relative block h-full">
@@ -62,10 +72,7 @@ const getPosterUrl = (
               muted
               playsinline
               preload="none"
-              poster={
-                getPosterUrl(project.posterImage) ||
-                getPosterUrl(project.imageSrc)
-              }
+              poster={posterUrl}
               class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 lazy-video"
             />
           )}
