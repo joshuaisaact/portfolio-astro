@@ -17,6 +17,16 @@ This is a migration of my personal portfolio from Next.js to Astro, focusing on 
 - **Fonts**: Geist & Plus Jakarta Sans
 - **Deployment**: Static site generation
 
+## Lighthouse Scores
+
+Desktop:
+
+<img width="944" height="622" alt="image" src="https://github.com/user-attachments/assets/3187d217-4887-46a7-8bbc-f6bf4ec80a38" />
+
+Mobile:
+
+<img width="949" height="628" alt="image" src="https://github.com/user-attachments/assets/c1e51a99-3be6-45ad-b376-cded1c9f2e77" />
+
 ## Project Structure
 
 ```text
@@ -89,13 +99,5 @@ Key differences from the Next.js version:
 - Improved build times and bundle size
 - Better Lighthouse scores out of the box
 
-## Lighthouse Scores
 
-Desktop:
-
-<img width="944" height="622" alt="image" src="https://github.com/user-attachments/assets/3187d217-4887-46a7-8bbc-f6bf4ec80a38" />
-
-Mobile:
-
-<img width="949" height="628" alt="image" src="https://github.com/user-attachments/assets/c1e51a99-3be6-45ad-b376-cded1c9f2e77" />
 
