@@ -26,7 +26,7 @@ features:
 architecture:
   frontend: "Built with Slack's Block Kit UI—their docs were actually pretty solid which made the development surprisingly smooth. Created interactive elements for quick status updates and a dynamic home tab showing the 4-week planning view."
   backend: "I'd been wanting to try Bun on a real project, so this was the perfect excuse. Used JSON and SQLite for storage since it didn't need anything more complex than that. Set up a cron job for the weekly schedule resets. Slack Bolt framework handles the API interactions, and Socket Mode keeps everything secure without needing to expose endpoints."
-  infrastructure: "Deployed on DigitalOcean for reliability. Environment variable configuration for easy deployment. OAuth 2.0 flow for secure workspace installation. Scheduled tasks for automated weekly schedule resets."
+  infrastructure: "Originally deployed on DigitalOcean and used in production by the team. Now available as a self-hostable open-source project with complete deployment instructions in the repository. Teams can fork and deploy to their own infrastructure with environment variable configuration for easy setup. OAuth 2.0 flow for secure workspace installation. Scheduled tasks for automated weekly schedule resets."
 videoSrc: "/media/projects/videos/joshdesk.mp4"
 videoPreviewSrc: "/media/projects/videos/joshdesk.mp4"
 posterImage: "../../assets/projects/joshdesk-poster.webp"
