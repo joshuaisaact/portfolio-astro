@@ -2,7 +2,7 @@
 title: "JoshDesk"
 order: 2
 slug: "joshdesk"
-description: "A Slack app for hybrid team coordination that simplifies office attendance tracking. Features 4-week scheduling, automatic status updates, and smart reminders. Built with TypeScript and Bun, deployed on DigitalOcean."
+description: "When our team's hybrid work tool got prohibitively expensive, I built a free, open-source alternative in two weeks. A Slack app that helps teams coordinate office days, with a bonus feature: weather forecasts so you can avoid commuting on rainy days."
 imageSrc: "../../assets/projects/joshdesk-poster.webp"
 imageAlt: "JoshDesk Slack app interface"
 links:
@@ -20,19 +20,18 @@ features:
   - "One-click office/WFH status updates"
   - "Automatic weekly schedule reset every Friday"
   - "Team view command to see everyone's status at a glance"
-  - "Data persistence between app restarts"
   - "Weather-aware planning integration"
   - "Smart weekly reminders to keep schedules current"
-  - "Customizable team settings for admins"
+  - "Customizable admin settings including configurable reminder schedules (our CTO wanted control over when the team got nudged to update their plans)"
 architecture:
-  frontend: "Custom Slack Block Kit UI for intuitive user experience. Interactive elements for quick status updates with minimal clicks. Dynamic home tab interface showing 4-week planning view."
-  backend: "Built with TypeScript and Bun for fast execution. Slack Bolt framework for handling API interactions. Persistent data storage with automatic weekly schedule management. Socket Mode for secure event handling without exposing endpoints."
+  frontend: "Built with Slack's Block Kit UI—their docs were actually pretty solid which made the development surprisingly smooth. Created interactive elements for quick status updates and a dynamic home tab showing the 4-week planning view."
+  backend: "I'd been wanting to try Bun on a real project, so this was the perfect excuse. Used JSON and SQLite for storage since it didn't need anything more complex than that. Set up a cron job for the weekly schedule resets. Slack Bolt framework handles the API interactions, and Socket Mode keeps everything secure without needing to expose endpoints."
   infrastructure: "Deployed on DigitalOcean for reliability. Environment variable configuration for easy deployment. OAuth 2.0 flow for secure workspace installation. Scheduled tasks for automated weekly schedule resets."
 videoSrc: "/media/projects/videos/joshdesk.mp4"
 videoPreviewSrc: "/media/projects/videos/joshdesk.mp4"
 posterImage: "../../assets/projects/joshdesk-poster.webp"
 ---
 
-JoshDesk streamlines hybrid work coordination through a simple Slack interface. It solves the common problem of tracking who's in the office on which days, eliminating the need for messy spreadsheets or constant messaging. Built with TypeScript and Bun, this project focuses on delivering a frictionless user experience directly within Slack.
+At my job, we were using Officely to coordinate hybrid work schedules—a Slack plugin that let people share which days they'd be in the office versus working from home. It worked well until the pricing ballooned once we hit a certain team size. So I built JoshDesk in two weeks during my spare time as a free, open-source alternative.
 
-The app provides a 4-week view of team attendance, making it easy for teams to coordinate in-office days. With two-click status updates and automatic weekly schedule resets, JoshDesk reduces the overhead of managing hybrid work arrangements while improving team coordination.
+Beyond just replicating the core functionality, I added features I actually wanted to use: weather forecasts integrated right into the planning view, so you can strategically choose your office days when it's not pouring rain. The app gives you a 4-week view of team attendance, two-click status updates, and automatic weekly resets—all the essentials without the enterprise price tag.
