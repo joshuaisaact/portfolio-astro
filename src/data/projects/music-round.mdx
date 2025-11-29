@@ -1,0 +1,34 @@
+---
+title: "Music Round"
+slug: "music-round"
+order: 0
+description: "A real-time multiplayer song guessing game where players compete to identify songs from Spotify previews. Features daily challenges, battle royale mode, and hint systems."
+imageSrc: "../../assets/projects/music-round-preview.png"
+imageAlt: "Music Round game interface"
+links:
+  - type: "github"
+    url: "https://github.com/joshuaisaact/music-round"
+    label: "GitHub Repository"
+skills:
+  - "React"
+  - "TypeScript"
+  - "TailwindCSS"
+  - "Convex"
+  - "TanStack Start"
+  - "Spotify API"
+features:
+  - "Real-time multiplayer with shareable game codes"
+  - "Daily challenge mode with global leaderboard"
+  - "Battle royale mode - 50 rounds, 3 lives, last player standing"
+  - "Hint system that reveals letters at a point cost"
+  - "Multiple curated playlists (decades, genres, festivals)"
+  - "Time-decay scoring rewarding faster answers"
+architecture:
+  frontend: "React 19 with TanStack Start for SSR and routing. TanStack Query for server state management. Tailwind CSS for pixel-art styled UI components."
+  backend: "Convex for real-time database and serverless functions. Handles game state, player synchronization, and round transitions. Spotify Web API for song previews with Deezer fallback."
+  infrastructure: "Deployed on Netlify with Convex cloud backend. Real-time subscriptions keep all players in sync. Deterministic daily seeds ensure same songs for all players."
+---
+
+Music Round started as a pub quiz game brought online. Players join lobbies with shareable codes and compete to identify songs from 30-second Spotify previews.
+
+The real-time sync was the interesting technical challenge - multiple players need to see the same timer, same scores, and same round transitions simultaneously. Convex handles this with reactive queries that push updates to all connected clients.
