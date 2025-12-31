@@ -63,9 +63,9 @@ const posterUrl = project.videoSrc
     {
       !isMinimal && (project.videoPreviewSrc || project.imageSrc) && (
         <div class="relative aspect-3/2 sm:aspect-4/3 overflow-hidden bg-gray-100 dark:bg-gray-800">
-          {project.videoSrc && (
+          {project.videoPreviewSrc && (
             <video
-              data-video-src={project.videoPreviewSrc || project.videoSrc}
+              data-video-src={project.videoPreviewSrc}
               data-video-src-mp4={project.videoSrc}
               autoplay
               loop
@@ -76,7 +76,7 @@ const posterUrl = project.videoSrc
               class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 lazy-video"
             />
           )}
-          {!project.videoSrc && project.imageSrc && (
+          {!project.videoPreviewSrc && project.imageSrc && (
             <Image
               src={project.imageSrc}
               alt={project.imageAlt || project.title}
