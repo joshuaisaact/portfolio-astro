@@ -125,7 +125,13 @@ const {
       }
 
       applyTheme();
-      document.addEventListener("astro:after-swap", applyTheme);
+      document.addEventListener("astro:before-swap", (event) => {
+        const theme = localStorage?.getItem("theme") ??
+          (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        if (theme === "dark") {
+          event.newDocument.documentElement.classList.add("dark");
+        }
+      });
     </script>
   </head>
   <body class="font-manrope min-h-screen">
