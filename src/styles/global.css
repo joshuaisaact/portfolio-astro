@@ -9,10 +9,6 @@
   --font-manrope: "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
 }
 
-body {
-  visibility: visible !important;
-  opacity: 1 !important;
-}
 
 :root {
   /* Theme colors */
