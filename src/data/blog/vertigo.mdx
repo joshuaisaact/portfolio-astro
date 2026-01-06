@@ -1,0 +1,118 @@
+---
+title: "Speed Vertigo: A New Kind of Engineering Debt"
+date: "2026-01-05"
+featured_image: "./burjkhalifa.webp"
+excerpt: "Speed vertigo: we shipped knowledge we'll need to actually earn later."
+tags: ["AI", "LLM", "debt", "philosophy"]
+---
+
+import Figure from '../../components/Figure.astro';
+import mapvsterrain from './mapvsterrain.jpg';
+
+The rapid evolution of AI coding is creating a new category of debt. It is a trade-off we should **willingly make** (speed is survival, after all) but we must also acknowledge the cost. I have begun thinking of this sensation as "Speed Vertigo".
+
+## A bit about me
+
+For context, I'm professionally employed as a software engineer at an AI-forward YC alumni software startup, and I'm a career changer. I was previously in enterprise sales for just over eight years, the majority of the time spent selling software to hedge funds. 
+
+I've been writing code professionally for coming up on 18 months now, which means AI has been present my entire professional coding career. I am what some might consider an 'AI-native' engineer. 
+
+**In the last six months alone, I’ve merged over 225 PRs**. That volume includes architecting an AI-powered report builder, migrating distributed systems using agents, and shipping customer-facing AI systems to live environments. In my spare time, I keep the momentum going with projects like an agentic yoga coach and live multiplayer games.
+
+I use Claude Code heavily, and have an AI-forward workflow, but I don't 'vibe code'. We are responsible for the code that ultimately makes it into production, it's reviewed as if it came from a human, and I'm conscious that I'm the first line reviewer for any generated code, before my colleagues see it.
+
+I mention this not to brag, but to establish the baseline: I am not using AI to fake competence. I am using it to amplify output. And even with that output, the vertigo persists.
+
+## This is not imposter syndrome
+
+The feeling is *not* imposter syndrome. It's different. 
+
+Imposter syndrome is doubting that you belong somewhere. The fear that you are **under-qualified** for the position you hold. Speed Vertigo is the realization that you are **over-leveraged** in the code you shipped.
+
+The sensation is akin to standing on a skyscraper you built in record time. Imagine you're an architect, and you suddenly get access to a tool that allows you to build the Burj Khalifa overnight. Of course, you use it. Speed is survival in a competitive market. If you don't build it fast, other companies will, and you will be obsolete.
+
+But all of a sudden you're stood there, 829.8 meters off the ground, looking down, and the ground begins to spin. *That* is the feeling I'm describing. It is the dizziness of looking at a complex system you created, knowing that while the structure is sound, your personal understanding of its foundation is thinner than if you had laid every brick by hand.
+
+## What I am not describing
+
+I want to make a few things clear here, because I imagine some readers might jump to conclusions. I am not talking about shipping broken code. I'm also not talking about "vibe coding".
+
+In this scenario, you understand the code. You've read every line. You follow the logic. You treat it like your own. But there is a distinct difference between **reading a map** and **walking the terrain**. There is a gap between verified output and *earned understanding*.
+
+When you build something from scratch, you hit the gotchas - the hidden memory leaks, the edge cases, the library bugs. You learn why the solution looks the way it does because you tried three other ways that failed.
+
+When you prompt the solution, you get the final answer without the gotchas. You verify it works, but you lack the battle scars that tell you *why* it works. That missing context is the *Vertigo Debt*.
+
+<Figure
+  src={mapvsterrain}
+  alt="Diagram of reading a map vs walking the terrain"
+  title="Full disclosure - this diagram was made with Nano Banana"
+/>
+
+To be clear, I am not talking about shipping code that I *hope* works. The code is tested, reviewed, and functions perfectly. The debt isn't in the software's reliability, the debt is in the engineer's **"Mean Time to Debug."**
+
+If I wrote a parser by hand, I know exactly where it breaks. If I prompted it, I have to re-learn the logic during the outage. That future lag time is the debt. 
+
+## This is not new, but it's more pronounced
+
+Nothing is truly new in the world of engineering. I don't think this feeling is strictly unique to AI. To illustrate it, consider two scenarios for fixing a tricky race condition:
+
+1.  **The Hard Way:** You spend 3 days debugging. You dig through EventBridge logs, you read documentation, you scour Datadog, you add logging. Eventually, you find the source (a buffer dropping data) and fix it. You now *own* that knowledge.
+
+2.  **The Stack Overflow Way:** You google the symptoms. The first result describes your exact issue. You implement the suggestion, it fixes the bug, and you close the ticket in an hour.
+
+This is the same phenomenon. Earned vs. Unearned knowledge. But with AI, this feedback loop is massively compressed. Stack Overflow traffic is down not because bugs are gone, but because engineers now turn to AI to shortcut the struggle loop entirely.
+
+## A different kind of debt
+
+Let me be clear. I am not suggesting this is bad. **Speed matters**. If you don't use these tools, your competitors will outpace you.
+
+However, we need to be honest about the debt we are incurring. It is similar to technical debt, but distinct. I call it **vertigo debt**.
+
+Unlike technical debt (which lives in the codebase), vertigo debt lives in the engineer's head. 
+
+It raises uncomfortable questions:
+
+* Does knowledge earned slowly stick differently than knowledge acquired quickly?
+* When does this debt come due? 
+* How do we pay it down?
+
+## Incentivised hiding
+
+Engineering culture trades on technical credibility. Usually, you earn that credibility through struggle. AI lets you borrow it instantly.
+
+This makes the cost of asking "dumb questions" skyrocket. I’ve felt the temptation to stay silent, to just nod along in the PR review, because asking the clarifying question might reveal that while I verified the solution works, my derivation of it was "prompt-deep" rather than engineer-deep.
+
+Coming from sales, I was used to forecasting deals with *probability*. A "60% commit" didn't mean I was doing a bad job. It meant I had more discovery to do. It was a professional metric of risk.
+
+In engineering, we don't have a metric for this gradient. We assume that if you shipped the code, you derived it from first principles. **Vertigo Debt** is simply admitting that while the code is production-ready (100% verified), your *internal intuition* for it might only be at 60%.
+
+Silence compounds the problem. If nobody admits to the gap between verification and intuition, everyone assumes they're the only one carrying it.
+
+## How can we incur less of this debt in future? 
+
+I can't prescribe a universal fix, but I can share my strategy - and it's not to stop using AI.
+
+It's to get better at spotting the fractures in the foundation before the building is 829.8 meters tall.
+
+To do that, I've decided to throw myself into systems programming, specifically Zig. Not because everyone needs to write their own allocator, but because I have a hypothesis: **The best way to audit high-level AI code is to have low-level intuition**.
+
+Zig has few abstractions, which forces you to confront the hardware. Since starting Zig in the festive period, I've rebuilt a base64 encoder, implemented a basic HTTP 1.1 server from scratch, and I'm starting a project to write a Javascript interpreter.
+
+My bet is that rebuilding these things from first principles creates a compounding interest of understanding. It ensures that when I use AI to ship a feature in an hour, I'm not just reading the map. I recognize the terrain.
+
+In my day job, I'll use every abstraction and AI tool available to ship full-stack Typescript quickly. In my side projects, I'll deliberately strip those away - rebuilding primitives by hand so I actually understand what's being abstracted.
+
+## Moving forward...
+
+I realize that "learn a systems language in your spare time" is a big ask. Not everyone has the capacity for that, and we shouldn't create a culture where 60-hour weeks are the requirement for competence.
+
+If you don't have the margin for first-principles side projects, you can pay down the debt in smaller installments during the workday. Introduce **intentional friction**. Don't just read the solution and understand it. Ask the model why it chose that library. Ask it to explain the race condition it just fixed. Challenge the assumptions it brings to the table. Force the "struggle" back into the loop.
+
+My worry is that without this intentionality, we risk a bifurcation of the engineering class. Those who understand the systems they prompt, and those who are increasingly dependent on tools they can't debug without.
+
+Velocity is great for the product, but **understanding is what protects the engineer**.
+
+We need to normalize saying: **"I built this module in a day using AI. The code is solid, but the Vertigo Debt is high. Let's schedule time to pay it down."**
+
+Teams that can distinguish between "Output Speed" and "Understanding Depth" will make better decisions. And suffer much less vertigo.
