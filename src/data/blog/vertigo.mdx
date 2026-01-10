@@ -95,7 +95,7 @@ I can't prescribe a universal fix, but I can share my strategy - and it's not to
 
 It's to get better at spotting the fractures in the foundation before the building is 829.8 meters tall.
 
-To do that, I've decided to throw myself into systems programming, specifically Zig. Not because everyone needs to write their own allocator, but because I have a hypothesis: **The best way to audit high-level AI code is to have low-level intuition**.
+To do that, I've decided to throw myself into systems programming, specifically Zig. Not because everyone needs to write their own allocator, but because I have a hypothesis. **The best way to audit high-level AI code is to have low-level intuition**.
 
 Zig has few abstractions, which forces you to confront the hardware. Since starting Zig in the festive period, I've rebuilt a base64 encoder, implemented a basic HTTP 1.1 server from scratch, and I'm starting a project to write a Javascript interpreter.
 
@@ -105,14 +105,14 @@ In my day job, I'll use every abstraction and AI tool available to ship full-sta
 
 ## Moving forward...
 
-I realize that "learn a systems language in your spare time" is a big ask. Not everyone has the capacity for that, and we shouldn't create a culture where 60-hour weeks are the requirement for competence.
+I realize that "learn a systems language in your spare time" is a big ask. Not everyone has the capacity for that.
 
-If you don't have the margin for first-principles side projects, you can pay down the debt in smaller installments during the workday. Introduce **intentional friction**. Don't just read the solution and understand it. Ask the model why it chose that library. Ask it to explain the race condition it just fixed. Challenge the assumptions it brings to the table. Force the "struggle" back into the loop.
+If you don't have the margin for first-principles side projects, you can pay down the debt in smaller installments during the workday. Introduce **intentional friction**. Do more than read the solution and understand it. Ask the model why it chose that library. Ask it to explain the race condition it just fixed. Challenge the assumptions it brings to the table. Force the "struggle" back into the loop.
 
-My worry is that without this intentionality, we risk a bifurcation of the engineering class. Those who understand the systems they prompt, and those who are increasingly dependent on tools they can't debug without.
+My worry is that without this approach being more widespread we risk a bifurcation of the engineers. Those who understand the systems they prompt, and those who are increasingly dependent on tools they can't debug without.
 
 Velocity is great for the product, but **understanding is what protects the engineer**.
 
-We need to normalize saying: **"I built this module in a day using AI. The code is solid, but the Vertigo Debt is high. Let's schedule time to pay it down."**
+We need to normalize saying: **"I built this module in a day using AI. The code is solid, but the Vertigo Debt is high. Let's put in time time to pay it down."**
 
 Teams that can distinguish between "Output Speed" and "Understanding Depth" will make better decisions. And suffer much less vertigo.
