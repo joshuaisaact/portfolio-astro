@@ -13,6 +13,7 @@ import FootnoteList from '../../components/FootnoteList.astro';
 import FootnoteItem from '../../components/FootnoteItem.astro';
 import LinearProbingDemo from '../../components/react/LinearProbingDemo';
 import ElasticHashingDemo from '../../components/react/ElasticHashingDemo';
+import CodeTabs from '../../components/CodeTabs.astro';
 
 Last week I wrote about "vertigo debt": the gap between shipping code and truly understanding it. This post is about paying some of that debt down.
 
@@ -52,10 +53,10 @@ If you already know how hash tables work, skip to the next section. But even if 
 
 Say you have a list of users. You store them in an array:
 
-```
-users[0] = alice
-users[1] = bob
-users[2] = josh
+```zig
+users[0] = "alice";
+users[1] = "bob";
+users[2] = "josh";
 ```
 
 Retrieval is instant if you know the index. `users[2]` gives you josh immediately.
@@ -67,23 +68,49 @@ That's slow. With a million users, you might check a million slots.
 What if we could turn the name directly into an index? Some function that takes `"josh"` and spits out `2`. Then we could jump straight there.
 
 That's a hash function. It turns any key into a number:
-```
-hash("josh") → 7482918374
-```
+
+<CodeTabs tabs={[
+  {
+    label: "Zig",
+    lang: "zig",
+    code: `fn hash(key: []const u8) u64 {
+    var h: u64 = 0;
+    for (key) |char| {
+        h = h *% 31 +% char;  // *% wraps on overflow
+    }
+    return h;
+}
+
+hash("josh") // → 7482918374`
+  },
+  {
+    label: "TypeScript",
+    lang: "typescript",
+    code: `function hash(key: string): number {
+    let h = 0;
+    for (const char of key) {
+        h = h * 31 + char.charCodeAt(0);
+    }
+    return h;
+}
+
+hash("josh") // → 7482918374`
+  }
+]} />
 
 Take that number modulo the array size, and you have an index:
 
-```
-7482918374 % 1000 → 374
+```zig
+7482918374 % 1000 // → 374
 ```
 
 Now `users[374]` holds Josh's data. Lookup is O(1), constant time, no matter how big the array. Done.
 
 Except: what happens when two keys hash to the same index?
 
-```
-hash("josh") % 1000 → 374
-hash("emma") % 1000 → 374  // collision!
+```zig
+hash("josh") % 1000 // → 374
+hash("emma") % 1000 // → 374 collision!
 ```
 
 This is the collision problem. How you solve it determines everything about your hash table's performance.
@@ -193,10 +220,13 @@ Compare the worst-case lookup to the linear probing demo above. Even at 90% load
 
 The key is **interleaved probing**. Instead of exhausting one array before trying the next, you check offset 0 across *all* arrays, then offset 1 across all arrays, and so on. This prevents any single array from developing long probe chains.
 
-Here's how the tiers get set up in Zig. Each array is half the size of the previous:
+Here's how the tiers get set up. Each array is half the size of the previous:
 
-```zig
-// Split 1024 into: 512 + 256 + 128 + 64 + 32 + 16 + 8 + 4 + 2 + 1
+<CodeTabs tabs={[
+  {
+    label: "Zig",
+    lang: "zig",
+    code: `// Split 1024 into: 512 + 256 + 128 + 64 + 32 + 16 + 8 + 4 + 2 + 1
 var offset: usize = 0;
 var size = capacity / 2;
 
@@ -205,13 +235,31 @@ for (0..num_arrays) |i| {
     sizes[i] = size;
     offset += size;
     size = @max(size / 2, 1);  // halve each time, minimum 1
-}
-```
+}`
+  },
+  {
+    label: "TypeScript",
+    lang: "typescript",
+    code: `// Split 1024 into: 512 + 256 + 128 + 64 + 32 + 16 + 8 + 4 + 2 + 1
+let offset = 0;
+let size = capacity / 2;
+
+for (let i = 0; i < numArrays; i++) {
+    starts[i] = offset;
+    sizes[i] = size;
+    offset += size;
+    size = Math.max(Math.floor(size / 2), 1);  // halve each time, minimum 1
+}`
+  }
+]} />
 
 And here's the lookup. The nested loop structure is the entire insight:
 
-```zig
-pub fn get(key: K) ?V {
+<CodeTabs tabs={[
+  {
+    label: "Zig",
+    lang: "zig",
+    code: `pub fn get(key: K) ?V {
     const hash = hash(key);
 
     // Outer loop: probe offset (1, 2, 3...)
@@ -228,8 +276,30 @@ pub fn get(key: K) ?V {
         }
     }
     return null;
-}
-```
+}`
+  },
+  {
+    label: "TypeScript",
+    lang: "typescript",
+    code: `function get(key: K): V | null {
+    const h = hash(key);
+
+    // Outer loop: probe offset (1, 2, 3...)
+    // Inner loop: ALL arrays at this offset before incrementing
+    for (let offset = 1; offset <= maxProbes; offset++) {
+        for (let i = 0; i < numArrays; i++) {
+            if (offset > sizes[i]) continue;
+
+            const idx = starts[i] + (h % sizes[i]);
+            if (keys[idx] === key) {
+                return values[idx];
+            }
+        }
+    }
+    return null;
+}`
+  }
+]} />
 
 At offset 1, you check 10 positions (one per tier). Only if *all* of those miss do you check offset 2. This means worst-case probes grow with the number of offsets needed, not the size of any individual cluster.
 
