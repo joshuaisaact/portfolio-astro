@@ -1,0 +1,14 @@
+---
+interface Props {
+  title?: string;
+}
+
+const { title = "Footnotes" } = Astro.props;
+---
+
+<aside class="footnotes mt-12 pt-6 border-t border-gray-200 dark:border-gray-700">
+  <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-4">{title}</h2>
+  <ol class="list-decimal list-inside space-y-2 text-sm text-gray-600 dark:text-gray-400">
+    <slot />
+  </ol>
+</aside>

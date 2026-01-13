@@ -42,6 +42,7 @@
 html {
   background: linear-gradient(to bottom, #f9fafb 0%, #ffffff 50%, #f9fafb 100%);
   color: #000;
+  scroll-behavior: smooth;
 }
 
 html.dark {

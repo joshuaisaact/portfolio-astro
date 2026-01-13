@@ -1,0 +1,20 @@
+---
+interface Props {
+  id: string | number;
+}
+
+const { id } = Astro.props;
+---
+
+<li id={`fn-${id}`} class="footnote-item">
+  <span class="footnote-content">
+    <slot />
+  </span>
+  <a
+    href={`#fnref-${id}`}
+    class="footnote-back ml-2 text-primary dark:text-blue-400 hover:underline"
+    aria-label="Back to reference"
+  >
+    ↩
+  </a>
+</li>

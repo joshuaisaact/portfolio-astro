@@ -1,0 +1,301 @@
+---
+title: "Decoding Academic Papers with AI: A Practical Guide"
+date: "2026-01-10"
+featured_image: "./theorem1.png"
+excerpt: "I haven't thought about maths deeply in decades. Here's how I used Claude to understand a paper full of notation like φ : Z⁺ × Z⁺ → Z⁺, and built something useful from it."
+tags: ["AI", "learning", "Zig", "hash tables", "papers"]
+---
+
+import Figure from '../../components/Figure.astro';
+import theoremScreenshot from './theorem1.png';
+import Footnote from '../../components/Footnote.astro';
+import FootnoteList from '../../components/FootnoteList.astro';
+import FootnoteItem from '../../components/FootnoteItem.astro';
+import LinearProbingDemo from '../../components/react/LinearProbingDemo';
+import ElasticHashingDemo from '../../components/react/ElasticHashingDemo';
+
+Last week I wrote about "vertigo debt": the gap between shipping code and truly understanding it. This post is about paying some of that debt down.
+
+I'm going to show you how I took an academic paper, understood it deeply enough to implement it, and used AI as a learning collaborator rather than a code generator. By the end, you'll be able to read the screenshot below and know exactly what it means.
+
+<Figure
+  src={theoremScreenshot}
+  alt="Theorem 1 from the Elastic Hashing paper"
+  title="This looked like hieroglyphics to me two weeks ago"
+/>
+
+## A confession
+
+I haven't engaged with real mathematics in nearly two decades. I did A-Level Maths, got a decent grade, and then spent eight years in enterprise sales where the hardest calculation was commission percentages.
+
+When I transitioned to engineering 18 months ago, I got away with it. Most day-to-day code doesn't require mathematical notation. You need logic, systems thinking, debugging skills. Not proofs.
+
+Then I found this paper.
+
+## The paper
+
+In 2021, Andrew Krapivin, an undergraduate at Rutgers, came across a paper called "Tiny Pointers." He didn't think much of it at the time. Two years later, he revisited it "just for fun."<Footnote id="1" />
+
+What followed was one of those stories that makes you believe in tinkering. Krapivin wanted to make the pointers even smaller, which meant reorganising how data was stored. That led him to hash tables. And his explorations led him to accidentally disprove a 40-year-old conjecture.
+
+In 1985, Andrew Yao (who would later win the Turing Award) claimed that for a certain class of hash tables, you couldn't do better than "uniform probing": randomly checking slots until you find what you're looking for. The worst-case time was proportional to how full the table was. For four decades, nobody seriously challenged this.
+
+Krapivin didn't know about Yao's conjecture. He just kept tinkering. When he showed his results to his mentor Martín Farach-Colton, and then to William Kuszmaul at Carnegie Mellon, the reaction was immediate: "You didn't just come up with a cool hash table. You've actually completely wiped out a 40-year-old conjecture."
+
+The paper, published in January 2025, describes "elastic hashing". A technique that achieves worst-case performance proportional to (log x)² instead of x. At 99% capacity, that's the difference between ~7 probes and thousands.
+
+To understand why that matters, we need to start from first principles.
+
+## Hash tables from scratch
+
+If you already know how hash tables work, skip to the next section. But even if you do, the recap might be useful. It sets up exactly what problem the paper solves.
+
+Say you have a list of users. You store them in an array:
+
+```
+users[0] = alice
+users[1] = bob
+users[2] = josh
+```
+
+Retrieval is instant if you know the index. `users[2]` gives you josh immediately.
+
+But what if you need to find a user by name? You don't know that josh is at index 2. You'd have to check every slot: is this josh? No. Is this josh? No. Is this josh? Yes.
+
+That's slow. With a million users, you might check a million slots.
+
+What if we could turn the name directly into an index? Some function that takes `"josh"` and spits out `2`. Then we could jump straight there.
+
+That's a hash function. It turns any key into a number:
+```
+hash("josh") → 7482918374
+```
+
+Take that number modulo the array size, and you have an index:
+
+```
+7482918374 % 1000 → 374
+```
+
+Now `users[374]` holds Josh's data. Lookup is O(1), constant time, no matter how big the array. Done.
+
+Except: what happens when two keys hash to the same index?
+
+```
+hash("josh") % 1000 → 374
+hash("emma") % 1000 → 374  // collision!
+```
+
+This is the collision problem. How you solve it determines everything about your hash table's performance.
+
+## Linear probing: simple but fragile
+
+The simplest approach: if slot 374 is taken, try 375. Then 376. Keep going until you find an empty slot.
+
+```
+insert("josh"): slot 374 ✓
+insert("emma"): slot 374 taken → 375 ✓
+insert("alex"): slot 374 taken → 375 taken → 376 ✓
+```
+
+This works. It's cache-friendly (sequential memory access). CPUs love it.
+
+But there's a problem. As the table fills up, collisions cluster. One collision creates a "hot spot" that makes future collisions more likely in that area. At 50% load, you barely notice. At 90% load, it's sluggish. At 99% load?
+
+Try it yourself. Watch the clusters form:
+
+<LinearProbingDemo client:visible />
+
+At larger scales this gets worse. With 100,000 entries, worst-case lookups can hit tens of thousands of probes.
+
+## Why 99% load matters
+
+You might ask: why run a hash table that full? Just resize it.
+
+Usually, yes. But there are cases where you can't:
+- **Embedded systems**: Fixed memory, no dynamic allocation
+- **Memory-mapped files**: Hash table lives on disk, shared between processes
+- **Real-time systems**: Resizing causes latency spikes you can't afford
+- **Pre-allocated pools**: Game engines, trading systems
+
+In these scenarios, you allocate once and live with it. And if your data grows to 99% of capacity, linear probing falls apart.
+
+This is the problem the paper solves.
+
+## Hitting the wall
+
+When I opened the PDF, I wanted to understand the solution. But I hit a wall immediately:
+
+> *"Our construction will make use of a specific injection φ : Z⁺ × Z⁺ → Z⁺"*
+> *"There exists an injection φ : Z⁺ × Z⁺ → Z⁺ such that φ(i,j) ≤ O(i · j²)"*
+
+What's an injection? What's Z⁺? Why are there so many symbols?
+
+I had two choices: give up, or use AI to help me decode it.
+
+## Step 1: Decode the notation
+
+The first barrier isn't the ideas. It's the language. Academic maths compresses meaning into dense symbols. Once you unpack it, the ideas are often simpler than they look.
+
+I asked Claude to translate:
+
+**Me:** "What does φ : Z⁺ × Z⁺ → Z⁺ mean? Explain like I'm a programmer who hasn't done maths in 15 years."
+
+**Claude:** "This defines a function called φ (phi). It takes two positive integers as input and returns one positive integer. In code:
+```zig
+fn phi(i: usize, j: usize) usize
+```
+Z⁺ means 'positive integers' (1, 2, 3...). The × means it takes a pair. The → means 'returns'. In Zig, the return type just follows the parameters."
+
+Suddenly this wasn't hieroglyphics. It was a function signature.
+
+**Me:** "And what's an 'injection'?"
+
+**Claude:** "An injection is a function where every unique input gives a unique output. No two different (i, j) pairs produce the same φ(i, j). In programming terms: it's a perfect hash. No collisions."
+
+Two questions in, and the scary notation was becoming readable.
+
+## Step 2: Understand the claim
+
+With the notation decoded, I could parse Theorem 1:
+
+> *"It is possible to construct an open-addressing hash table that supports n − ⌊δn⌋ insertions in an array of size n..."*
+
+We can fill the table to (1 - δ) capacity. If δ = 0.01, that's 99% full.
+
+> *"...that offers amortized expected probe complexity O(1), worst-case expected probe complexity O(log δ⁻¹)..."*
+
+Average lookups are constant time. *Worst case* is logarithmic in how full the table is. At 99% load: O(log 100) ≈ O(7). Compare that to linear probing's 16,972 probes.
+
+This was the hook. High load factor *and* bounded worst-case? That's exactly what you need for fixed-capacity scenarios.
+
+## Step 3: Understand the mechanism
+
+Here's where papers get dense. But the core idea is simple: instead of one array, use multiple arrays of decreasing size.
+```zig
+// Capacity 1024:
+// arrays[0] = 512 slots
+// arrays[1] = 256 slots
+// arrays[2] = 128 slots
+// ...
+// arrays[9] = 1 slot
+```
+
+Same total memory. But when you probe for a key, you don't walk sequentially through one array (which causes clustering). You probe across *all* arrays in a specific order defined by the φ function.
+
+Why does this help? In linear probing, clusters feed on themselves. One collision makes adjacent collisions more likely. With multiple arrays, a "collision" in array 0 doesn't affect array 1. The load spreads out naturally.
+
+Here's the same 50 slots, but organized into tiers:
+
+<ElasticHashingDemo client:visible />
+
+Compare the worst-case lookup to the linear probing demo above. Even at 90% load, it stays bounded. At this small scale the difference is modest, but at 100,000 entries the gap becomes dramatic (see the benchmarks below).
+
+The key is **interleaved probing**. Instead of exhausting one array before trying the next, you check offset 0 across *all* arrays, then offset 1 across all arrays, and so on. This prevents any single array from developing long probe chains.
+
+Here's how the tiers get set up in Zig. Each array is half the size of the previous:
+
+```zig
+// Split 1024 into: 512 + 256 + 128 + 64 + 32 + 16 + 8 + 4 + 2 + 1
+var offset: usize = 0;
+var size = capacity / 2;
+
+for (0..num_arrays) |i| {
+    starts[i] = offset;
+    sizes[i] = size;
+    offset += size;
+    size = @max(size / 2, 1);  // halve each time, minimum 1
+}
+```
+
+And here's the lookup. The nested loop structure is the entire insight:
+
+```zig
+pub fn get(key: K) ?V {
+    const hash = hash(key);
+
+    // Outer loop: probe offset (1, 2, 3...)
+    // Inner loop: ALL arrays at this offset before incrementing
+    var offset: usize = 1;
+    while (offset <= max_probes) : (offset += 1) {
+        for (0..num_arrays) |i| {
+            if (offset > sizes[i]) continue;
+
+            const idx = starts[i] + (hash % sizes[i]);
+            if (keys[idx] == key) {
+                return values[idx];
+            }
+        }
+    }
+    return null;
+}
+```
+
+At offset 1, you check 10 positions (one per tier). Only if *all* of those miss do you check offset 2. This means worst-case probes grow with the number of offsets needed, not the size of any individual cluster.
+
+(The paper's φ function uses a more sophisticated priority ordering that weights by both offset and array index. The simple nested loop here captures the key insight: prioritize low offsets across all arrays, without the bit manipulation complexity.)
+
+## Step 4: Build and verify
+
+Understanding theory is one thing. Making it work is another.
+
+Over several days, Claude and I built a complete implementation in Zig. The collaboration:
+1. **Claude** generates initial code from the paper
+2. **I** run tests, find failures
+3. **We** debug together: "probe counts are too high"
+4. **Claude** spots issues in my implementation
+5. **I** verify fixes make mathematical sense
+
+The learning came from failures. When probe counts didn't match the paper's bounds, we had to dig into *why*. That forced real understanding of batch transitions, load factors, probe limits.
+
+If I'd copied working code, I'd have missed all of that.
+
+## The results
+
+Final benchmarks at 99% load:
+```
+    n     | Elastic max | Linear max
+----------|-------------|------------
+    1000  |     151     |     447
+   10000  |     130     |    4500
+  100000  |     305     |   16972
+```
+
+**305 worst-case probes vs 16,972.** A 56x improvement in the tail.
+
+Same memory. And now I understand *why* it works.
+
+## Translating the theorem
+
+Let's return to that screenshot. Here's what it says now:
+
+> *"There exists an injection φ : Z⁺ × Z⁺ → Z⁺ such that φ(i,j) ≤ O(i · j²)"*
+
+There's a function φ that takes two positive integers (array index and probe number) and returns a unique priority value. The priority grows at most proportionally to array index times probe number squared.
+
+That's it. A function signature with a growth bound. The dense notation was just compression. The idea underneath is almost disappointingly simple: probe multiple arrays in a carefully chosen order.
+
+## A framework for reading papers
+
+If you want to try this:
+1. **Start with claims, not proofs.** What does the paper promise? Ignore the derivation initially.
+2. **Decode notation aggressively.** Every unfamiliar symbol is a wall. Ask AI to translate to code.
+3. **Build a toy implementation.** Even a broken one. Bugs reveal what you don't understand.
+4. **Verify against claims.** If your results don't match, you've misunderstood something valuable.
+5. **Explain it back.** Writing forces clarity. If you can blog it, you understand it.
+
+## The meta-lesson
+
+I didn't need to understand elastic hashing. I could use std.HashMap forever. But spending a week wrestling with this paper built intuition I'll use for years.
+
+More importantly: **I now believe I can read papers.** The notation that scared me was just unfamiliar syntax. With AI as a translator, academic research is accessible in a way it wasn't before.
+
+That's the real payoff. Not the hash table, but the confidence that the next paper won't be as intimidating.
+
+---
+*The code is on [GitHub](https://github.com/joshuaisaact/elastic-hash). The paper: [Elastic Hashing](https://arxiv.org/pdf/2501.02305).*
+*If you found this useful, let me know what papers you've been intimidated by. Might make a good follow-up.*
+
+<FootnoteList>
+  <FootnoteItem id="1">The full story of Krapivin's discovery is told in [Quanta Magazine](https://www.quantamagazine.org/undergraduate-upends-a-40-year-old-data-science-conjecture-20250210/).</FootnoteItem>
+</FootnoteList>
