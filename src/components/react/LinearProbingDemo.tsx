@@ -33,9 +33,11 @@ function getSlotColor(probes: number, isEmpty: boolean): string {
   return "bg-red-500 dark:bg-red-600";
 }
 
-function getProbeLabel(probes: number): string {
-  if (probes === 1) return "1 probe";
-  return `${probes} probes`;
+function getCollisionLabel(probes: number): string {
+  const collisions = probes - 1;
+  if (collisions === 0) return "0 collisions";
+  if (collisions === 1) return "1 collision";
+  return `${collisions} collisions`;
 }
 
 const LinearProbingDemo: React.FC = () => {
@@ -123,7 +125,7 @@ const LinearProbingDemo: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-            Linear Probing Demo
+            Linear Probing
           </h3>
           <p className="text-sm text-gray-500 dark:text-gray-400">
             Watch clusters form as the table fills up
@@ -200,7 +202,7 @@ const LinearProbingDemo: React.FC = () => {
                   ${isOriginalHash ? 'ring-2 ring-blue-500 ring-offset-1 ring-offset-white dark:ring-offset-gray-900' : ''}
                   ${isFinalPosition && lastInsert.probes > 1 ? 'ring-2 ring-red-500 ring-offset-1 ring-offset-white dark:ring-offset-gray-900' : ''}
                 `}
-                title={slot.key ? `Slot ${index}: ${slot.key} (${getProbeLabel(slot.probes)})` : `Slot ${index}: empty`}
+                title={slot.key ? `Slot ${index}: ${slot.key} (${getCollisionLabel(slot.probes)})` : `Slot ${index}: empty`}
               />
             );
           })}
@@ -215,19 +217,19 @@ const LinearProbingDemo: React.FC = () => {
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded bg-emerald-400"></div>
-          <span className="text-gray-600 dark:text-gray-400">1 probe</span>
+          <span className="text-gray-600 dark:text-gray-400">0 collisions</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded bg-yellow-400"></div>
-          <span className="text-gray-600 dark:text-gray-400">2 probes</span>
+          <span className="text-gray-600 dark:text-gray-400">1 collision</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded bg-orange-400"></div>
-          <span className="text-gray-600 dark:text-gray-400">3-4 probes</span>
+          <span className="text-gray-600 dark:text-gray-400">2-3 collisions</span>
         </div>
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 rounded bg-red-500"></div>
-          <span className="text-gray-600 dark:text-gray-400">5+ probes</span>
+          <span className="text-gray-600 dark:text-gray-400">4+ collisions</span>
         </div>
       </div>
 

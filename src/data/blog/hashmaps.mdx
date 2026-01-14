@@ -14,10 +14,11 @@ import FootnoteItem from '../../components/FootnoteItem.astro';
 import LinearProbingDemo from '../../components/react/LinearProbingDemo';
 import ElasticHashingDemo from '../../components/react/ElasticHashingDemo';
 import CodeTabs from '../../components/CodeTabs.astro';
+import Chat from '../../components/Chat.astro';
 
-Last week I wrote about "vertigo debt": the gap between shipping code and truly understanding it. This post is about paying some of that debt down.
+Last week I wrote about ["vertigo debt"](/blog/vertigo/), the gap between shipping code and truly understanding it. This post is about paying some of that debt down.
 
-I'm going to show you how I took an academic paper, understood it deeply enough to implement it, and used AI as a learning collaborator rather than a code generator. By the end, you'll be able to read the screenshot below and know exactly what it means.
+I'm going to show you how I took an academic paper, understood it deeply enough to implement it, and used AI as a learning collaborator rather than a code generator. By the end, you'll be able to read the screenshot below and know exactly what it means. And if you stick around: I built something that beats SwissTable at 99% load.
 
 <Figure
   src={theoremScreenshot}
@@ -39,11 +40,11 @@ In 2021, Andrew Krapivin, an undergraduate at Rutgers, came across a paper calle
 
 What followed was one of those stories that makes you believe in tinkering. Krapivin wanted to make the pointers even smaller, which meant reorganising how data was stored. That led him to hash tables. And his explorations led him to accidentally disprove a 40-year-old conjecture.
 
-In 1985, Andrew Yao (who would later win the Turing Award) claimed that for a certain class of hash tables, you couldn't do better than "uniform probing": randomly checking slots until you find what you're looking for. The worst-case time was proportional to how full the table was. For four decades, nobody seriously challenged this.
+In 1985, Andrew Yao<Footnote id="2" /> claimed that for a certain class of hash tables, you couldn't do better than uniform probing (randomly checking slots until you find what you're looking for). The fuller the table, the worse it gets, exponentially so. For four decades, nobody seriously challenged this.
 
-Krapivin didn't know about Yao's conjecture. He just kept tinkering. When he showed his results to his mentor Martín Farach-Colton, and then to William Kuszmaul at Carnegie Mellon, the reaction was immediate: "You didn't just come up with a cool hash table. You've actually completely wiped out a 40-year-old conjecture."
+Krapivin didn't know about Yao's conjecture. He just kept tinkering. When he showed his results to faculty mentors, the reaction was immediate. "You've completely wiped out a 40-year-old conjecture."<Footnote id="3" />
 
-The paper, published in January 2025, describes "elastic hashing". A technique that achieves worst-case performance proportional to (log x)² instead of x. At 99% capacity, that's the difference between ~7 probes and thousands.
+[The paper](https://arxiv.org/pdf/2501.02305), published in January 2025, describes "elastic hashing". A technique that achieves worst-case performance proportional to (log x)² instead of x. At 99% capacity, that's the difference between ~7 probes and thousands.
 
 To understand why that matters, we need to start from first principles.
 
@@ -61,9 +62,7 @@ users[2] = "josh";
 
 Retrieval is instant if you know the index. `users[2]` gives you josh immediately.
 
-But what if you need to find a user by name? You don't know that josh is at index 2. You'd have to check every slot: is this josh? No. Is this josh? No. Is this josh? Yes.
-
-That's slow. With a million users, you might check a million slots.
+But what if you need to find a user by name? You don't know where josh is. With a million users, you might check a million slots. (Binary search fans, hold your horses.)
 
 What if we could turn the name directly into an index? Some function that takes `"josh"` and spits out `2`. Then we could jump straight there.
 
@@ -119,13 +118,13 @@ This is the collision problem. How you solve it determines everything about your
 
 The simplest approach: if slot 374 is taken, try 375. Then 376. Keep going until you find an empty slot.
 
-```
+```bash
 insert("josh"): slot 374 ✓
 insert("emma"): slot 374 taken → 375 ✓
 insert("alex"): slot 374 taken → 375 taken → 376 ✓
 ```
 
-This works. It's cache-friendly (sequential memory access). CPUs love it.
+This works. It's cache-friendly (sequential memory access). CPUs love it.<Footnote id="4" />
 
 But there's a problem. As the table fills up, collisions cluster. One collision creates a "hot spot" that makes future collisions more likely in that area. At 50% load, you barely notice. At 90% load, it's sluggish. At 99% load?
 
@@ -133,28 +132,30 @@ Try it yourself. Watch the clusters form:
 
 <LinearProbingDemo client:visible />
 
-At larger scales this gets worse. With 100,000 entries, worst-case lookups can hit tens of thousands of probes.
+At larger scales this gets worse. With 100,000 entries, worst-case lookups can hit tens of thousands of probes.<Footnote id="5" />
 
 ## Why 99% load matters
 
 You might ask: why run a hash table that full? Just resize it.
 
-Usually, yes. But there are cases where you can't:
-- **Embedded systems**: Fixed memory, no dynamic allocation
-- **Memory-mapped files**: Hash table lives on disk, shared between processes
+Sometimes you can't. You've got a fixed memory budget and need to use every byte:
+
+- **Embedded systems**: No dynamic allocation
+- **Caches**: You paid for 4GB, you want to use 4GB
 - **Real-time systems**: Resizing causes latency spikes you can't afford
-- **Pre-allocated pools**: Game engines, trading systems
+- **Memory-mapped files**: Hash table on disk, shared between processes
+- **Game engines, trading systems**: Pre-allocated pools, no malloc in the hot path
 
-In these scenarios, you allocate once and live with it. And if your data grows to 99% of capacity, linear probing falls apart.
+In these scenarios, you allocate once and live with it. When your data grows to 99% of capacity, you need a hash table that doesn't fall apart.
 
-This is the problem the paper solves.
+That's what the paper delivers.
 
 ## Hitting the wall
 
 When I opened the PDF, I wanted to understand the solution. But I hit a wall immediately:
 
-> *"Our construction will make use of a specific injection φ : Z⁺ × Z⁺ → Z⁺"*
-> *"There exists an injection φ : Z⁺ × Z⁺ → Z⁺ such that φ(i,j) ≤ O(i · j²)"*
+> Our construction will make use of a specific injection φ : Z⁺ × Z⁺ → Z⁺
+> There exists an injection φ : Z⁺ × Z⁺ → Z⁺ such that φ(i,j) ≤ O(i · j²)
 
 What's an injection? What's Z⁺? Why are there so many symbols?
 
@@ -166,19 +167,29 @@ The first barrier isn't the ideas. It's the language. Academic maths compresses 
 
 I asked Claude to translate:
 
-**Me:** "What does φ : Z⁺ × Z⁺ → Z⁺ mean? Explain like I'm a programmer who hasn't done maths in 15 years."
+<Chat role="user">
+What does φ : Z⁺ × Z⁺ → Z⁺ mean? Explain like I'm a programmer who hasn't done maths in 15 years.
+</Chat>
 
-**Claude:** "This defines a function called φ (phi). It takes two positive integers as input and returns one positive integer. In code:
+<Chat role="assistant">
+This defines a function called φ (phi). It takes two positive integers as input and returns one positive integer. In code:
+
 ```zig
 fn phi(i: usize, j: usize) usize
 ```
-Z⁺ means 'positive integers' (1, 2, 3...). The × means it takes a pair. The → means 'returns'. In Zig, the return type just follows the parameters."
+
+Z⁺ means 'positive integers' (1, 2, 3...). The × means it takes a pair. The → means 'returns'. In Zig, the return type just follows the parameters.
+</Chat>
 
 Suddenly this wasn't hieroglyphics. It was a function signature.
 
-**Me:** "And what's an 'injection'?"
+<Chat role="user">
+And what's an 'injection'?
+</Chat>
 
-**Claude:** "An injection is a function where every unique input gives a unique output. No two different (i, j) pairs produce the same φ(i, j). In programming terms: it's a perfect hash. No collisions."
+<Chat role="assistant">
+An injection is a function where every unique input gives a unique output. No two different (i, j) pairs produce the same φ(i, j). In programming terms: it's a perfect hash. No collisions.
+</Chat>
 
 Two questions in, and the scary notation was becoming readable.
 
@@ -186,11 +197,11 @@ Two questions in, and the scary notation was becoming readable.
 
 With the notation decoded, I could parse Theorem 1:
 
-> *"It is possible to construct an open-addressing hash table that supports n − ⌊δn⌋ insertions in an array of size n..."*
+> It is possible to construct an open-addressing hash table that supports n − ⌊δn⌋ insertions in an array of size n...
 
 We can fill the table to (1 - δ) capacity. If δ = 0.01, that's 99% full.
 
-> *"...that offers amortized expected probe complexity O(1), worst-case expected probe complexity O(log δ⁻¹)..."*
+> ...that offers amortized expected probe complexity O(1), worst-case expected probe complexity O(log δ⁻¹)...
 
 Average lookups are constant time. *Worst case* is logarithmic in how full the table is. At 99% load: O(log 100) ≈ O(7). Compare that to linear probing's 16,972 probes.
 
@@ -218,7 +229,17 @@ Here's the same 50 slots, but organized into tiers:
 
 Compare the worst-case lookup to the linear probing demo above. Even at 90% load, it stays bounded. At this small scale the difference is modest, but at 100,000 entries the gap becomes dramatic (see the benchmarks below).
 
-The key is **interleaved probing**. Instead of exhausting one array before trying the next, you check offset 0 across *all* arrays, then offset 1 across all arrays, and so on. This prevents any single array from developing long probe chains.
+The key is **interleaved probing**. Instead of exhausting one array before trying the next, you check offset 0 across *all* arrays, then offset 1 across all arrays, and so on.
+
+Think of "offset" as distance from home. At offset 0, you check your ideal slot in all 6 tiers. That's 6 checks, but you haven't moved yet. If all 6 are occupied, you try offset 1 in all tiers.
+
+The total checks might be similar to linear probing. So why is this better?
+
+In linear probing, a cluster of 24 slots is a wall you have to walk through. And every new item that hashes into that cluster makes it longer. Clusters feed on themselves. At high load, one cluster can span the entire array. That's your O(n) worst case.
+
+With elastic hashing, there's no wall. Being at offset 4 means checking 24 slots, but they're spread across 6 independent arrays. A "cluster" in tier 0 doesn't touch tier 1. The clusters can't merge. The maximum offset is bounded by the tier structure, not by how unlucky your data is.
+
+Same checks, but a ceiling on how bad it can get.
 
 Here's how the tiers get set up. Each array is half the size of the previous:
 
@@ -301,75 +322,48 @@ And here's the lookup. The nested loop structure is the entire insight:
   }
 ]} />
 
-At offset 1, you check 10 positions (one per tier). Only if *all* of those miss do you check offset 2. This means worst-case probes grow with the number of offsets needed, not the size of any individual cluster.
-
-(The paper's φ function uses a more sophisticated priority ordering that weights by both offset and array index. The simple nested loop here captures the key insight: prioritize low offsets across all arrays, without the bit manipulation complexity.)
-
-## Step 4: Build and verify
-
-Understanding theory is one thing. Making it work is another.
-
-Over several days, Claude and I built a complete implementation in Zig. The collaboration worked: my elastic hashing implementation matched the paper's bounds. But when I benchmarked it against Zig's `std.HashMap` (which uses SwissTable under the hood), reality hit.
-
-The tiered array approach alone wasn't enough. SwissTable's SIMD-accelerated probing was just too fast.
-
-So I went back to the paper. There's a batch insertion algorithm I'd skimmed past initially, focused on the core data structure. The insight: instead of inserting elements one at a time, you can batch insertions in a way that minimizes displacement cascades.
-
-The final implementation combines both ideas: **SIMD 16-slot buckets** (borrowing from SwissTable's playbook) with the **batch insertion algorithm** from the elastic hashing paper. A hybrid.
-
-## The results
-
-Benchmarks at 99% load factor, 10 runs averaged (ratio >1 = Hybrid faster than `std.HashMap`):
-
-| n | insert | lookup |
-|---|--------|--------|
-| 10k | **1.49x** | **1.29x** |
-| 50k | **1.50x** | **1.13x** |
-| 100k | **1.49x** | **1.10x** |
-| 250k | 1.58x | 0.43x |
-| 500k | 1.47x | 0.42x |
-| 1M | 1.22x | 0.47x |
-| 2.5M | **1.10x** | **1.47x** |
-| 5M | **1.25x** | **1.48x** |
-| 10M | **1.23x** | **1.43x** |
-
-Insertions are 1.1-1.6x faster across the board. Lookups win at small sizes (<100k) and large sizes (>2.5M), but there's a "cache locality valley" in the middle where SwissTable's flat memory layout has an advantage.
-
-That valley is interesting. It appears right where the working set exceeds L2 cache but fits in L3. The tiered structure hurts cache locality at exactly the wrong scale. At larger sizes, when everything's hitting main memory anyway, the reduced probe count wins again.
-
-I'll dig into the cache dynamics and the full implementation in a follow-up post. For now: **it's possible to beat SwissTable at 99% load**, but it takes combining multiple techniques.
+At offset 1, you check 10 positions (one per tier). Only if *all* of those miss do you check offset 2. This means worst-case probes grow with the number of offsets needed, not the size of any individual cluster.<Footnote id="6" />
 
 ## Translating the theorem
 
 Let's return to that screenshot. Here's what it says now:
 
-> *"There exists an injection φ : Z⁺ × Z⁺ → Z⁺ such that φ(i,j) ≤ O(i · j²)"*
+> There exists an injection φ : Z⁺ × Z⁺ → Z⁺ such that φ(i,j) ≤ O(i · j²)
 
-There's a function φ that takes two positive integers (array index and probe number) and returns a unique priority value. The priority grows at most proportionally to array index times probe number squared.
+There's a function φ that takes an array index and probe number, and tells you what order to check slots. Early probes in small arrays get priority.
 
 That's it. A function signature with a growth bound. The dense notation was just compression. The idea underneath is almost disappointingly simple: probe multiple arrays in a carefully chosen order.
 
-## A framework for reading papers
+## Step 4: Go further
 
-If you want to try this:
-1. **Start with claims, not proofs.** What does the paper promise? Ignore the derivation initially.
-2. **Decode notation aggressively.** Every unfamiliar symbol is a wall. Ask AI to translate to code.
-3. **Build a toy implementation.** Even a broken one. Bugs reveal what you don't understand.
-4. **Verify against claims.** If your results don't match, you've misunderstood something valuable.
-5. **Explain it back.** Writing forces clarity. If you can blog it, you understand it.
+I could have stopped there. I had a working implementation in Zig: **305 worst-case probes vs linear probing's 16,972** at 99% load. A 56x improvement in the tail, same memory.
 
-## The meta-lesson
+But I wanted to see how it compared to production code. Benchmarking against Zig's `std.HashMap` (which uses SwissTable under the hood) sent me down more rabbit holes. The final implementation combines:
+
+- **SIMD 16-slot buckets** that scan fingerprints in parallel
+- **Batch insertion** from the paper's φ priority function
+- **Bitmask tricks** (`@ctz`) to find empty slots without branching
+
+The hybrid beats SwissTable at 99% load—1.5x faster inserts, and faster lookups at both small and large scales. Next week I'll do a deep dive on the implementation: why there's a "cache locality valley" in the middle, how the batch algorithm actually works, and what I learned about SIMD along the way.
+
+For now, [the code is on GitHub](https://github.com/joshuaisaact/elastic-hash).
+
+## In summary
 
 I didn't need to understand elastic hashing. I could use std.HashMap forever. But spending a week wrestling with this paper built intuition I'll use for years.
 
-More importantly: **I now believe I can read papers.** The notation that scared me was just unfamiliar syntax. With AI as a translator, academic research is accessible in a way it wasn't before.
+More importantly, I now know I can take cutting-edge computer science and turn it into working code. The notation that scared me was just unfamiliar syntax. With AI as a translator, the gap between "academic paper" and "thing I can build" got a lot smaller.
 
-That's the real payoff. Not the hash table, but the confidence that the next paper won't be as intimidating.
+Remember Krapivin? An undergraduate who disproved a 40-year-old conjecture by tinkering "just for fun." That's the door AI opens. Not replacing the tinkering, but making it possible for more of us to try.
 
 ---
-*The code is on [GitHub](https://github.com/joshuaisaact/elastic-hash). The paper: [Elastic Hashing](https://arxiv.org/pdf/2501.02305).*
-*If you found this useful, let me know what papers you've been intimidated by. Might make a good follow-up.*
+*The paper: [Elastic Hashing](https://arxiv.org/pdf/2501.02305). The code: [GitHub](https://github.com/joshuaisaact/elastic-hash). Next week: the deep dive on the hybrid implementation that beats SwissTable.*
 
 <FootnoteList>
   <FootnoteItem id="1">The full story of Krapivin's discovery is told in [Quanta Magazine](https://www.quantamagazine.org/undergraduate-upends-a-40-year-old-data-science-conjecture-20250210/).</FootnoteItem>
+  <FootnoteItem id="2">Yao would later win the Turing Award in 2000 for his contributions to the theory of computation.</FootnoteItem>
+  <FootnoteItem id="3">Technically, it's "funnel hashing" in the paper that kills Yao's conjecture, since Yao's claim was specifically about greedy strategies. Elastic hashing sidesteps the conjecture by being non-greedy, but achieves better worst-case bounds (O(log δ⁻¹) vs O(log² δ⁻¹)). I implemented elastic hashing because it's more practical.</FootnoteItem>
+  <FootnoteItem id="4">If you want to go deep on why CPUs love sequential memory access, Andrew Kelley's [A Practical Guide to Applying Data-Oriented Design](https://www.youtube.com/watch?v=IroPQ150F6c) is essential viewing.</FootnoteItem>
+  <FootnoteItem id="5">Linear probing's worst case is O(n). With 100,000 entries at 99% load, that's theoretically 99,999 probes. In my benchmarks the observed worst case was 16,972. Still terrible.</FootnoteItem>
+  <FootnoteItem id="6">The paper's φ function uses a more sophisticated priority ordering that weights by both offset and array index. The simple nested loop here captures the key insight without the bit manipulation complexity.</FootnoteItem>
 </FootnoteList>

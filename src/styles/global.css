@@ -107,9 +107,10 @@ html.dark {
   border-radius: 0.375rem;
   background-color: rgb(36 41 51);
   padding: 0.2rem 0.4rem;
-  font-size: 0.875em;
+  font-size: 14.22px;
   color: #c9d1d9;
   font-weight: 400;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
   border: 1px solid rgb(255 255 255 / 0.08);
 }
 
