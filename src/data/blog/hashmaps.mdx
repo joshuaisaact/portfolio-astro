@@ -309,31 +309,35 @@ At offset 1, you check 10 positions (one per tier). Only if *all* of those miss 
 
 Understanding theory is one thing. Making it work is another.
 
-Over several days, Claude and I built a complete implementation in Zig. The collaboration:
-1. **Claude** generates initial code from the paper
-2. **I** run tests, find failures
-3. **We** debug together: "probe counts are too high"
-4. **Claude** spots issues in my implementation
-5. **I** verify fixes make mathematical sense
+Over several days, Claude and I built a complete implementation in Zig. The collaboration worked: my elastic hashing implementation matched the paper's bounds. But when I benchmarked it against Zig's `std.HashMap` (which uses SwissTable under the hood), reality hit.
 
-The learning came from failures. When probe counts didn't match the paper's bounds, we had to dig into *why*. That forced real understanding of batch transitions, load factors, probe limits.
+The tiered array approach alone wasn't enough. SwissTable's SIMD-accelerated probing was just too fast.
 
-If I'd copied working code, I'd have missed all of that.
+So I went back to the paper. There's a batch insertion algorithm I'd skimmed past initially, focused on the core data structure. The insight: instead of inserting elements one at a time, you can batch insertions in a way that minimizes displacement cascades.
+
+The final implementation combines both ideas: **SIMD 16-slot buckets** (borrowing from SwissTable's playbook) with the **batch insertion algorithm** from the elastic hashing paper. A hybrid.
 
 ## The results
 
-Final benchmarks at 99% load:
-```
-    n     | Elastic max | Linear max
-----------|-------------|------------
-    1000  |     151     |     447
-   10000  |     130     |    4500
-  100000  |     305     |   16972
-```
+Benchmarks at 99% load factor, 10 runs averaged (ratio >1 = Hybrid faster than `std.HashMap`):
 
-**305 worst-case probes vs 16,972.** A 56x improvement in the tail.
+| n | insert | lookup |
+|---|--------|--------|
+| 10k | **1.49x** | **1.29x** |
+| 50k | **1.50x** | **1.13x** |
+| 100k | **1.49x** | **1.10x** |
+| 250k | 1.58x | 0.43x |
+| 500k | 1.47x | 0.42x |
+| 1M | 1.22x | 0.47x |
+| 2.5M | **1.10x** | **1.47x** |
+| 5M | **1.25x** | **1.48x** |
+| 10M | **1.23x** | **1.43x** |
 
-Same memory. And now I understand *why* it works.
+Insertions are 1.1-1.6x faster across the board. Lookups win at small sizes (<100k) and large sizes (>2.5M), but there's a "cache locality valley" in the middle where SwissTable's flat memory layout has an advantage.
+
+That valley is interesting. It appears right where the working set exceeds L2 cache but fits in L3. The tiered structure hurts cache locality at exactly the wrong scale. At larger sizes, when everything's hitting main memory anyway, the reduced probe count wins again.
+
+I'll dig into the cache dynamics and the full implementation in a follow-up post. For now: **it's possible to beat SwissTable at 99% load**, but it takes combining multiple techniques.
 
 ## Translating the theorem
 
