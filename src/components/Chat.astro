@@ -1,0 +1,61 @@
+---
+interface Props {
+  role: 'user' | 'assistant';
+}
+
+const { role } = Astro.props;
+const isUser = role === 'user';
+---
+
+<div class={`chat-message ${isUser ? 'chat-user' : 'chat-assistant'}`}>
+  <div class="chat-label">{isUser ? 'Me' : 'Claude'}</div>
+  <div class="chat-content">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .chat-message {
+    margin: 1.25rem 0;
+    padding: 0 0 0 1rem;
+    border-left: 3px solid;
+  }
+
+  .chat-user {
+    border-color: rgb(99 102 241);
+  }
+
+  .chat-assistant {
+    border-color: rgb(217 119 87);
+  }
+
+  .chat-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-bottom: 0.375rem;
+  }
+
+  .chat-user .chat-label {
+    color: rgb(99 102 241);
+  }
+
+  .chat-assistant .chat-label {
+    color: rgb(217 119 87);
+  }
+
+  .chat-content {
+    color: rgb(55 65 81);
+  }
+
+  :global(.dark) .chat-content {
+    color: rgb(209 213 219);
+  }
+
+  .chat-content :global(p) {
+    margin: 0;
+  }
+
+  .chat-content :global(pre) {
+    margin: 0.75rem 0 0 0;
+  }
+</style>

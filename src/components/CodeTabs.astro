@@ -1,0 +1,109 @@
+---
+import { Code } from 'astro:components';
+
+interface Tab {
+  label: string;
+  lang: string;
+  code: string;
+}
+
+interface Props {
+  tabs: Tab[];
+}
+
+const { tabs } = Astro.props;
+---
+
+<div class="code-tabs">
+  <div class="tab-buttons">
+    {tabs.map((tab, i) => (
+      <button
+        class={`tab-btn ${i === 0 ? 'active' : ''}`}
+        data-tab={i}
+        type="button"
+      >
+        {tab.label}
+      </button>
+    ))}
+  </div>
+  <div class="tab-panels">
+    {tabs.map((tab, i) => (
+      <div class={`tab-panel ${i === 0 ? '' : 'hidden'}`} data-panel={i}>
+        <Code code={tab.code} lang={tab.lang} theme="github-dark" />
+      </div>
+    ))}
+  </div>
+</div>
+
+<script>
+  function initCodeTabs() {
+    document.querySelectorAll('.code-tabs').forEach(container => {
+      const buttons = container.querySelectorAll('.tab-btn');
+      const panels = container.querySelectorAll('.tab-panel');
+
+      buttons.forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tabIndex = btn.getAttribute('data-tab');
+
+          // Update buttons
+          buttons.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+
+          // Update panels
+          panels.forEach(p => p.classList.add('hidden'));
+          container.querySelector(`[data-panel="${tabIndex}"]`)?.classList.remove('hidden');
+        });
+      });
+    });
+  }
+
+  initCodeTabs();
+  document.addEventListener('astro:page-load', initCodeTabs);
+</script>
+
+<style>
+  .code-tabs {
+    margin: 1.5rem 0;
+  }
+
+  .tab-buttons {
+    display: flex;
+    gap: 0;
+    background: rgb(36 41 51);
+    border-top-left-radius: 0.5rem;
+    border-top-right-radius: 0.5rem;
+    padding: 0 0.5rem;
+  }
+
+  .tab-btn {
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: rgb(156 163 175);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: -1px;
+  }
+
+  .tab-btn:hover {
+    color: rgb(229 231 235);
+  }
+
+  .tab-btn.active {
+    color: rgb(96 165 250);
+    border-bottom-color: rgb(96 165 250);
+  }
+
+  .tab-panel.hidden {
+    display: none;
+  }
+
+  .tab-panel :global(pre) {
+    margin-top: 0 !important;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+  }
+</style>
