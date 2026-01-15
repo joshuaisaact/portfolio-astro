@@ -83,7 +83,7 @@ const canonicalURL = `https://joshtuddenham.dev/blog/${post.id}`;
         </div>
 
         {
-          (post.data.featured_image || post.data.featured_video) && (
+          (post.data.featured_image || post.data.featured_video) && !post.data.hide_featured_image && (
             <div
               class:list={[
                 "relative overflow-hidden rounded-lg mb-8",
