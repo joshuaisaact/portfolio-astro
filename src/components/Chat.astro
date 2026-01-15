@@ -1,14 +1,21 @@
 ---
 interface Props {
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'translation';
 }
 
 const { role } = Astro.props;
-const isUser = role === 'user';
+
+const roleConfig = {
+  user: { class: 'chat-user', label: 'Me' },
+  assistant: { class: 'chat-assistant', label: 'Claude' },
+  translation: { class: 'chat-translation', label: 'Translated' },
+};
+
+const config = roleConfig[role];
 ---
 
-<div class={`chat-message ${isUser ? 'chat-user' : 'chat-assistant'}`}>
-  <div class="chat-label">{isUser ? 'Me' : 'Claude'}</div>
+<div class={`chat-message ${config.class}`}>
+  <div class="chat-label">{config.label}</div>
   <div class="chat-content">
     <slot />
   </div>
@@ -29,6 +36,10 @@ const isUser = role === 'user';
     border-color: rgb(217 119 87);
   }
 
+  .chat-translation {
+    border-color: rgb(34 197 94);
+  }
+
   .chat-label {
     font-size: 0.8rem;
     font-weight: 600;
@@ -41,6 +52,10 @@ const isUser = role === 'user';
 
   .chat-assistant .chat-label {
     color: rgb(217 119 87);
+  }
+
+  .chat-translation .chat-label {
+    color: rgb(34 197 94);
   }
 
   .chat-content {

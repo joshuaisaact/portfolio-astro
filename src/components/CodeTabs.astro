@@ -12,21 +12,40 @@ interface Props {
 }
 
 const { tabs } = Astro.props;
+
+const languageLogos: Record<string, string> = {
+  typescript: '/logos/typescript.svg',
+  ts: '/logos/typescript.svg',
+  zig: '/logos/zig.svg',
+  go: '/logos/gopher.svg',
+  golang: '/logos/gopher.svg',
+  python: '/logos/python.svg',
+  py: '/logos/python.svg',
+};
+
+function getLogoPath(tab: Tab): string | null {
+  const langLower = tab.lang.toLowerCase();
+  const labelLower = tab.label.toLowerCase();
+  return languageLogos[langLower] || languageLogos[labelLower] || null;
+}
 ---
 
-<div class="code-tabs">
-  <div class="tab-buttons">
+<div class="code-tabs my-6">
+  <div class="flex gap-2 bg-[rgb(36,41,51)] rounded-t-lg px-2">
     {tabs.map((tab, i) => (
       <button
-        class={`tab-btn ${i === 0 ? 'active' : ''}`}
+        class={`tab-btn flex items-center gap-1.5 px-4 text-sm font-medium text-gray-400 bg-transparent border-none border-b-2 border-transparent cursor-pointer transition-all -mb-px hover:text-gray-200 ${i === 0 ? 'active' : ''}`}
         data-tab={i}
         type="button"
       >
+        {getLogoPath(tab) && (
+          <img src={getLogoPath(tab)} alt="" class="block w-4 h-4 shrink-0" />
+        )}
         {tab.label}
       </button>
     ))}
   </div>
-  <div class="tab-panels">
+  <div>
     {tabs.map((tab, i) => (
       <div class={`tab-panel ${i === 0 ? '' : 'hidden'}`} data-panel={i}>
         <Code code={tab.code} lang={tab.lang} theme="github-dark" />
@@ -62,43 +81,9 @@ const { tabs } = Astro.props;
 </script>
 
 <style>
-  .code-tabs {
-    margin: 1.5rem 0;
-  }
-
-  .tab-buttons {
-    display: flex;
-    gap: 0;
-    background: rgb(36 41 51);
-    border-top-left-radius: 0.5rem;
-    border-top-right-radius: 0.5rem;
-    padding: 0 0.5rem;
-  }
-
-  .tab-btn {
-    padding: 0.625rem 1rem;
-    font-size: 0.875rem;
-    font-weight: 500;
-    color: rgb(156 163 175);
-    background: transparent;
-    border: none;
-    border-bottom: 2px solid transparent;
-    cursor: pointer;
-    transition: all 0.15s;
-    margin-bottom: -1px;
-  }
-
-  .tab-btn:hover {
-    color: rgb(229 231 235);
-  }
-
   .tab-btn.active {
     color: rgb(96 165 250);
     border-bottom-color: rgb(96 165 250);
-  }
-
-  .tab-panel.hidden {
-    display: none;
   }
 
   .tab-panel :global(pre) {

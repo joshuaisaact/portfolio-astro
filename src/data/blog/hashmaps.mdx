@@ -8,6 +8,7 @@ tags: ["AI", "learning", "Zig", "hash tables", "papers"]
 
 import Figure from '../../components/Figure.astro';
 import theoremScreenshot from './theorem1.png';
+import theorem2 from './theorem2.png';
 import Footnote from '../../components/Footnote.astro';
 import FootnoteList from '../../components/FootnoteList.astro';
 import FootnoteItem from '../../components/FootnoteItem.astro';
@@ -81,6 +82,17 @@ That's a hash function. It turns any key into a number:
 }
 
 hash("josh") // → 7482918374`
+  },
+  {
+    label: "Python",
+    lang: "python",
+    code: `def hash(key: str) -> int:
+    h = 0
+    for char in key:
+        h = h * 31 + ord(char)
+    return h
+
+hash("josh")  # → 7482918374`
   },
   {
     label: "TypeScript",
@@ -210,13 +222,13 @@ This was the hook. High load factor *and* bounded worst-case? That's exactly wha
 ## Step 3: Understand the mechanism
 
 Here's where papers get dense. But the core idea is simple: instead of one array, use multiple arrays of decreasing size.
-```zig
-// Capacity 1024:
-// arrays[0] = 512 slots
-// arrays[1] = 256 slots
-// arrays[2] = 128 slots
-// ...
-// arrays[9] = 1 slot
+```bash
+Capacity 1024:
+arrays[0] = 512 slots
+arrays[1] = 256 slots
+arrays[2] = 128 slots
+...
+arrays[9] = 1 slot
 ```
 
 Same total memory. But when you probe for a key, you don't walk sequentially through one array (which causes clustering). You probe across *all* arrays in a specific order defined by the φ function.
@@ -257,6 +269,19 @@ for (0..num_arrays) |i| {
     offset += size;
     size = @max(size / 2, 1);  // halve each time, minimum 1
 }`
+  },
+  {
+    label: "Python",
+    lang: "python",
+    code: `# Split 1024 into: 512 + 256 + 128 + 64 + 32 + 16 + 8 + 4 + 2 + 1
+offset = 0
+size = capacity // 2
+
+for i in range(num_arrays):
+    starts[i] = offset
+    sizes[i] = size
+    offset += size
+    size = max(size // 2, 1)  # halve each time, minimum 1`
   },
   {
     label: "TypeScript",
@@ -300,6 +325,25 @@ And here's the lookup. The nested loop structure is the entire insight:
 }`
   },
   {
+    label: "Python",
+    lang: "python",
+    code: `def get(key: K) -> V | None:
+    h = hash(key)
+
+    # Outer loop: probe offset (1, 2, 3...)
+    # Inner loop: ALL arrays at this offset before incrementing
+    for offset in range(1, max_probes + 1):
+        for i in range(num_arrays):
+            if offset > sizes[i]:
+                continue
+
+            idx = starts[i] + (h % sizes[i])
+            if keys[idx] == key:
+                return values[idx]
+
+    return None`
+  },
+  {
     label: "TypeScript",
     lang: "typescript",
     code: `function get(key: K): V | null {
@@ -328,9 +372,14 @@ At offset 1, you check 10 positions (one per tier). Only if *all* of those miss 
 
 Let's return to that screenshot. Here's what it says now:
 
-> There exists an injection φ : Z⁺ × Z⁺ → Z⁺ such that φ(i,j) ≤ O(i · j²)
+<Figure
+  src={theorem2}
+  alt="There exists an injection φ : Z⁺ × Z⁺ → Z⁺ such that φ(i,j) ≤ O(i · j²)"
+/>
 
-There's a function φ that takes an array index and probe number, and tells you what order to check slots. Early probes in small arrays get priority.
+<Chat role="translation">
+Check out my function φ - it needs an array index and probe number as inputs, and as an output it tells you the order to look for something. It prioritises early slots in smaller arrays.
+</Chat>
 
 That's it. A function signature with a growth bound. The dense notation was just compression. The idea underneath is almost disappointingly simple: probe multiple arrays in a carefully chosen order.
 
@@ -338,7 +387,7 @@ That's it. A function signature with a growth bound. The dense notation was just
 
 I could have stopped there. I had a working implementation in Zig: **305 worst-case probes vs linear probing's 16,972** at 99% load. A 56x improvement in the tail, same memory.
 
-But I wanted to see how it compared to production code. Benchmarking against Zig's `std.HashMap` (which uses SwissTable under the hood) sent me down more rabbit holes. The final implementation combines:
+But I wanted to see how it compared to production code. Benchmarking against Zig's `std.HashMap` (which uses [SwissTable](https://abseil.io/about/design/swisstables) under the hood) sent me down more rabbit holes.<Footnote id="7" /> The final implementation combines:
 
 - **SIMD 16-slot buckets** that scan fingerprints in parallel
 - **Batch insertion** from the paper's φ priority function
@@ -366,4 +415,5 @@ Remember Krapivin? An undergraduate who disproved a 40-year-old conjecture by ti
   <FootnoteItem id="4">If you want to go deep on why CPUs love sequential memory access, Andrew Kelley's [A Practical Guide to Applying Data-Oriented Design](https://www.youtube.com/watch?v=IroPQ150F6c) is essential viewing.</FootnoteItem>
   <FootnoteItem id="5">Linear probing's worst case is O(n). With 100,000 entries at 99% load, that's theoretically 99,999 probes. In my benchmarks the observed worst case was 16,972. Still terrible.</FootnoteItem>
   <FootnoteItem id="6">The paper's φ function uses a more sophisticated priority ordering that weights by both offset and array index. The simple nested loop here captures the key insight without the bit manipulation complexity.</FootnoteItem>
+  <FootnoteItem id="7">If you want to learn more about how SwissTable works, [this article](https://dev.to/huizhou92/swisstable-a-high-performance-hash-table-implementation-1knc) about how the Go team implemented it explains it well, with really useful further reading too.</FootnoteItem>
 </FootnoteList>
