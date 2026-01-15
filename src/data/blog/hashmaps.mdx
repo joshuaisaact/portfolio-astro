@@ -386,15 +386,16 @@ That's it. A function signature with a growth bound. The dense notation was just
 
 I could have stopped there. I had a working implementation in Zig: **305 worst-case probes vs linear probing's 16,972** at 99% load. A 56x improvement in the tail, same memory.
 
-But I wanted to see how it compared to production code. Benchmarking against Zig's `std.HashMap` (which uses [SwissTable](https://abseil.io/about/design/swisstables) under the hood) sent me down more rabbit holes.<Footnote id="7" />
+But I wanted to see how it compared to production code. Benchmarking against Zig's `std.HashMap` (which is [Swiss-table inspired](https://abseil.io/about/design/swisstables)) sent me down more rabbit holes.<Footnote id="7" />
 
 The final implementation combines:
 
 - **SIMD 16-slot buckets** that scan fingerprints in parallel
-- **Batch insertion** from the paper's φ priority function
+- **Three-case batch insertion** from the paper—dynamically routes inserts between tiers based on fullness, with probe limits derived from the φ priority function
+- **Comptime specialization** that unrolls tier loops when capacity is known at compile time—4x faster lookups
 - **Bitmask tricks** (`@ctz`) to find empty slots without branching
 
-The hybrid beats SwissTable at 99% load—1.5x faster inserts, and faster lookups at both small and large scales. Next week I'll do a deep dive on the implementation: why there's a "cache locality valley" in the middle, how the batch algorithm actually works, and what I learned about SIMD along the way.
+The hybrid beats Zig's `std.HashMap` at 99% actual capacity—4x faster inserts, with better worst-case lookup latency. Next week I'll do a deep dive on the implementation: how the batch algorithm actually works, and what I learned about SIMD.
 
 ## In summary
 
