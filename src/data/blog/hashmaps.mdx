@@ -187,7 +187,7 @@ This defines a function called φ (phi). It takes two positive integers as input
 fn phi(i: usize, j: usize) usize
 ```
 
-Z⁺ means 'positive integers' (1, 2, 3...). The × means it takes a pair. The → means 'returns'. In Zig, the return type just follows the parameters.
+Z⁺ means 'positive integers' (1, 2, 3...). The × means it takes a pair. The → means 'returns'.
 </Chat>
 
 Suddenly this wasn't hieroglyphics. It was a function signature.
@@ -384,7 +384,9 @@ That's it. A function signature with a growth bound. The dense notation was just
 
 I could have stopped there. I had a working implementation in Zig: **305 worst-case probes vs linear probing's 16,972** at 99% load. A 56x improvement in the tail, same memory.
 
-But I wanted to see how it compared to production code. Benchmarking against Zig's `std.HashMap` (which uses [SwissTable](https://abseil.io/about/design/swisstables) under the hood) sent me down more rabbit holes.<Footnote id="7" /> The final implementation combines:
+But I wanted to see how it compared to production code. Benchmarking against Zig's `std.HashMap` (which uses [SwissTable](https://abseil.io/about/design/swisstables) under the hood) sent me down more rabbit holes.<Footnote id="7" />
+
+The final implementation combines:
 
 - **SIMD 16-slot buckets** that scan fingerprints in parallel
 - **Batch insertion** from the paper's φ priority function
@@ -392,18 +394,17 @@ But I wanted to see how it compared to production code. Benchmarking against Zig
 
 The hybrid beats SwissTable at 99% load—1.5x faster inserts, and faster lookups at both small and large scales. Next week I'll do a deep dive on the implementation: why there's a "cache locality valley" in the middle, how the batch algorithm actually works, and what I learned about SIMD along the way.
 
-For now, [the code is on GitHub](https://github.com/joshuaisaact/elastic-hash).
-
 ## In summary
 
-I didn't need to understand elastic hashing. I could use std.HashMap forever. But spending a week wrestling with this paper built intuition I'll use for years.
+I didn't need to understand elastic hashing. I could use Zig's standard library, or Go's `map`, or Python dictionaries, or JavaScript objects forever. But now I understand the tradeoffs, not just the API. Next time I'm designing a cache for millions of writes, I'll know why it matters, and which hash table design to reach for.
 
 More importantly, I now know I can take cutting-edge computer science and turn it into working code. The notation that scared me was just unfamiliar syntax. With AI as a translator, the gap between "academic paper" and "thing I can build" got a lot smaller.
 
 Remember Krapivin? An undergraduate who disproved a 40-year-old conjecture by tinkering "just for fun." That's the door AI opens. Not replacing the tinkering, but making it possible for more of us to try.
 
 ---
-*The paper: [Elastic Hashing](https://arxiv.org/pdf/2501.02305). The code: [GitHub](https://github.com/joshuaisaact/elastic-hash). Next week: the deep dive on the hybrid implementation that beats SwissTable.*
+
+[Elastic Hashing paper](https://arxiv.org/pdf/2501.02305) · [GitHub](https://github.com/joshuaisaact/elastic-hash)
 
 <FootnoteList>
   <FootnoteItem id="1">The full story of Krapivin's discovery is told in [Quanta Magazine](https://www.quantamagazine.org/undergraduate-upends-a-40-year-old-data-science-conjecture-20250210/).</FootnoteItem>
