@@ -1,7 +1,6 @@
 ---
 title: "Decoding Academic Papers with AI: A Practical Guide"
 date: "2026-01-10"
-featured_image: "./theorem1.png"
 excerpt: "I haven't thought about maths deeply in decades. Here's how I used Claude to understand a paper full of notation like φ : Z⁺ × Z⁺ → Z⁺, and built something useful from it."
 tags: ["AI", "learning", "Zig", "hash tables", "papers"]
 ---
@@ -19,15 +18,13 @@ import Chat from '../../components/Chat.astro';
 
 Last week I wrote about ["vertigo debt"](/blog/vertigo/), the gap between shipping code and truly understanding it. This post is about paying some of that debt down.
 
-I'm going to show you how I took an academic paper, understood it deeply enough to implement it, and used AI as a learning collaborator rather than a code generator. By the end, you'll be able to read the screenshot below and know exactly what it means. And if you stick around: I built something that beats SwissTable at 99% load.
+I'm going to show you how I took an academic paper, understood it deeply enough to implement it, and used AI as a learning collaborator rather than a code generator. By the end, you'll be able to read the screenshot below and know exactly what it means.
 
 <Figure
   src={theoremScreenshot}
   alt="Theorem 1 from the Elastic Hashing paper"
   title="This looked like hieroglyphics to me two weeks ago"
 />
-
-## A confession
 
 I haven't engaged with real mathematics in nearly two decades. I did A-Level Maths, got a decent grade, and then spent eight years in enterprise sales where the hardest calculation was commission percentages.
 
@@ -41,7 +38,7 @@ In 2021, Andrew Krapivin, an undergraduate at Rutgers, came across a paper calle
 
 What followed was one of those stories that makes you believe in tinkering. Krapivin wanted to make the pointers even smaller, which meant reorganising how data was stored. That led him to hash tables. And his explorations led him to accidentally disprove a 40-year-old conjecture.
 
-In 1985, Andrew Yao<Footnote id="2" /> claimed that for a certain class of hash tables, you couldn't do better than uniform probing (randomly checking slots until you find what you're looking for). The fuller the table, the worse it gets, exponentially so. For four decades, nobody seriously challenged this.
+In 1985, Andrew Yao<Footnote id="2" /> claimed that for a certain class of hash tables, you couldn't do better than uniform probing (randomly checking slots until you find what you're looking for). The fuller the table, the worse it gets, exponentially so. For four decades, most computer scientists assumed he was right.
 
 Krapivin didn't know about Yao's conjecture. He just kept tinkering. When he showed his results to faculty mentors, the reaction was immediate. "You've completely wiped out a 40-year-old conjecture."<Footnote id="3" />
 
