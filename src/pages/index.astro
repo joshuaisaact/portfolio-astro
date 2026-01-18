@@ -45,6 +45,18 @@ const blogPosts = allPosts.sort(
     role="main"
   >
     <Welcome />
+    <Section id="blog" title="Blog">
+      <BlogCarousel posts={blogPosts} />
+      <div class="mt-6 text-center">
+        <a
+          href="/blog"
+          class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
+        >
+          <span>View all posts</span>
+          <ArrowRight class="w-4 h-4" />
+        </a>
+      </div>
+    </Section>
     <Section id="projects" title="Featured Projects">
       <ProjectCarousel projects={applicationProjects} />
       <div class="mt-6 text-center">
@@ -63,18 +75,6 @@ const blogPosts = allPosts.sort(
         projectType="tool"
         cardType="minimal"
       />
-    </Section>
-    <Section id="blog" title="Blog">
-      <BlogCarousel posts={blogPosts} />
-      <div class="mt-6 text-center">
-        <a
-          href="/blog"
-          class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
-        >
-          <span>View all posts</span>
-          <ArrowRight class="w-4 h-4" />
-        </a>
-      </div>
     </Section>
     <Section id="contact" title="Contact">
       <Contact />
