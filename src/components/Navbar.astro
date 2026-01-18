@@ -3,9 +3,9 @@ import { Image } from "astro:assets";
 import ThemeIcon from "./ThemeIcon.astro";
 
 const navLinks = [
-  { href: "/", label: "About", id: "about" },
-  { href: "/projects", label: "Projects", id: "projects" },
   { href: "/blog", label: "Blog", id: "blog" },
+  { href: "/projects", label: "Projects", id: "projects" },
+  { href: "/", label: "About", id: "about" },
   { href: "/#contact", label: "Contact", id: "contact" },
 ];
 const socialLinks = [
@@ -36,8 +36,16 @@ const socialLinks = [
     <nav class="flex h-14 items-center justify-between">
       <a
         href="/"
-        class="text-lg font-medium tracking-tight text-gray-900 transition-colors hover:text-gray-600 dark:text-gray-100 dark:hover:text-gray-300 sm:text-xl"
+        class="flex items-center gap-2 text-lg font-medium tracking-tight text-gray-900 transition-colors hover:text-gray-600 dark:text-gray-100 dark:hover:text-gray-300 sm:text-xl"
       >
+        <Image
+          src="/icon.png"
+          alt=""
+          width={24}
+          height={24}
+          loading="eager"
+          class="rounded-full"
+        />
         Joshua Tuddenham
       </a>
 

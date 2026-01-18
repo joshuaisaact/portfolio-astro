@@ -1,5 +1,5 @@
 ---
-import Blog from "../components/Blog.astro";
+import BlogCarousel from "../components/BlogCarousel.astro";
 import Contact from "../components/Contact.astro";
 import Navbar from "../components/Navbar.astro";
 import Projects from "../components/Projects.astro";
@@ -23,6 +23,11 @@ const utilityProjects = allProjects
   )
   .sort((a, b) => (a.data.order ?? 999) - (b.data.order ?? 999))
   .map((p) => p.data);
+
+const allPosts = await getCollection("blog");
+const blogPosts = allPosts.sort(
+  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
+);
 ---
 
 <a
@@ -40,12 +45,24 @@ const utilityProjects = allProjects
     role="main"
   >
     <Welcome />
+    <Section id="blog" title="Blog">
+      <BlogCarousel posts={blogPosts} />
+      <div class="mt-6 text-center">
+        <a
+          href="/blog"
+          class="inline-flex items-center justify-center gap-2 px-6 py-3 text-base font-medium text-white bg-(--theme-5)/90 backdrop-blur-sm rounded-full border border-white/20 shadow-lg shadow-(--theme-5)/25 hover:bg-(--theme-5) hover:shadow-xl hover:shadow-(--theme-5)/30 transition-all duration-200"
+        >
+          <span>View all posts</span>
+          <ArrowRight class="w-4 h-4" />
+        </a>
+      </div>
+    </Section>
     <Section id="projects" title="Featured Projects">
       <ProjectCarousel projects={applicationProjects} />
       <div class="mt-6 text-center">
         <a
           href="/projects"
-          class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
+          class="inline-flex items-center justify-center gap-2 px-6 py-3 text-base font-medium text-white bg-(--theme-5)/90 backdrop-blur-sm rounded-full border border-white/20 shadow-lg shadow-(--theme-5)/25 hover:bg-(--theme-5) hover:shadow-xl hover:shadow-(--theme-5)/30 transition-all duration-200"
         >
           <span>View all projects</span>
           <ArrowRight class="w-4 h-4" />
@@ -58,9 +75,6 @@ const utilityProjects = allProjects
         projectType="tool"
         cardType="minimal"
       />
-    </Section>
-    <Section id="blog" title="Blog">
-      <Blog />
     </Section>
     <Section id="contact" title="Contact">
       <Contact />
