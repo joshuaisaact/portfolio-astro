@@ -1,0 +1,185 @@
+---
+import ProjectCard from "./ProjectCard.astro";
+import type { Project } from "./Projects.astro";
+import { ChevronLeft, ChevronRight } from "lucide-astro";
+
+interface Props {
+  projects: Project[];
+}
+
+const { projects } = Astro.props;
+---
+
+<section aria-label="Featured Projects Carousel" class="space-y-6 sm:space-y-8">
+  <div>
+    <p class="text-base sm:text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+      When I'm not shipping features at work, I like to build things that solve
+      problems I find interesting. From AI debate platforms to tools that make
+      hybrid work less annoying. Some of these have even won hackathons.
+    </p>
+  </div>
+
+  <div class="embla relative" aria-roledescription="carousel">
+    <!-- Carousel Viewport -->
+    <div class="embla__viewport overflow-hidden py-2">
+      <div class="embla__container flex gap-3 sm:gap-4" role="list">
+        {
+          projects.map((project, index) => (
+            <div
+              class="embla__slide flex-[0_0_100%] md:flex-[0_0_calc(50%-0.5rem)] min-w-0"
+              role="listitem"
+              aria-roledescription="slide"
+              aria-label={`${index + 1} of ${projects.length}: ${project.title}`}
+            >
+              <ProjectCard project={project} variant="full" />
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <!-- Navigation Arrows (hidden on mobile, use swipe + dots) -->
+    <button
+      type="button"
+      class="embla__prev invisible hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 -translate-x-14 lg:-translate-x-16 z-10
+        w-10 h-10 lg:w-12 lg:h-12 items-center justify-center
+        bg-white dark:bg-gray-800 rounded-full shadow-lg
+        border border-gray-200 dark:border-gray-700
+        text-gray-600 dark:text-gray-300
+        hover:bg-gray-50 dark:hover:bg-gray-700
+        hover:text-gray-900 dark:hover:text-white
+        disabled:opacity-40 disabled:cursor-not-allowed
+        transition-all duration-200"
+      aria-label="Previous project"
+      disabled
+    >
+      <ChevronLeft class="w-5 h-5 lg:w-6 lg:h-6" />
+    </button>
+
+    <button
+      type="button"
+      class="embla__next hidden md:flex absolute right-0 top-1/2 -translate-y-1/2 translate-x-14 lg:translate-x-16 z-10
+        w-10 h-10 lg:w-12 lg:h-12 items-center justify-center
+        bg-white dark:bg-gray-800 rounded-full shadow-lg
+        border border-gray-200 dark:border-gray-700
+        text-gray-600 dark:text-gray-300
+        hover:bg-gray-50 dark:hover:bg-gray-700
+        hover:text-gray-900 dark:hover:text-white
+        disabled:opacity-40 disabled:cursor-not-allowed
+        transition-all duration-200"
+      aria-label="Next project"
+    >
+      <ChevronRight class="w-5 h-5 lg:w-6 lg:h-6" />
+    </button>
+
+    <!-- Dot Indicators -->
+    <div
+      class="embla__dots flex justify-center gap-2 mt-4"
+      role="tablist"
+      aria-label="Slide navigation"
+    >
+      {
+        projects.map((_, index) => (
+          <button
+            type="button"
+            class:list={[
+              "embla__dot w-2.5 h-2.5 rounded-full transition-colors duration-200",
+              index === 0
+                ? "bg-blue-600 dark:bg-blue-500"
+                : "bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500",
+            ]}
+            role="tab"
+            aria-label={`Go to slide ${index + 1}`}
+            aria-selected={index === 0 ? "true" : "false"}
+            data-index={index}
+          />
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<script>
+  import EmblaCarousel from "embla-carousel";
+
+  function initCarousel() {
+    const emblaNode = document.querySelector(".embla__viewport");
+    if (!emblaNode) return;
+
+    const embla = EmblaCarousel(emblaNode as HTMLElement, {
+      loop: false,
+      align: "start",
+      containScroll: false,
+    });
+
+    const prevBtn = document.querySelector(".embla__prev");
+    const nextBtn = document.querySelector(".embla__next");
+    const dots = document.querySelectorAll(".embla__dot");
+
+    // Navigation buttons
+    prevBtn?.addEventListener("click", () => embla.scrollPrev());
+    nextBtn?.addEventListener("click", () => embla.scrollNext());
+
+    // Dot navigation
+    dots.forEach((dot) => {
+      dot.addEventListener("click", () => {
+        const index = parseInt(dot.getAttribute("data-index") || "0", 10);
+        embla.scrollTo(index);
+      });
+    });
+
+    // Update dots on slide change
+    const updateDots = () => {
+      const selected = embla.selectedScrollSnap();
+      dots.forEach((dot, index) => {
+        const isSelected = index === selected;
+        dot.setAttribute("aria-selected", isSelected ? "true" : "false");
+        if (isSelected) {
+          dot.classList.remove("bg-gray-300", "dark:bg-gray-600", "hover:bg-gray-400", "dark:hover:bg-gray-500");
+          dot.classList.add("bg-blue-600", "dark:bg-blue-500");
+        } else {
+          dot.classList.remove("bg-blue-600", "dark:bg-blue-500");
+          dot.classList.add("bg-gray-300", "dark:bg-gray-600", "hover:bg-gray-400", "dark:hover:bg-gray-500");
+        }
+      });
+    };
+
+    // Update button states
+    const updateButtons = () => {
+      if (prevBtn) {
+        const canScrollPrev = embla.canScrollPrev();
+        (prevBtn as HTMLButtonElement).disabled = !canScrollPrev;
+        prevBtn.classList.toggle("invisible", !canScrollPrev);
+      }
+      if (nextBtn) {
+        const canScrollNext = embla.canScrollNext();
+        (nextBtn as HTMLButtonElement).disabled = !canScrollNext;
+        nextBtn.classList.toggle("invisible", !canScrollNext);
+      }
+    };
+
+    embla.on("select", updateDots);
+    embla.on("select", updateButtons);
+    embla.on("init", updateDots);
+    embla.on("init", updateButtons);
+
+    // Keyboard navigation
+    emblaNode.setAttribute("tabindex", "0");
+    emblaNode.addEventListener("keydown", (e: Event) => {
+      const keyEvent = e as KeyboardEvent;
+      if (keyEvent.key === "ArrowLeft") {
+        embla.scrollPrev();
+        keyEvent.preventDefault();
+      } else if (keyEvent.key === "ArrowRight") {
+        embla.scrollNext();
+        keyEvent.preventDefault();
+      }
+    });
+  }
+
+  // Initialize on page load
+  initCarousel();
+
+  // Re-initialize on Astro page transitions
+  document.addEventListener("astro:page-load", initCarousel);
+</script>

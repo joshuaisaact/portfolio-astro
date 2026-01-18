@@ -3,9 +3,11 @@ import Blog from "../components/Blog.astro";
 import Contact from "../components/Contact.astro";
 import Navbar from "../components/Navbar.astro";
 import Projects from "../components/Projects.astro";
+import ProjectCarousel from "../components/ProjectCarousel.astro";
 import Section from "../components/Section.astro";
 import Welcome from "../components/Welcome.astro";
 import Layout from "../layouts/Layout.astro";
+import { ArrowRight } from "lucide-astro";
 import { getCollection } from "astro:content";
 
 const allProjects = await getCollection("projects");
@@ -39,7 +41,16 @@ const utilityProjects = allProjects
   >
     <Welcome />
     <Section id="projects" title="Featured Projects">
-      <Projects projects={applicationProjects} projectType="application" />
+      <ProjectCarousel projects={applicationProjects} />
+      <div class="mt-6 text-center">
+        <a
+          href="/projects"
+          class="inline-flex items-center gap-2 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium transition-colors"
+        >
+          <span>View all projects</span>
+          <ArrowRight class="w-4 h-4" />
+        </a>
+      </div>
     </Section>
     <Section id="dev-tools" title="Developer Tools & Utilities" cardType="full">
       <Projects
