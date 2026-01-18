@@ -227,7 +227,7 @@ html.dark {
 }
 
 /* Prose enhancements - bolder accent color usage */
-.prose a {
+.prose a:not(.not-prose a):not([class*="bg-"]) {
   color: var(--theme-5);
   text-decoration: underline;
   text-decoration-color: var(--theme-5);
@@ -235,15 +235,15 @@ html.dark {
   transition: text-decoration-color 0.15s;
 }
 
-.prose a:hover {
+.prose a:not(.not-prose a):not([class*="bg-"]):hover {
   text-decoration-color: currentColor;
 }
 
-.dark .prose a {
+.dark .prose a:not(.not-prose a):not([class*="bg-"]) {
   color: #6b9e8f;
 }
 
-.dark .prose a:hover {
+.dark .prose a:not(.not-prose a):not([class*="bg-"]):hover {
   color: #8fbdae;
 }
 
