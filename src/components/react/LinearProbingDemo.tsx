@@ -120,14 +120,14 @@ const LinearProbingDemo: React.FC = () => {
   }, []);
 
   return (
-    <div className="my-8 p-4 sm:p-6 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
+    <div className="not-prose my-8 p-4 sm:p-6 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-1">
             Linear Probing
           </h3>
-          <p className="text-sm text-gray-500 dark:text-gray-400">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-0">
             Watch clusters form as the table fills up
           </p>
         </div>
