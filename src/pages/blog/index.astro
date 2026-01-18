@@ -2,6 +2,7 @@
 import Layout from "../../layouts/Layout.astro";
 import Navbar from "../../components/Navbar.astro";
 import BlogCard from "../../components/BlogCard.astro";
+import Subscribe from "../../components/Subscribe.astro";
 import { getCollection } from "astro:content";
 
 // Get all blog posts
@@ -111,6 +112,8 @@ const createPageURL = (page: number) => {
           </nav>
         )
       }
+
+      <Subscribe />
     </main>
   </div>
 </Layout>

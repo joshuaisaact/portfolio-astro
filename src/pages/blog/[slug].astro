@@ -4,6 +4,7 @@ import { Image } from "astro:assets";
 import { ArrowLeft } from "lucide-astro";
 import Layout from "../../layouts/Layout.astro";
 import Navbar from "../../components/Navbar.astro";
+import Subscribe from "../../components/Subscribe.astro";
 
 export async function getStaticPaths() {
   const posts = await getCollection("blog");
@@ -122,6 +123,8 @@ const canonicalURL = `https://joshtuddenham.dev/blog/${post.id}`;
       <div class="prose prose-lg dark:prose-invert max-w-none">
         <Content />
       </div>
+
+      <Subscribe compact />
     </article>
   </div>
 </Layout>

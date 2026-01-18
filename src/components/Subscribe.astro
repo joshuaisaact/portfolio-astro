@@ -1,0 +1,67 @@
+---
+interface Props {
+  compact?: boolean;
+}
+
+const { compact = false } = Astro.props;
+---
+
+<div
+  class:list={[
+    "subscribe-form",
+    compact ? "py-8" : "py-12",
+    "border-t border-gray-200 dark:border-gray-800",
+  ]}
+>
+  <div class:list={[compact ? "text-center" : "max-w-xl mx-auto text-center"]}>
+    {!compact && (
+      <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+        Subscribe to my newsletter
+      </h3>
+    )}
+    <p class:list={[
+      "text-gray-600 dark:text-gray-400",
+      compact ? "text-sm mb-3" : "mb-4"
+    ]}>
+      {compact
+        ? "Liked this? Get an email when I publish a new post."
+        : "Get notified when I publish new posts. No spam, unsubscribe anytime."}
+    </p>
+    <form
+      action="https://buttondown.com/api/emails/embed-subscribe/joshuaisaact"
+      method="post"
+      target="popupwindow"
+      onsubmit="window.open('https://buttondown.com/joshuaisaact', 'popupwindow')"
+      class:list={[
+        "flex gap-2",
+        compact ? "flex-col sm:flex-row sm:justify-center" : "flex-col sm:flex-row justify-center"
+      ]}
+    >
+      <input
+        type="email"
+        name="email"
+        placeholder="you@example.com"
+        required
+        aria-label="Email address"
+        class:list={[
+          "px-4 py-2.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-(--theme-5) focus:border-transparent",
+          compact ? "w-full sm:w-64" : "flex-1 sm:max-w-xs"
+        ]}
+      />
+      <button
+        type="submit"
+        class="px-6 py-2.5 text-sm font-medium text-white bg-(--theme-5) rounded-md shadow-sm hover:shadow-md hover:bg-(--theme-5)/90 transition-all duration-200"
+      >
+        Subscribe
+      </button>
+    </form>
+    <p class="mt-3 text-xs text-gray-500 dark:text-gray-500">
+      Powered by <a
+        href="https://buttondown.com/joshuaisaact"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="underline hover:text-(--theme-5)"
+      >Buttondown</a>
+    </p>
+  </div>
+</div>

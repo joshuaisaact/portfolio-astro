@@ -2,6 +2,7 @@
 import BlogCarousel from "../components/BlogCarousel.astro";
 import Contact from "../components/Contact.astro";
 import Navbar from "../components/Navbar.astro";
+import Subscribe from "../components/Subscribe.astro";
 import Projects from "../components/Projects.astro";
 import ProjectCarousel from "../components/ProjectCarousel.astro";
 import Section from "../components/Section.astro";
@@ -79,5 +80,8 @@ const blogPosts = allPosts.sort(
     <Section id="contact" title="Contact">
       <Contact />
     </Section>
+    <footer class="mt-8">
+      <Subscribe />
+    </footer>
   </main>
 </Layout>
