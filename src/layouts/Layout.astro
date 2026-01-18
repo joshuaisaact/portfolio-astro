@@ -1,6 +1,5 @@
 ---
 import "../styles/global.css";
-import "@fontsource-variable/manrope";
 import "@fontsource-variable/fraunces";
 import "@fontsource-variable/ibm-plex-sans";
 import { ClientRouter } from "astro:transitions";
@@ -27,14 +26,6 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="sitemap" href="/sitemap-index.xml" />
 
-    <!-- Preload critical font -->
-    <link
-      rel="preload"
-      href="/fonts/manrope-latin-wght-normal.woff2"
-      as="font"
-      type="font/woff2"
-      crossorigin
-    />
 
     <!-- Favicons -->
     <link rel="icon" type="image/x-icon" href="/favicon.ico" />
@@ -146,7 +137,7 @@ const {
       });
     </script>
   </head>
-  <body class="font-manrope min-h-screen">
+  <body class="font-ibm-plex min-h-screen">
     <slot />
   </body>
 </html>

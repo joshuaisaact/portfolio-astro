@@ -6,7 +6,6 @@
 @theme {
   --color-gray-850: #1a1d29;
 
-  --font-manrope: "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
   --font-fraunces: "Fraunces Variable", Georgia, "Times New Roman", serif;
   --font-ibm-plex: "IBM Plex Sans Variable", ui-sans-serif, system-ui, sans-serif;
 }
@@ -165,11 +164,6 @@ html.dark {
   font-family: var(--font-fraunces);
   font-weight: 600;
   font-variation-settings: "SOFT" 50, "WONK" 1;
-}
-
-/* Prose body uses IBM Plex for more substance */
-.prose {
-  font-family: var(--font-ibm-plex);
 }
 
 /* Vertical rhythm - 8px baseline grid */
