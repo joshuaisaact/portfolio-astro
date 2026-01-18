@@ -1,0 +1,41 @@
+---
+import Layout from "../../layouts/Layout.astro";
+import Navbar from "../../components/Navbar.astro";
+import Projects from "../../components/Projects.astro";
+import Section from "../../components/Section.astro";
+import { getCollection } from "astro:content";
+
+const allProjects = await getCollection("projects");
+
+const applicationProjects = allProjects
+  .filter((p) => !p.data.projectType || p.data.projectType === "application")
+  .sort((a, b) => (a.data.order ?? 999) - (b.data.order ?? 999))
+  .map((p) => p.data);
+
+const utilityProjects = allProjects
+  .filter((p) =>
+    ["tool", "library", "starter"].includes(p.data.projectType || ""),
+  )
+  .sort((a, b) => (a.data.order ?? 999) - (b.data.order ?? 999))
+  .map((p) => p.data);
+
+const pageTitle = "All Projects | Josh Tuddenham";
+const canonicalURL = "https://joshtuddenham.dev/projects";
+---
+
+<Layout
+  title={pageTitle}
+  description="Browse all of my projects, from full-stack applications to developer tools and utilities."
+  canonicalURL={canonicalURL}
+>
+  <Navbar />
+  <main class="mx-auto max-w-7xl px-2 sm:px-4 lg:px-8" role="main">
+    <Section id="dev-tools" title="Developer Tools & Utilities">
+      <Projects projects={utilityProjects} projectType="tool" cardType="minimal" />
+    </Section>
+
+    <Section id="projects" title="Projects">
+      <Projects projects={applicationProjects} projectType="application" />
+    </Section>
+  </main>
+</Layout>
