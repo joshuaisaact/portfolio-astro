@@ -1,0 +1,25 @@
+---
+title: "Elastic Hash Zig"
+slug: "elastic-hash-zig"
+projectType: "library"
+order: 0
+description: "SIMD-accelerated elastic hashing implementation in Zig. 4-8x faster inserts than std.HashMap at 99% load factor."
+links:
+  - type: "github"
+    url: "https://github.com/joshuaisaact/elastic-hash"
+    label: "View on GitHub"
+  - type: "blog"
+    url: "https://www.joshtuddenham.dev/blog/hashmaps"
+    label: "Read the blog post"
+skills:
+  - "Zig"
+features:
+  - "4-8x faster inserts than std.HashMap at 99% load factor"
+  - "1.1-2.6x faster deletes at high load"
+  - "SIMD fingerprint scanning with 16-byte buckets"
+  - "Comptime version 2-7x faster when capacity is known"
+  - "Real tiered elastic hashing as described in the paper"
+  - "Separated memory layout for cache-efficient fingerprint scanning"
+---
+
+A Zig implementation of elastic hashing, optimized for write-heavy workloads at high load factors. Best suited for insert-heavy scenarios at >95% load, delete-heavy workloads, or when capacity is known at compile time.
