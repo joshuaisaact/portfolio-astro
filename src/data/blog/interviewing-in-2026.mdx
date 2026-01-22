@@ -8,8 +8,9 @@ tags: ["interviews", "AI", "hiring", "neurodiversity"]
 import Footnote from '../../components/Footnote.astro';
 import FootnoteList from '../../components/FootnoteList.astro';
 import FootnoteItem from '../../components/FootnoteItem.astro';
+import CodeTabs from '../../components/CodeTabs.astro';
 
-84% of developers now use AI tools. 46% of code is AI-generated. 50% of engineers at Meta and 34% at Microsoft use Claude Code as their primary coding tool.<Footnote id="1" /> Yet we still hire by testing people without AI access.
+84% of developers now use AI tools. 46% of code is AI-generated, and 50% of engineers at Meta and 34% at Microsoft use Claude Code as their primary coding tool.<Footnote id="1" /> Yet we still hire by testing people without AI access.
 
 That's not just unfair to candidates. It's a business risk.
 
@@ -33,63 +34,170 @@ It's not typing speed. It's not memorizing algorithms. It's not even system desi
 
 The skill is judgment. The ability to inject constraints the AI doesn't know. To catch the hallucination before it ships. To know when the machine is wrong.
 
-Stack Overflow's 2025 survey found that 46% of developers don't trust AI output accuracy.<Footnote id="6" /> We know human review is critical. We know the value is in verification, not generation.
+Stack Overflow's 2025 survey found that 46% of developers don't trust AI output accuracy.<Footnote id="5" /> We know human review is critical. We know the value is in verification, not generation.
 
-But our interviews still reward the person who codes fastest. Not the one who catches the bug.
+But our interviews still reward the person who codes fastest and has the best recall under pressure. Not the one who catches the bug, who deeply understands business context, or who can make the best decisions based on the trade-offs engineers need to make, and the constraints put in front of them.
 
-## The playbook
+## An AI-first Framework
 
-Everyone hates interviews. But the conversation usually stops at "LeetCode bad." That's not useful. Here's what I'd actually replace it with.
+Everyone hates interviews. The conversation usually circles around "LeetCode bad." The changes we're seeing now are more transformational than that. This is more than disgruntled engineers not wanting to spend three months grinding things with limited real-world business use. This is about companies flying blind in this new world, assessing yesterday's engineers, not today's. 
 
-**1. The Vague Prompt Test**
+But given it's easy to criticise, and difficult to suggest solutions, here's my good-faith attempt at coming up with a replacement:
 
-Give them a laptop. Full AI access. A deliberately underspecified goal. "Build a reliable webhook service."
+### Vague Prompt Test
 
-The fail: they immediately prompt "Write an Express server with a POST endpoint."
+Give them a laptop. Full AI access. A deliberately underspecified goal.
 
-The pass: they stop. They ask questions. "What's the expected throughput? What's the retry policy? Do we need exactly-once delivery?"
+**Build an endpoint that enriches user data with analytics from Snowflake.**
 
-The signal: you're hiring someone to inject the constraints the AI lacks. If they dive straight into code without clarifying requirements, they'll do the same thing on the job. And AI will happily build the wrong thing very fast.
+A candidate prompts "Write an endpoint that fetches users and calls Snowflake." Claude generates this:
 
-I spent eight years in enterprise sales before switching to engineering. The entire job was asking the right questions before proposing a solution. Discovery before demo. It turns out that skill transfers directly to working with AI. But most technical interviews have no rubric for it.
+```typescript
+const users = await User.find().populate('profile');
 
-**2. The Hallucination Review**
+const analytics = await snowflake.getAnalytics(
+  users.map(u => u._id)
+);
 
-Hand them an AI-generated pull request. The code works. The tests pass. But there's a subtle flaw. Maybe it introduced mutable global state. Maybe there's a race condition that only shows up under load. Maybe the error handling swallows exceptions silently.
+return users.map(u => ({
+  ...u.toObject(),
+  ...analytics[u._id]
+}));
+```
 
-The fail: "LGTM."
+The code works. Tests pass. But what questions did they ask first?
 
-The pass: "Why did we introduce this shared state? What happens if two requests hit this simultaneously?"
+A stronger approach starts with discovery: *"What's the latency on the Snowflake call? What's expected concurrency? How big are these user documents?"*
 
-The signal: can they spot knowledge debt before it ships? A junior engineer rubber-stamps AI output. A senior engineer interrogates it. This is the skill that actually matters now.
+That leads to different code:
 
-**3. Collaborative First-Principles Design**
+```typescript
+const userIds = (await User.find().select('_id').lean())
+  .map(u => u._id);
+
+const analytics = await snowflake.getAnalytics(userIds);
+
+const users = await User.find({ _id: { $in: userIds } })
+  .populate('profile')
+  .lean();
+
+return users.map(u => ({ ...u, ...analytics[u._id] }));
+```
+
+The signal: the first version holds thousands of hydrated ORM objects in memory during a 2-second external call. Under load, those objects survive garbage collection, get promoted to old gen, and trigger stop-the-world pauses. P95 explodes.
+
+The second version holds a lightweight array of IDs in memory, does a 2-second external call using the IDs, then hydrates the full objects. Same result, fraction of the memory pressure.
+
+AI won't catch this, because you need to know the constraints and context to give it. It doesn't know your traffic patterns. It doesn't know what's sitting in memory while it waits for a slow API call. The judgment being assessed is asking the questions that inject those constraints before the code exists.
+
+### Hallucination Review
+
+Hand them an AI-generated pull request. The code works. The tests pass.
+
+<CodeTabs tabs={[
+  {
+    label: "TypeScript",
+    lang: "typescript",
+    code: `// GraphQL resolver
+const attendees = async (event, args, context) => {
+    return Promise.all(
+        event.attendeeIds.map(id => context.dataloaders.user.load(id))
+    );
+};`
+  },
+  {
+    label: "Python",
+    lang: "python",
+    code: `# GraphQL resolver
+async def attendees(event, info):
+    return await asyncio.gather(
+        *[info.context.dataloaders.user.load(id) for id in event.attendee_ids]
+    )`
+  }
+]} />
+
+*"This loads full User documents for every attendee. 500 attendees means 500 full docs in memory simultaneously, all held until the response serializes. Can we add a projection? Do we actually need the full user object here, or just name and avatar?"*
+
+<CodeTabs tabs={[
+  {
+    label: "TypeScript",
+    lang: "typescript",
+    code: `// Webhook handler
+app.post('/webhook', async (req, res) => {
+    await processEvent(req.body);
+    res.sendStatus(200);
+});`
+  },
+  {
+    label: "Python",
+    lang: "python",
+    code: `# Webhook handler
+@app.post('/webhook')
+async def webhook(request: Request):
+    await process_event(await request.json())
+    return Response(status_code=200)`
+  }
+]} />
+
+*"What if processEvent takes 30 seconds? Most webhook providers timeout after 10 seconds and retry. We'd process the same event twice. Should we acknowledge immediately and use a queue? Or at least add idempotency keys?"*
+
+<CodeTabs tabs={[
+  {
+    label: "TypeScript",
+    lang: "typescript",
+    code: `// Order details endpoint
+app.get('/api/orders/:id', authMiddleware, async (req, res) => {
+    const order = await Order.findById(req.params.id);
+    res.json(order);
+});`
+  },
+  {
+    label: "Python",
+    lang: "python",
+    code: `# Order details endpoint
+@app.get('/api/orders/{order_id}')
+@require_auth
+async def get_order(order_id: str, user: User = Depends(get_current_user)):
+    order = await Order.find_by_id(order_id)
+    return order`
+  }
+]} />
+
+*"This checks if a user is logged in. It doesn't check if this user owns the order. I can fetch anyone's order if I guess the ID."*
+
+This one's worth pausing on. AI (still) gets auth wrong constantly. When you prompt "create an endpoint to fetch an order by ID," nothing in that sentence says "users should only see their own orders." The AI builds exactly what you asked for. It doesn't know your access control rules because you didn't tell it, and it can't infer them from context. 
+
+Authentication is visible, there's middleware, patterns to copy. Authorization is business logic that lives in your head. Wouldn't you want to assess this as a business that cares about security? What risks are you taking on *not* explicitly assessing this as part of your interview process?
+
+AI generates plausible code. It often generates code with subtle issues that only surface under load, at scale, or in failure modes. Or in this case, when someone guesses a UUID. Catching these before they ship *is* the job now.
+
+### Collaborative First-Principles Design
 
 No code. Shared whiteboard. But instead of "present your solution while we watch," it's "let's solve this together."
 
-You sketch something. The interviewer pushes back. "You mentioned a queue here. Why? What happens if it dies?" You think. You might change your answer. "Good question. If we need exactly-once delivery, maybe we should use a different approach."
+**Design a registration system for sporting events. Walk me through how a user signs up.**
 
-The fail: defensiveness. Hand-waving. Can't explain choices or won't update them when challenged.
+Candidate sketches: User → API → Database → Confirmation Email.
 
-The pass: reasoning out loud. Responding to pushback. Changing your mind when the evidence warrants it.
+Interviewer pushes: "The email provider has a 30% rate limit. What happens during a flash sale when 10,000 people register in a minute?"
 
-Traditional whiteboard interviews punish people who think iteratively. Who need to talk through ideas. Who update their mental model as they go. But that's not a weakness. That's how good engineering actually works. Nobody designs a system perfectly in their head and then transcribes it. You iterate. You get feedback. You revise.
+*"We probably need a queue between registration and email. Actually, should we even send confirmation synchronously? Maybe we write to the database, return success, and process emails async. What's the business requirement if emails are delayed by 30 seconds?"*
 
-The collaborative version tests the same depth. But it rewards iteration instead of performance.
+The signal: nobody designs a system perfectly in their head. Real engineering is iterative. You propose, get pushback, revise. This tests the same depth as a whiteboard interview but rewards collaboration instead of performance.
 
-**4. The Respectful Take-Home**
+### Paid Trial (Optional)
 
-A defined feature in an existing repo. 4 hour cap. Async. We put this last, when we're 90% sure we want to hire.
+Not every role needs this. But if you want to see someone work in your actual codebase, pay them for it.
 
-The signal: can they navigate an existing codebase? Can they communicate decisions in writing? Do they respect the constraint, or do they spend 12 hours gold-plating?
+A half-day contract. A real ticket from your backlog. Their environment, their hours, their tools. You're not testing whether they can perform under artificial constraints. You're seeing how they actually work.
 
-Take-homes get a bad reputation because companies put them first and don't cap them. That's disrespectful. But a bounded take-home at the end of a process, when both sides are invested, tests what actually matters. And it lets candidates work in conditions that match the job.
+The take-home gets a bad reputation because companies use it as a free filter early in the pipeline. Bounded, paid, and late in the process, it's something else entirely: a mutual trial. They're evaluating you too.
 
 ## The uncomfortable truth
 
 In an AI-native world, soft skills are becoming more important, not less. The ability to clarify requirements. To communicate tradeoffs. To collaborate under uncertainty. These are the things AI can't do.
 
-Yet 68% of HR professionals admit their recruitment frameworks aren't designed to surface these skills.<Footnote id="5" /> We test what's easy to measure. Algorithm recall. Syntax. Speed.
+Yet 68% of HR professionals admit their recruitment frameworks aren't designed to surface these skills.<Footnote id="6" /> We test what's easy to measure. Algorithm recall. Syntax. Speed.
 
 Here's the irony. We know 46% of developers don't trust AI output. We know human judgment is critical. But we've built hiring pipelines that select for the opposite.
 
@@ -108,6 +216,6 @@ If your interview process can't identify that, you're not hiring for the future.
   <FootnoteItem id="2">[Zurich UK 2024](https://neurodiversity.directory/neurodiversity-statistics/).</FootnoteItem>
   <FootnoteItem id="3">[Zurich UK 2024](https://neurodiversity.directory/neurodiversity-statistics/).</FootnoteItem>
   <FootnoteItem id="4">[UK Employment Tribunal Data](https://cognassist.com/neurodiversity-statistics-and-research/) 2022-2024.</FootnoteItem>
-  <FootnoteItem id="5">[City & Guilds Neurodiversity Index 2024](https://cityandguildsfoundation.org/what-we-offer/campaigning/neurodiversity-index/).</FootnoteItem>
-  <FootnoteItem id="6">[Stack Overflow Developer Survey 2025](https://survey.stackoverflow.co/2025/ai).</FootnoteItem>
+  <FootnoteItem id="5">[Stack Overflow Developer Survey 2025](https://survey.stackoverflow.co/2025/ai).</FootnoteItem>
+  <FootnoteItem id="6">[City & Guilds Neurodiversity Index 2024](https://cityandguildsfoundation.org/what-we-offer/campaigning/neurodiversity-index/).</FootnoteItem>
 </FootnoteList>

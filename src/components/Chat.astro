@@ -1,6 +1,6 @@
 ---
 interface Props {
-  role: 'user' | 'assistant' | 'translation';
+  role: 'user' | 'assistant' | 'translation' | 'candidate';
 }
 
 const { role } = Astro.props;
@@ -9,6 +9,7 @@ const roleConfig = {
   user: { class: 'chat-user', label: 'Me' },
   assistant: { class: 'chat-assistant', label: 'Claude' },
   translation: { class: 'chat-translation', label: 'Translated' },
+  candidate: { class: 'chat-candidate', label: 'Candidate' },
 };
 
 const config = roleConfig[role];
@@ -40,6 +41,10 @@ const config = roleConfig[role];
     border-color: rgb(34 197 94);
   }
 
+  .chat-candidate {
+    border-color: rgb(245 158 11);
+  }
+
   .chat-label {
     font-size: 0.8rem;
     font-weight: 600;
@@ -56,6 +61,10 @@ const config = roleConfig[role];
 
   .chat-translation .chat-label {
     color: rgb(34 197 94);
+  }
+
+  .chat-candidate .chat-label {
+    color: rgb(245 158 11);
   }
 
   .chat-content {
