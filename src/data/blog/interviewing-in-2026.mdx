@@ -84,7 +84,7 @@ const users = await User.find({ _id: { $in: userIds } })
 return users.map(u => ({ ...u, ...analytics[u._id] }));
 ```
 
-The signal: the first version holds thousands of hydrated ORM objects in memory during a 2-second external call. Under load, those objects survive garbage collection, get promoted to old gen, and trigger stop-the-world pauses. P95 explodes.
+The first version holds thousands of hydrated ORM objects in memory during a 2-second external call. Under load, those objects survive garbage collection, get promoted to old gen, and trigger stop-the-world pauses. P95 explodes.
 
 The second version holds a lightweight array of IDs in memory, does a 2-second external call using the IDs, then hydrates the full objects. Same result, fraction of the memory pressure.
 
@@ -175,15 +175,19 @@ AI generates plausible code. It often generates code with subtle issues that onl
 
 No code. Shared whiteboard. But instead of "present your solution while we watch," it's "let's solve this together."
 
-**Design a registration system for sporting events. Walk me through how a user signs up.**
+**Users are complaining they get the same push notification multiple times. How do we prevent that?**
 
-Candidate sketches: User → API → Database → Confirmation Email.
+There's no off-the-shelf answer here. No library to install. It's trade-offs all the way down.
 
-Interviewer pushes: "The email provider has a 30% rate limit. What happens during a flash sale when 10,000 people register in a minute?"
+Candidate: *"We could track which notifications we've sent and check before sending."*
 
-*"We probably need a queue between registration and email. Actually, should we even send confirmation synchronously? Maybe we write to the database, return success, and process emails async. What's the business requirement if emails are delayed by 30 seconds?"*
+**Where do you store that? How long do you remember? What counts as the 'same' notification? What happens if the send fails and we retry?**
 
-The signal: nobody designs a system perfectly in their head. Real engineering is iterative. You propose, get pushback, revise. This tests the same depth as a whiteboard interview but rewards collaboration instead of performance.
+*"Maybe we generate an idempotency key per notification. Store it in Redis with a TTL. But what's the right window, an hour? A day? And if Redis goes down, do we fail open and risk duplicates, or fail closed and risk missing notifications entirely?"*
+
+Nobody designs a system perfectly in their head. Real engineering is iterative. You propose, get pushback, revise.
+
+The trade-offs here are genuine. Two senior engineers at the same company might disagree on the right answer. That's what makes it interesting, and that's what makes it useful. You're not testing whether they know the "correct" solution. You're testing how they think when there isn't one.
 
 ### Paid Trial (Optional)
 
@@ -201,15 +205,13 @@ Yet 68% of HR professionals admit their recruitment frameworks aren't designed t
 
 Here's the irony. We know 46% of developers don't trust AI output. We know human judgment is critical. But we've built hiring pipelines that select for the opposite.
 
-## The bottom line
+## What's at stake
 
-The engineers who thrive in 2026 won't be the ones who type fastest. They'll be the ones with the judgment to steer the machine. And the depth to know when it's wrong.
+Your interview process is a filter. The question is what it's filtering for.
 
-If your interview process can't identify that, you're not hiring for the future. You're hiring for 2019.
+If it's optimized for performance under artificial pressure, you're selecting for that. If it can't surface judgment, context, or collaboration, you're not hiring for those either.
 
----
-
-*Sources: Stack Overflow Developer Survey 2025, GitHub/Microsoft 2025, Zurich UK 2024, City & Guilds Neurodiversity Index 2025, UK Employment Tribunal Data*
+In an AI-native world, that's not just a missed opportunity. It's exposure.
 
 <FootnoteList>
   <FootnoteItem id="1">[Blind survey](https://dallasexpress.com/business-markets/survey-even-meta-and-microsoft-engineers-ditch-company-ai-for-claude/) of 1,215 US software professionals, December 2025.</FootnoteItem>
