@@ -1,0 +1,113 @@
+---
+title: "Interviewing in 2026"
+date: "2026-01-22"
+excerpt: "Your interview process is a liability. Here's the fix."
+tags: ["interviews", "AI", "hiring", "neurodiversity"]
+---
+
+import Footnote from '../../components/Footnote.astro';
+import FootnoteList from '../../components/FootnoteList.astro';
+import FootnoteItem from '../../components/FootnoteItem.astro';
+
+84% of developers now use AI tools. 46% of code is AI-generated. 50% of engineers at Meta and 34% at Microsoft use Claude Code as their primary coding tool.<Footnote id="1" /> Yet we still hire by testing people without AI access.
+
+That's not just unfair to candidates. It's a business risk.
+
+You're optimizing your pipeline for people who might actively resist AI adoption. Or worse, who lack the judgment to use it well. And you may be selecting against the engineers who've most effectively integrated AI into their workflow. Exactly the people you want.
+
+## The compliance risk nobody talks about
+
+I have ADHD. I can tell you exactly what happens in a high pressure interview. My brain jumps ahead. I see the whole system at once but struggle to narrate it linearly. I know the answer before I can explain how I got there. Under time pressure, that gap between knowing and explaining gets worse.
+
+None of that means I can't build the system. It means I can't perform building the system in a way that maps to neurotypical expectations of what "thinking out loud" should look like.
+
+I'm not alone. 76% of neurodivergent job seekers say traditional recruitment methods put them at a disadvantage.<Footnote id="2" /> Timed assessments. Panel interviews. Whiteboard performances. 28% report being rejected for subjective reasons like "communication style" or "team fit."<Footnote id="3" /> Employment tribunal awards citing neurodivergent conditions are up 133% year on year.<Footnote id="4" />
+
+Timed live coding doesn't test ability to ship. It tests ability to mask. And increasingly, that's a liability for companies, not just candidates.
+
+## What we're actually selecting for
+
+Here's the uncomfortable question. If 46% of code is AI-generated, what's the actual skill we need?
+
+It's not typing speed. It's not memorizing algorithms. It's not even system design pattern recognition, though that helps.
+
+The skill is judgment. The ability to inject constraints the AI doesn't know. To catch the hallucination before it ships. To know when the machine is wrong.
+
+Stack Overflow's 2025 survey found that 46% of developers don't trust AI output accuracy.<Footnote id="6" /> We know human review is critical. We know the value is in verification, not generation.
+
+But our interviews still reward the person who codes fastest. Not the one who catches the bug.
+
+## The playbook
+
+Everyone hates interviews. But the conversation usually stops at "LeetCode bad." That's not useful. Here's what I'd actually replace it with.
+
+**1. The Vague Prompt Test**
+
+Give them a laptop. Full AI access. A deliberately underspecified goal. "Build a reliable webhook service."
+
+The fail: they immediately prompt "Write an Express server with a POST endpoint."
+
+The pass: they stop. They ask questions. "What's the expected throughput? What's the retry policy? Do we need exactly-once delivery?"
+
+The signal: you're hiring someone to inject the constraints the AI lacks. If they dive straight into code without clarifying requirements, they'll do the same thing on the job. And AI will happily build the wrong thing very fast.
+
+I spent eight years in enterprise sales before switching to engineering. The entire job was asking the right questions before proposing a solution. Discovery before demo. It turns out that skill transfers directly to working with AI. But most technical interviews have no rubric for it.
+
+**2. The Hallucination Review**
+
+Hand them an AI-generated pull request. The code works. The tests pass. But there's a subtle flaw. Maybe it introduced mutable global state. Maybe there's a race condition that only shows up under load. Maybe the error handling swallows exceptions silently.
+
+The fail: "LGTM."
+
+The pass: "Why did we introduce this shared state? What happens if two requests hit this simultaneously?"
+
+The signal: can they spot knowledge debt before it ships? A junior engineer rubber-stamps AI output. A senior engineer interrogates it. This is the skill that actually matters now.
+
+**3. Collaborative First-Principles Design**
+
+No code. Shared whiteboard. But instead of "present your solution while we watch," it's "let's solve this together."
+
+You sketch something. The interviewer pushes back. "You mentioned a queue here. Why? What happens if it dies?" You think. You might change your answer. "Good question. If we need exactly-once delivery, maybe we should use a different approach."
+
+The fail: defensiveness. Hand-waving. Can't explain choices or won't update them when challenged.
+
+The pass: reasoning out loud. Responding to pushback. Changing your mind when the evidence warrants it.
+
+Traditional whiteboard interviews punish people who think iteratively. Who need to talk through ideas. Who update their mental model as they go. But that's not a weakness. That's how good engineering actually works. Nobody designs a system perfectly in their head and then transcribes it. You iterate. You get feedback. You revise.
+
+The collaborative version tests the same depth. But it rewards iteration instead of performance.
+
+**4. The Respectful Take-Home**
+
+A defined feature in an existing repo. 4 hour cap. Async. We put this last, when we're 90% sure we want to hire.
+
+The signal: can they navigate an existing codebase? Can they communicate decisions in writing? Do they respect the constraint, or do they spend 12 hours gold-plating?
+
+Take-homes get a bad reputation because companies put them first and don't cap them. That's disrespectful. But a bounded take-home at the end of a process, when both sides are invested, tests what actually matters. And it lets candidates work in conditions that match the job.
+
+## The uncomfortable truth
+
+In an AI-native world, soft skills are becoming more important, not less. The ability to clarify requirements. To communicate tradeoffs. To collaborate under uncertainty. These are the things AI can't do.
+
+Yet 68% of HR professionals admit their recruitment frameworks aren't designed to surface these skills.<Footnote id="5" /> We test what's easy to measure. Algorithm recall. Syntax. Speed.
+
+Here's the irony. We know 46% of developers don't trust AI output. We know human judgment is critical. But we've built hiring pipelines that select for the opposite.
+
+## The bottom line
+
+The engineers who thrive in 2026 won't be the ones who type fastest. They'll be the ones with the judgment to steer the machine. And the depth to know when it's wrong.
+
+If your interview process can't identify that, you're not hiring for the future. You're hiring for 2019.
+
+---
+
+*Sources: Stack Overflow Developer Survey 2025, GitHub/Microsoft 2025, Zurich UK 2024, City & Guilds Neurodiversity Index 2025, UK Employment Tribunal Data*
+
+<FootnoteList>
+  <FootnoteItem id="1">[Blind survey](https://dallasexpress.com/business-markets/survey-even-meta-and-microsoft-engineers-ditch-company-ai-for-claude/) of 1,215 US software professionals, December 2025.</FootnoteItem>
+  <FootnoteItem id="2">[Zurich UK 2024](https://neurodiversity.directory/neurodiversity-statistics/).</FootnoteItem>
+  <FootnoteItem id="3">[Zurich UK 2024](https://neurodiversity.directory/neurodiversity-statistics/).</FootnoteItem>
+  <FootnoteItem id="4">[UK Employment Tribunal Data](https://cognassist.com/neurodiversity-statistics-and-research/) 2022-2024.</FootnoteItem>
+  <FootnoteItem id="5">[City & Guilds Neurodiversity Index 2024](https://cityandguildsfoundation.org/what-we-offer/campaigning/neurodiversity-index/).</FootnoteItem>
+  <FootnoteItem id="6">[Stack Overflow Developer Survey 2025](https://survey.stackoverflow.co/2025/ai).</FootnoteItem>
+</FootnoteList>
