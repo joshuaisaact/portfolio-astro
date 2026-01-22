@@ -41,9 +41,9 @@ But our interviews still reward the person who codes fastest and has the best re
 
 ## An AI-first Framework
 
-Everyone hates interviews. The conversation usually circles around "LeetCode bad." The changes we're seeing now are more transformational than that. This is more than disgruntled engineers not wanting to spend three months grinding things with limited real-world business use. This is about companies flying blind in this new world, assessing yesterday's engineers, not today's. 
+Engineers have always complained interviews reward the wrong things. But this feels like something else. The dying gasps of a system built for a world that no longer exists. 
 
-But given it's easy to criticise, and difficult to suggest solutions, here's my good-faith attempt at coming up with a replacement:
+But given it's easy to criticise, and difficult to suggest solutions, here's my good-faith attempt at coming up with a replacement.
 
 ### Vague Prompt Test
 
@@ -89,7 +89,7 @@ The first version holds thousands of hydrated ORM objects in memory during a 2-s
 
 The second version holds a lightweight array of IDs in memory, does a 2-second external call using the IDs, then hydrates the full objects. Same result, fraction of the memory pressure.
 
-AI won't catch this, because you need to know the constraints and context to give it. It doesn't know your traffic patterns. It doesn't know what's sitting in memory while it waits for a slow API call. The judgment being assessed is asking the questions that inject those constraints before the code exists.
+AI won't catch this, because you need to know the constraints and context to give it. It doesn't know your traffic patterns. It doesn't know what's sitting in memory while it waits for a slow API call. You're assessing whether the candidate asks the questions that surface constraints before prompting AI.
 
 ### Hallucination Review
 
