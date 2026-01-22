@@ -1,0 +1,224 @@
+---
+title: "Your Interview Process is a Liability"
+date: "2026-01-23"
+featured_image: "./me.png"
+excerpt: "Testing engineers without the tools they use every day is a business liability. It actively selects against the future. Here is the fix."
+tags: ["interviews", "AI"]
+---
+
+import Footnote from '../../components/Footnote.astro';
+import FootnoteList from '../../components/FootnoteList.astro';
+import FootnoteItem from '../../components/FootnoteItem.astro';
+import CodeTabs from '../../components/CodeTabs.astro';
+
+84% of developers now use AI tools. 46% of code is AI-generated, and 50% of engineers at Meta and 34% at Microsoft use Claude Code as their primary coding tool.<Footnote id="1" /> Yet we still hire by testing people without AI access.
+
+That's not just unfair to candidates. It's a business risk.
+
+You're optimizing your pipeline for people who might actively resist AI adoption. Or worse, who lack the judgment to use it well. And you may be selecting against the engineers who've most effectively integrated AI into their workflow. Exactly the people you want.
+
+## The compliance risk nobody talks about
+
+I have ADHD. I can tell you exactly what happens in a high pressure interview. My brain jumps ahead. I see the whole system at once but struggle to narrate it linearly. I know the answer before I can explain how I got there. Under time pressure, that gap between knowing and explaining gets worse.
+
+None of that means I can't build the system. It means I can't perform building the system in a way that maps to neurotypical expectations of what "thinking out loud" should look like.
+
+I'm not alone. 76% of neurodivergent job seekers say traditional recruitment methods put them at a disadvantage.<Footnote id="2" /> Timed assessments. Panel interviews. Whiteboard performances. 28% report being rejected for subjective reasons like "communication style" or "team fit."<Footnote id="3" /> Employment tribunal awards citing neurodivergent conditions are up 133% year on year.<Footnote id="4" />
+
+Timed live coding doesn't test ability to ship. It tests ability to mask. And increasingly, that's a liability for companies, not just candidates.
+
+## What we're actually selecting for
+
+Here's the uncomfortable question. If 46% of code is AI-generated, what's the actual skill we need?
+
+It's not typing speed. It's not memorizing algorithms. It's not even system design pattern recognition, though that helps.
+
+The skill is judgment. The ability to inject constraints the AI doesn't know. To catch the hallucination before it ships. To know when the machine is wrong.
+
+Stack Overflow's 2025 survey found that 46% of developers don't trust AI output accuracy.<Footnote id="5" /> We know human review is critical. We know the value is in verification, not generation.
+
+But our interviews still reward the person who codes fastest and has the best recall under pressure. Not the one who catches the bug, who deeply understands business context, or who can make the best decisions based on the trade-offs engineers need to make, and the constraints put in front of them.
+
+## An AI-first Framework
+
+Everyone hates interviews. The conversation usually circles around "LeetCode bad." The changes we're seeing now are more transformational than that. This is more than disgruntled engineers not wanting to spend three months grinding things with limited real-world business use. This is about companies flying blind in this new world, assessing yesterday's engineers, not today's. 
+
+But given it's easy to criticise, and difficult to suggest solutions, here's my good-faith attempt at coming up with a replacement:
+
+### Vague Prompt Test
+
+Give them a laptop. Full AI access. A deliberately underspecified goal.
+
+**Build an endpoint that enriches user data with analytics from Snowflake.**
+
+A candidate prompts "Write an endpoint that fetches users and calls Snowflake." Claude generates this:
+
+```typescript
+const users = await User.find().populate('profile');
+
+const analytics = await snowflake.getAnalytics(
+  users.map(u => u._id)
+);
+
+return users.map(u => ({
+  ...u.toObject(),
+  ...analytics[u._id]
+}));
+```
+
+The code works. Tests pass. But what questions did they ask first?
+
+A stronger approach starts with discovery: *"What's the latency on the Snowflake call? What's expected concurrency? How big are these user documents?"*
+
+That leads to different code:
+
+```typescript
+const userIds = (await User.find().select('_id').lean())
+  .map(u => u._id);
+
+const analytics = await snowflake.getAnalytics(userIds);
+
+const users = await User.find({ _id: { $in: userIds } })
+  .populate('profile')
+  .lean();
+
+return users.map(u => ({ ...u, ...analytics[u._id] }));
+```
+
+The first version holds thousands of hydrated ORM objects in memory during a 2-second external call. Under load, those objects survive garbage collection, get promoted to old gen, and trigger stop-the-world pauses. P95 explodes.
+
+The second version holds a lightweight array of IDs in memory, does a 2-second external call using the IDs, then hydrates the full objects. Same result, fraction of the memory pressure.
+
+AI won't catch this, because you need to know the constraints and context to give it. It doesn't know your traffic patterns. It doesn't know what's sitting in memory while it waits for a slow API call. The judgment being assessed is asking the questions that inject those constraints before the code exists.
+
+### Hallucination Review
+
+Hand them an AI-generated pull request. The code works. The tests pass.
+
+<CodeTabs tabs={[
+  {
+    label: "TypeScript",
+    lang: "typescript",
+    code: `// GraphQL resolver
+const attendees = async (event, args, context) => {
+    return Promise.all(
+        event.attendeeIds.map(id => context.dataloaders.user.load(id))
+    );
+};`
+  },
+  {
+    label: "Python",
+    lang: "python",
+    code: `# GraphQL resolver
+async def attendees(event, info):
+    return await asyncio.gather(
+        *[info.context.dataloaders.user.load(id) for id in event.attendee_ids]
+    )`
+  }
+]} />
+
+*"This loads full User documents for every attendee. 500 attendees means 500 full docs in memory simultaneously, all held until the response serializes. Can we add a projection? Do we actually need the full user object here, or just name and avatar?"*
+
+<CodeTabs tabs={[
+  {
+    label: "TypeScript",
+    lang: "typescript",
+    code: `// Webhook handler
+app.post('/webhook', async (req, res) => {
+    await processEvent(req.body);
+    res.sendStatus(200);
+});`
+  },
+  {
+    label: "Python",
+    lang: "python",
+    code: `# Webhook handler
+@app.post('/webhook')
+async def webhook(request: Request):
+    await process_event(await request.json())
+    return Response(status_code=200)`
+  }
+]} />
+
+*"What if processEvent takes 30 seconds? Most webhook providers timeout after 10 seconds and retry. We'd process the same event twice. Should we acknowledge immediately and use a queue? Or at least add idempotency keys?"*
+
+<CodeTabs tabs={[
+  {
+    label: "TypeScript",
+    lang: "typescript",
+    code: `// Order details endpoint
+app.get('/api/orders/:id', authMiddleware, async (req, res) => {
+    const order = await Order.findById(req.params.id);
+    res.json(order);
+});`
+  },
+  {
+    label: "Python",
+    lang: "python",
+    code: `# Order details endpoint
+@app.get('/api/orders/{order_id}')
+@require_auth
+async def get_order(order_id: str, user: User = Depends(get_current_user)):
+    order = await Order.find_by_id(order_id)
+    return order`
+  }
+]} />
+
+*"This checks if a user is logged in. It doesn't check if this user owns the order. I can fetch anyone's order if I guess the ID."*
+
+This one's worth pausing on. AI (still) gets auth wrong constantly. When you prompt "create an endpoint to fetch an order by ID," nothing in that sentence says "users should only see their own orders." The AI builds exactly what you asked for. It doesn't know your access control rules because you didn't tell it, and it can't infer them from context. 
+
+Authentication is visible, there's middleware, patterns to copy. Authorization is business logic that lives in your head. Wouldn't you want to assess this as a business that cares about security? What risks are you taking on *not* explicitly assessing this as part of your interview process?
+
+AI generates plausible code. It often generates code with subtle issues that only surface under load, at scale, or in failure modes. Or in this case, when someone guesses a UUID. Catching these before they ship *is* the job now.
+
+### Collaborative First-Principles Design
+
+No code. Shared whiteboard. But instead of "present your solution while we watch," it's "let's solve this together."
+
+**Users are complaining they get the same push notification multiple times. How do we prevent that?**
+
+There's no off-the-shelf answer here. No library to install. It's trade-offs all the way down.
+
+Candidate: *"We could track which notifications we've sent and check before sending."*
+
+**Where do you store that? How long do you remember? What counts as the 'same' notification? What happens if the send fails and we retry?**
+
+*"Maybe we generate an idempotency key per notification. Store it in Redis with a TTL. But what's the right window, an hour? A day? And if Redis goes down, do we fail open and risk duplicates, or fail closed and risk missing notifications entirely?"*
+
+Nobody designs a system perfectly in their head. Real engineering is iterative. You propose, get pushback, revise.
+
+The trade-offs here are genuine. Two senior engineers at the same company might disagree on the right answer. That's what makes it interesting, and that's what makes it useful. You're not testing whether they know the "correct" solution. You're testing how they think when there isn't one.
+
+### Paid Trial (Optional)
+
+Not every role needs this. But if you want to see someone work in your actual codebase, pay them for it.
+
+A half-day contract. A real ticket from your backlog. Their environment, their hours, their tools. You're not testing whether they can perform under artificial constraints. You're seeing how they actually work.
+
+The take-home gets a bad reputation because companies use it as a free filter early in the pipeline. Bounded, paid, and late in the process, it's something else entirely: a mutual trial. They're evaluating you too.
+
+## The uncomfortable truth
+
+In an AI-native world, soft skills are becoming more important, not less. The ability to clarify requirements. To communicate tradeoffs. To collaborate under uncertainty. These are the things AI can't do.
+
+Yet 68% of HR professionals admit their recruitment frameworks aren't designed to surface these skills.<Footnote id="6" /> We test what's easy to measure. Algorithm recall. Syntax. Speed.
+
+Here's the irony. We know 46% of developers don't trust AI output. We know human judgment is critical. But we've built hiring pipelines that select for the opposite.
+
+## What's at stake
+
+Your interview process is a filter. The question is what it's filtering for.
+
+If it's optimized for performance under artificial pressure, you're selecting for that. If it can't surface judgment, context, or collaboration, you're not hiring for those either.
+
+In an AI-native world, that's not just a missed opportunity. It's exposure.
+
+<FootnoteList>
+  <FootnoteItem id="1">[Blind survey](https://dallasexpress.com/business-markets/survey-even-meta-and-microsoft-engineers-ditch-company-ai-for-claude/) of 1,215 US software professionals, December 2025.</FootnoteItem>
+  <FootnoteItem id="2">[Zurich UK 2024](https://neurodiversity.directory/neurodiversity-statistics/).</FootnoteItem>
+  <FootnoteItem id="3">[Zurich UK 2024](https://neurodiversity.directory/neurodiversity-statistics/).</FootnoteItem>
+  <FootnoteItem id="4">[UK Employment Tribunal Data](https://cognassist.com/neurodiversity-statistics-and-research/) 2022-2024.</FootnoteItem>
+  <FootnoteItem id="5">[Stack Overflow Developer Survey 2025](https://survey.stackoverflow.co/2025/ai).</FootnoteItem>
+  <FootnoteItem id="6">[City & Guilds Neurodiversity Index 2024](https://cityandguildsfoundation.org/what-we-offer/campaigning/neurodiversity-index/).</FootnoteItem>
+</FootnoteList>
