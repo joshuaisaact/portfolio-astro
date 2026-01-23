@@ -6,10 +6,12 @@ excerpt: "Testing engineers without the tools they use every day is a business l
 tags: ["interviews", "AI"]
 ---
 
+import Figure from '../../components/Figure.astro';
 import Footnote from '../../components/Footnote.astro';
 import FootnoteList from '../../components/FootnoteList.astro';
 import FootnoteItem from '../../components/FootnoteItem.astro';
 import CodeTabs from '../../components/CodeTabs.astro';
+import sellPen from './sellmepen.jpg';
 
 84% of developers now use AI tools. 46% of code is AI-generated, and 50% of engineers at Meta and 34% at Microsoft use Claude Code as their primary coding tool.<Footnote id="1" /> Yet we still hire by testing people without AI access.
 
@@ -23,7 +25,7 @@ I have ADHD. I can tell you exactly what happens in a high pressure interview. M
 
 None of that means I can't build the system. It means I can't perform building the system in a way that maps to neurotypical expectations of what "thinking out loud" should look like.
 
-I'm not alone. 76% of neurodivergent job seekers say traditional recruitment methods put them at a disadvantage.<Footnote id="2" /> Timed assessments. Panel interviews. Whiteboard performances. 28% report being rejected for subjective reasons like "communication style" or "team fit."<Footnote id="3" /> Employment tribunal awards citing neurodivergent conditions are up 133% year on year.<Footnote id="4" />
+I'm not alone. 76% of neurodivergent job seekers say traditional recruitment methods put them at a disadvantage.<Footnote id="2" /> Timed assessments. Panel interviews. Whiteboard performances. 65% fear discrimination from management if they disclose their condition.<Footnote id="3" /> Employment tribunal awards citing neurodivergent conditions are up 133% year on year.<Footnote id="4" />
 
 Timed live coding doesn't test ability to ship. It tests ability to mask. And increasingly, that's a liability for companies, not just candidates.
 
@@ -38,6 +40,16 @@ The skill is judgment. The ability to inject constraints the AI doesn't know. To
 Stack Overflow's 2025 survey found that 46% of developers don't trust AI output accuracy.<Footnote id="5" /> We know human review is critical. We know the value is in verification, not generation.
 
 But our interviews still reward the person who codes fastest and has the best recall under pressure. Not the one who catches the bug, who deeply understands business context, or who can make the best decisions based on the trade-offs engineers need to make, and the constraints put in front of them.
+
+I've run sales hiring processes and built sales teams. If someone proposed "sell me this pen" as an interview round, they'd get laughed out of the room. We figured out decades ago that theatrical stunts don't predict performance.
+
+<Figure
+  src={sellPen}
+  alt="Leonardo DiCaprio selling a pen"
+  title="Now invert a binary tree"
+/>
+
+Yet engineering interviews are full of the equivalent. Timed algorithm puzzles, whiteboard performances, pressure tests that reward recall over reasoning. Google banned their famous brainteaser questions ("how many golf balls fit in an airplane?") in 2013 after their head of HR found they "don't predict anything" and "serve primarily to make the interviewer feel smart."<Footnote id="7" /> That was over a decade ago.
 
 ## An AI-first Framework
 
@@ -170,7 +182,7 @@ This one's worth pausing on. AI (still) gets auth wrong constantly. When you pro
 
 Authentication is visible, there's middleware, patterns to copy. Authorization is business logic that lives in your head. Wouldn't you want to assess this as a business that cares about security? What risks are you taking on *not* explicitly assessing this as part of your interview process?
 
-AI generates plausible code. It often generates code with subtle issues that only surface under load, at scale, or in failure modes. Or in this case, when someone guesses a UUID. Catching these before they ship *is* the job now.
+AI generates plausible code. It often generates code with subtle issues that only surface under load, at scale, or in failure modes. Or in this case, when someone guesses an id. Catching these before they ship *is* the job now.
 
 ### Collaborative First-Principles Design
 
@@ -206,19 +218,31 @@ Yet 68% of HR professionals admit their recruitment frameworks aren't designed t
 
 Here's the irony. We know 46% of developers don't trust AI output. We know human judgment is critical. But we've built hiring pipelines that select for the opposite.
 
+## Some companies have figured this out
+
+Canva ($3B ARR, 220 million users) now **requires** that candidates use AI tools during technical interviews. They retired LeetCode-style questions entirely. Instead, they give candidates ambiguous, realistic problems and evaluate whether they can break down requirements, catch issues in AI-generated code, and make sound technical decisions.<Footnote id="8" />
+
+Their finding? "Candidates with minimal AI experience often struggled. Not because they couldn't code, but because they lacked the judgment to guide AI effectively."
+
+The framework exists. Some companies are already using it.
+
 ## What's at stake
 
 Your interview process is a filter. The question is what it's filtering for.
 
 If it's optimized for performance under artificial pressure, you're selecting for that. If it can't surface judgment, context, or collaboration, you're not hiring for those either.
 
-In an AI-native world, that's not just a missed opportunity. It's exposure.
+In an AI-native world, that's not just a missed opportunity. It's a liability you're actively building into your team. 
+
+You're not hiring for 2026. You're hiring for 2019 - and calling it rigor.
 
 <FootnoteList>
   <FootnoteItem id="1">[Blind survey](https://dallasexpress.com/business-markets/survey-even-meta-and-microsoft-engineers-ditch-company-ai-for-claude/) of 1,215 US software professionals, December 2025.</FootnoteItem>
   <FootnoteItem id="2">[Zurich UK 2024](https://neurodiversity.directory/neurodiversity-statistics/).</FootnoteItem>
-  <FootnoteItem id="3">[Zurich UK 2024](https://neurodiversity.directory/neurodiversity-statistics/).</FootnoteItem>
+  <FootnoteItem id="3">[Birkbeck University / Neurodiversity in Business 2023](https://www.bbk.ac.uk/news/neurodivergent-employees-fear-discrimination-despite-uk-businesses-promoting-neurodiverse-workplaces).</FootnoteItem>
   <FootnoteItem id="4">[UK Employment Tribunal Data](https://cognassist.com/neurodiversity-statistics-and-research/) 2022-2024.</FootnoteItem>
   <FootnoteItem id="5">[Stack Overflow Developer Survey 2025](https://survey.stackoverflow.co/2025/ai).</FootnoteItem>
   <FootnoteItem id="6">[City & Guilds Neurodiversity Index 2024](https://cityandguildsfoundation.org/what-we-offer/campaigning/neurodiversity-index/).</FootnoteItem>
+  <FootnoteItem id="7">[Laszlo Bock, SVP People Operations at Google, New York Times 2013](https://www.nytimes.com/2013/06/20/business/in-head-hunting-big-data-may-not-be-such-a-big-deal.html).</FootnoteItem>
+  <FootnoteItem id="8">[Canva](https://www.canva.dev/blog/engineering/yes-you-can-use-ai-in-our-interviews/).</FootnoteItem>
 </FootnoteList>
