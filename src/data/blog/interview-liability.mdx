@@ -55,7 +55,7 @@ In my first engineering interview back in 2024, I was asked to recursively flatt
   title="Now invert a binary tree"
 />
 
-Yet engineering interviews are full of the equivalent. Timed algorithm puzzles, whiteboard performances, pressure tests that reward recall over reasoning. Google banned their famous brainteaser questions ("how many golf balls fit in an airplane?") in 2013 after their head of HR found they "don't predict anything" and "serve primarily to make the interviewer feel smart."<Footnote id="7" /> Then they doubled down on LeetCode. The industry recognized the problem and made it worse.
+Yet engineering interviews are full of the equivalent. Timed algorithm puzzles, whiteboard performances, pressure tests that reward recall over reasoning. Google banned their famous brainteaser questions ("how many golf balls fit in an airplane?") in 2013 after their head of HR found they "don't predict anything" and "serve primarily to make the interviewer feel smart."<Footnote id="6" /> Then they doubled down on LeetCode. The industry recognized the problem and made it worse.
 
 ## An AI-first Framework
 
@@ -65,7 +65,15 @@ I understand why LeetCode persists. It scales. Thousands of candidates, consiste
 
 It's theater.
 
+The research is damning. A North Carolina State/Microsoft study found that candidates in traditional whiteboard interviews performed half as well as those given the same problem privately.<Footnote id="7" /> The format tests anxiety, not competence. All women in the public condition failed; all women in the private condition passed—same problem, same skill level, different environment.<Footnote id="8" /> If you've ever wondered why engineering struggles to retain women, consider that we've built a filter optimised to reject them. A 2025 study of 131 software engineering candidates found zero correlation between weekly LeetCode practice hours and interview readiness—while communication practice and peer mock interviews showed twice the effect.<Footnote id="9" /> Isolated algorithmic assessments have validity coefficients of 0.31–0.42, explaining just 10–18% of job performance. Combine them with work samples and structured interviews? That jumps to 0.63–0.65.<Footnote id="10" /> We know how to do this better. We just don't.
+
+If this is so obvious, why hasn't it changed? A few reasons. First, survivor bias: people who passed LeetCode interviews design LeetCode interviews. The system selects for its own perpetuation. Second, invisible false negatives: when you reject a good candidate, you never find out. When you hire a bad one, everyone knows. So companies optimize for avoiding visible mistakes, not for finding the best people. Third, legal comfort. "We gave everyone the same test" is easier to defend than "we made a judgment call about their judgment." And finally, nobody got fired for copying Google, even when Google's process makes no sense for a 50-person startup.
+
+Understanding why the system persists doesn't make it right. But it does explain why change has to be deliberate.
+
 Given it's easy to criticise, and difficult to suggest solutions, here's my good-faith attempt at coming up with a replacement.
+
+A note on scope - this framework assumes you're hiring for roles where judgment matters more than raw implementation speed. That is typically mid-level and above. For junior roles, you probably do need to see someone write code. But even there, "build this small thing with full tool access" beats "implement this algorithm without Google." The question isn't whether to assess technical ability. It's whether artificial constraints add signal or just noise.
 
 ### Judgment Under Ambiguity
 
@@ -238,13 +246,13 @@ The take-home gets a bad reputation because companies use it as a free filter ea
 
 In an AI-native world, soft skills are becoming more important, not less. The ability to clarify requirements. To communicate tradeoffs. To collaborate under uncertainty. These are the things AI can't do.
 
-Yet 68% of HR professionals admit their recruitment frameworks aren't designed to surface these skills.<Footnote id="6" /> We test what's easy to measure. Algorithm recall. Syntax. Speed.
+Yet 68% of HR professionals admit their recruitment frameworks aren't designed to surface these skills.<Footnote id="11" /> We test what's easy to measure. Algorithm recall. Syntax. Speed.
 
 Here's the irony. We know 46% of developers don't trust AI output. We know human judgment is critical. But we've built hiring pipelines that select for the opposite.
 
 ## Some companies have figured this out
 
-Canva ($3B ARR, 220 million users) now **requires** that candidates use AI tools during technical interviews. They retired LeetCode-style questions entirely. Instead, they give candidates ambiguous, realistic problems and evaluate whether they can break down requirements, catch issues in AI-generated code, and make sound technical decisions.<Footnote id="8" />
+Canva ($3B ARR, 220 million users) now **requires** that candidates use AI tools during technical interviews. They retired LeetCode-style questions entirely. Instead, they give candidates ambiguous, realistic problems and evaluate whether they can break down requirements, catch issues in AI-generated code, and make sound technical decisions.<Footnote id="12" />
 
 Their finding? 
 
@@ -264,7 +272,7 @@ In an AI-native world, that's not just a missed opportunity. It's a liability yo
 
 You're not hiring for 2026. You're hiring for 2019 - and calling it rigor.
 
-Pick one of these. Try it in your next loop. See what you learn.
+Pick one of these. Try it in your next loop. See what you learn.<Footnote id="13" />
 
 <FootnoteList>
   <FootnoteItem id="1">[Blind survey](https://dallasexpress.com/business-markets/survey-even-meta-and-microsoft-engineers-ditch-company-ai-for-claude/) of 1,215 US software professionals, December 2025.</FootnoteItem>
@@ -272,7 +280,12 @@ Pick one of these. Try it in your next loop. See what you learn.
   <FootnoteItem id="3">[Birkbeck University / Neurodiversity in Business 2023](https://www.bbk.ac.uk/news/neurodivergent-employees-fear-discrimination-despite-uk-businesses-promoting-neurodiverse-workplaces).</FootnoteItem>
   <FootnoteItem id="4">[UK Employment Tribunal Data](https://cognassist.com/neurodiversity-statistics-and-research/) 2022-2024.</FootnoteItem>
   <FootnoteItem id="5">[Stack Overflow Developer Survey 2025](https://survey.stackoverflow.co/2025/ai).</FootnoteItem>
-  <FootnoteItem id="6">[City & Guilds Neurodiversity Index 2024](https://cityandguildsfoundation.org/what-we-offer/campaigning/neurodiversity-index/).</FootnoteItem>
-  <FootnoteItem id="7">[Laszlo Bock, SVP People Operations at Google, New York Times 2013](https://www.nytimes.com/2013/06/20/business/in-head-hunting-big-data-may-not-be-such-a-big-deal.html).</FootnoteItem>
-  <FootnoteItem id="8">[Canva](https://www.canva.dev/blog/engineering/yes-you-can-use-ai-in-our-interviews/).</FootnoteItem>
+  <FootnoteItem id="6">[Laszlo Bock, SVP People Operations at Google, New York Times 2013](https://www.nytimes.com/2013/06/20/business/in-head-hunting-big-data-may-not-be-such-a-big-deal.html).</FootnoteItem>
+  <FootnoteItem id="7">[NC State/Microsoft 2020](https://news.ncsu.edu/2020/07/tech-job-interviews-anxiety/). "Does Stress Impact Technical Interview Performance?"</FootnoteItem>
+  <FootnoteItem id="8">Same study. The researchers note this likely reflects performance anxiety patterns, not ability differences—the private condition proved the point.</FootnoteItem>
+  <FootnoteItem id="9">[Bell et al. 2025](https://arxiv.org/abs/2507.02068). Study of 131 candidates (professionals averaging 9 years experience, plus students). Communication practice showed approximately 2× the effect on perceived readiness.</FootnoteItem>
+  <FootnoteItem id="10">[Sackett et al. 2021](https://www.criteriacorp.com/blog/updates-employee-selection-science), revising Schmidt & Hunter's landmark 1998 meta-analysis. Multimethod assessment more than doubles explained variance in job performance.</FootnoteItem>
+  <FootnoteItem id="11">[City & Guilds Neurodiversity Index 2024](https://cityandguildsfoundation.org/what-we-offer/campaigning/neurodiversity-index/).</FootnoteItem>
+  <FootnoteItem id="12">[Canva](https://www.canva.dev/blog/engineering/yes-you-can-use-ai-in-our-interviews/).</FootnoteItem>
+  <FootnoteItem id="13">A caveat: every interview format gets gamed eventually. If "judgment under ambiguity" becomes standard, candidates will learn to performatively ask "what's our runway?" the same way they currently grind LeetCode. The advantage of these formats isn't that they're ungameable - it's that the performance is closer to the job. Someone who's practiced asking good clarifying questions has... practiced asking good clarifying questions. That's not a bug.</FootnoteItem>
 </FootnoteList>
