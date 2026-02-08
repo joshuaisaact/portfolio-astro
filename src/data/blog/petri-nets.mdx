@@ -24,13 +24,9 @@ if (financeApproved && legalApproved) {
 
 Two booleans. Simple. Ships tomorrow.
 
-Six months later, contracts over £50k also need CEO approval. 
+Six months later, contracts over £50k also need CEO approval, so you add a third boolean. 
 
-You add a third boolean. 
-
-Someone asks: "What happens if finance approves but legal doesn't?"
-
-Someone discovers a contract executed without CEO approval, because a code path didn't check the new flag.
+Someone asks: "What happens if finance approves but legal doesn't?" Someone discovers a contract executed without CEO approval, because a code path didn't check the new flag.
 
 You're now debugging a system with 8 possible states.
 
@@ -38,7 +34,7 @@ Add two more booleans (`!cancelled`, `!expired`) and it's 32 possible states.
 
 Most of them are invalid. Nothing in the code tells you which ones are reachable.
 
-This problem was solved in 1962.
+What if I told you that this problem was solved in 1962?
 
 It's called a [Petri net](https://en.wikipedia.org/wiki/Petri_net). And you've almost certainly never heard of it.<Footnote id="1" />
 
