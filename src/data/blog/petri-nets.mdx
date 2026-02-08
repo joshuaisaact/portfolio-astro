@@ -16,7 +16,7 @@ import FootnoteItem from '../../components/FootnoteItem.astro';
 You have a contract approval workflow. Finance and legal both need to sign off before the contract executes. You model it like this:
 
 ```typescript
-if (financeApproved && legalApproved && !cancelled && !expired) {
+if (financeApproved && legalApproved) {
   executeContract();
 }
 ```
@@ -31,7 +31,7 @@ Someone asks: "What happens if finance approves but legal doesn't?"
 
 Someone discovers a contract executed without CEO approval, because a code path didn't check the new flag.
 
-You're now debugging a system with 32 possible states.
+You're now debugging a system with 8 possible states. Add two more booleans (`!cancelled`, `!expired`) and it's 32.
 
 Most of them are invalid, and nothing in the code tells you which ones are reachable.
 
