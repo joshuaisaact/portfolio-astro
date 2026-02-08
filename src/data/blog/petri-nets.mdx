@@ -365,7 +365,7 @@ For most systems, that's the right split. Coloured nets are for when the interac
 
 I hit real limitations building these examples. You should know about them.
 
-**Cancellation is hard.** Basic Petri nets don't have a "cancel everything in flight" primitive. If finance rejects, there's no way to sweep up tokens from other places. I designed for independent failure paths: rejection is terminal per approver, and the join simply never fires. Extensions like colored Petri nets and cancellation regions solve this, but they add complexity and erode the formal properties that make analysis possible.
+**Cancellation is hard.** Basic Petri nets don't have a "cancel everything in flight" primitive. If finance rejects, there's no way to sweep up tokens from other places. I designed for independent failure paths: rejection is terminal per approver, and the join simply never fires. Extensions like coloured Petri nets and cancellation regions solve this, but they add complexity and erode the formal properties that make analysis possible.
 
 **The verbosity is the price of safety.** The boolean version is one line. The Petri net version is a dozen types and transitions. The formalism doesn't let you take shortcuts. That's a feature when you're debugging at 2am and a cost when you're shipping on Thursday.
 
