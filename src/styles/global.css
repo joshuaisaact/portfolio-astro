@@ -73,16 +73,17 @@ html.dark {
 
 .prose :not(pre) > code {
   border-radius: 0.25rem;
-  background-color: rgb(36 41 51 / 0.6);
-  padding: 0.15rem 0.35rem;
+  background-color: rgb(0 0 0 / 0.06);
+  padding: 0.1rem 0.3rem;
   font-size: 0.9em;
-  color: #c9d1d9;
+  color: #1a1a1a;
   font-weight: 400;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
 .dark .prose :not(pre) > code {
-  background-color: rgb(255 255 255 / 0.1);
+  background-color: rgb(255 255 255 / 0.08);
+  color: #e0e0e0;
 }
 
 .prose code::before,
