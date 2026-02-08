@@ -135,9 +135,9 @@ const pourOver = {
 
 `pourOver` has three inputs. You need hot water AND ground beans AND an empty cup. `heatWater` and `grindBeans` are both enabled from the initial state. They can fire in either order because their inputs are independent. `pourOver` blocks until both complete. Concurrency and synchronisation, expressed in data, no `Promise.all` required.
 
-In fact, `Promise.all([heatWater(), grindBeans()]).then(pourOver)` is the same topology: two independent operations feeding a join. The difference is that `Promise.all` encodes the dependency in control flow that executes and disappears. The Petri net encodes it in structure you can inspect and prove things about. You have `Promise.all` for one join. Now chain six of them together and tell me which states are reachable.
+Why not just use `Promise.all`? In fact, `Promise.all([heatWater(), grindBeans()]).then(pourOver)` is the same topology: two independent operations feeding a join. The difference is that `Promise.all` encodes the dependency in control flow that executes and disappears. The Petri net encodes it in structure you can inspect and prove things about.
 
-That's the vocabulary. Places hold tokens, transitions move them, firing rules enforce ordering. Now for the systems that actually matter.
+`Promise.all` works for one join. Now chain six of them together and tell me which states are reachable.
 
 ## Concurrent approvals
 
