@@ -335,6 +335,16 @@ Four outcomes: both approve, finance rejects, legal rejects, both reject. Every 
 
 And because the net is just data, you can generate diagrams from it too. A `toDot` function turns any net into a Graphviz DOT file. The interactive diagrams in this article were built from the same topology. The model, the runtime, and the documentation are the same thing.
 
+## What about multiple customers at once?
+
+The checkout demo models one flow: three customers sharing two items. But in production, you don't have one net running all customers. You have thousands of concurrent orders, each with their own state.
+
+There are two approaches. **Coloured Petri nets** put data on the tokens. Instead of `paymentPending: 2` you have `paymentPending: [{ orderId: 47 }, { orderId: 52 }]`. Transitions get guard functions that pattern-match across places: "take the token from `paymentPending` where `orderId` matches the one from `inventoryReserved`." This is powerful, but `canFire` goes from a simple count check to a combinatorial search over token bindings. Worse, every distinct combination of data values in every place is a different state. Three customers with IDs already produces a much larger state space than three anonymous tokens. Exhaustive analysis becomes infeasible fast.
+
+**One net per instance** is the simpler answer. Each order gets its own net with anonymous tokens. You keep the simple engine. You keep exhaustive analysis. You prove each individual workflow is sound. Cross-instance concerns like inventory contention get handled where they already live: in the database, with the concurrency primitives you already trust. The analyser proves the workflow topology is correct. The database proves the shared resources are consistent. Each tool does what it's good at.
+
+For most systems, that's the right split. Coloured nets are for when the interactions between instances are themselves what you need to prove correct, and at that point you're in proper formal methods territory.
+
 ## Why this matters
 
 **Workflow correctness becomes provable, not testable.** Your e2e tests cover the paths your team thought of. The reachability analyser covers all of them. When the product manager asks "can a contract execute without CEO approval?" or "can we oversell inventory?", the answer isn't "we have tests for that." It's "we proved it's impossible. Here's the state space."
