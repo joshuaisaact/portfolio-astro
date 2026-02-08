@@ -101,6 +101,21 @@ html.dark {
   position: relative;
 }
 
+/* Code blocks break out of prose column slightly on larger screens */
+@media (min-width: 768px) {
+  .code-block-wrapper {
+    margin-left: -2rem;
+    margin-right: -2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .code-block-wrapper {
+    margin-left: -3rem;
+    margin-right: -3rem;
+  }
+}
+
 .copy-button {
   position: absolute;
   right: 0.75rem;
@@ -110,8 +125,13 @@ html.dark {
   padding: 0.25rem 0.5rem;
   font-size: 0.75rem;
   color: rgb(229 231 235);
-  transition: background-color 0.15s;
+  transition: background-color 0.15s, opacity 0.15s;
   backdrop-filter: blur(8px);
+  opacity: 0;
+}
+
+.code-block-wrapper:hover .copy-button {
+  opacity: 1;
 }
 
 .copy-button:hover {
