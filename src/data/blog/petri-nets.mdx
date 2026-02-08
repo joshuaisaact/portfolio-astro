@@ -371,15 +371,23 @@ I hit real limitations building these examples. You should know about them.
 
 ## Why you haven't heard of this
 
-Nobody built the tooling.
+Nobody built the tooling.<Footnote id="3" />
 
 [XState](https://github.com/statelyai/xstate), a statechart library, has 27,000 GitHub stars, visual editors, and framework integrations. Statecharts are state machines: one active state at a time, transitions between them. Petri nets solve a different problem. Multiple tokens, multiple places, concurrent flow. But the most maintained [Petri net package](https://www.npmjs.com/package/petri-net) in TypeScript has 3 npm downloads per month. The academic tooling is Java desktop apps from 2005. The formalism is simple (you've just read the entire engine in 30 lines) but nobody built the bridge between academia and practice. Meanwhile, we build elaborate event-driven architectures, saga orchestrators, and distributed state machines to solve problems that Petri nets handle in 30 lines.
 
-The irony is that Petri nets are quietly powering enterprise software already. [BPMN](https://en.wikipedia.org/wiki/Business_Process_Model_and_Notation) engines like [Camunda](https://camunda.com/) run token-based semantics derived directly from Petri net theory.<Footnote id="3" /> The process mining industry uses them as a core formalism.<Footnote id="4" /> But nobody calls them Petri nets. The most successful deployment of the theory is invisible to the people who would benefit most from understanding it.
+The irony is that Petri nets are quietly powering enterprise software already. [BPMN](https://en.wikipedia.org/wiki/Business_Process_Model_and_Notation) engines like [Camunda](https://camunda.com/) run token-based semantics derived directly from Petri net theory.<Footnote id="4" /> The process mining industry uses them as a core formalism.<Footnote id="5" /> But nobody calls them Petri nets. The most successful deployment of the theory is invisible to the people who would benefit most from understanding it.
 
 If you're orchestrating LLM agents with concurrent tool calls and synchronisation points, you're building Petri nets too. That's the next post.
 
 ## Try it
+
+Install the library:
+
+```bash
+npm install petri-ts
+```
+
+Or clone the repo to run the examples:
 
 ```bash
 git clone https://github.com/joshuaisaact/petri-net
@@ -405,6 +413,7 @@ Next time you're reaching for a boolean to model a workflow, try this instead. T
 <FootnoteList>
   <FootnoteItem id="1">If you have heard of it, well done, I seriously mean that! It comes from Carl Adam Petri's 1962 PhD dissertation at the University of Bonn, "Kommunikation mit Automaten." One of the things I do when I decide what to write is canvas the opinions of friends and colleagues (intelligent people whose opinions I both trust and respect), and none of the people I spoke to had heard of it. So you are in a minority!</FootnoteItem>
   <FootnoteItem id="2">Maxim Fateev, co-creator of Temporal, has discussed his experience with Amazon's Simple Workflow Service, which used Petri net semantics internally. His assessment was that while it worked, the abstraction level was wrong for most business workflows. He's right when it's step A then step B then step C. Most real workflows aren't that simple.</FootnoteItem>
-  <FootnoteItem id="3">Dijkman, Dumas, and Ouyang formally mapped BPMN to Petri nets in their 2007 paper. Every BPMN construct (sequence flows, parallel gateways, inclusive gateways) has a precise Petri net translation.</FootnoteItem>
-  <FootnoteItem id="4">Wil van der Aalst, widely considered the father of process mining and Chief Scientist at Celonis (valued at $13B+), built the field on Petri net discovery algorithms. His textbook *Process Mining* is essentially applied Petri net theory.</FootnoteItem>
+  <FootnoteItem id="3">Since publishing this article, I've built [petri-ts](https://www.npmjs.com/package/petri-ts), a TypeScript Petri net library available on npm. The engine, analyser, and examples from this post are all there. So now someone has.</FootnoteItem>
+  <FootnoteItem id="4">Dijkman, Dumas, and Ouyang formally mapped BPMN to Petri nets in their 2007 paper. Every BPMN construct (sequence flows, parallel gateways, inclusive gateways) has a precise Petri net translation.</FootnoteItem>
+  <FootnoteItem id="5">Wil van der Aalst, widely considered the father of process mining and Chief Scientist at Celonis (valued at $13B+), built the field on Petri net discovery algorithms. His textbook *Process Mining* is essentially applied Petri net theory.</FootnoteItem>
 </FootnoteList>
