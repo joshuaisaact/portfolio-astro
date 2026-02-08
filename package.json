@@ -18,7 +18,7 @@
     "@tailwindcss/vite": "^4.1.16",
     "@types/react": "^19.2.2",
     "@types/react-dom": "^19.2.2",
-    "astro": "^5.16.6",
+    "astro": "^5.17.1",
     "embla-carousel": "^8.6.0",
     "lucide-astro": "^0.548.0",
     "react": "^19.2.0",
