@@ -52,7 +52,7 @@ I'll show the entire engine (30 lines of TypeScript), walk through three example
 
 ## The entire engine
 
-A Petri net has three concepts. **Places** hold tokens. They're your states or conditions (`awaitingFinance`, `inventory`, `paymentPending`). **Transitions** are actions (`approveFinance`, `beginCheckout`). A transition has input places it consumes from and output places it produces into. **Firing** is the only thing that happens: when all input places have a token, the transition removes one from each input and adds one to each output.
+A Petri net has three concepts. **Places** hold tokens. They're your states or conditions (`awaitingFinance`, `inventory`, `paymentPending`). **Transitions** are actions (`approveFinance`, `beginCheckout`). A transition has input places it consumes from and output places it produces into. **Firing** is the only thing that happens: when all input places have a token, the transition removes one from each input and adds one to each output. A **marking** is a snapshot of the net, how many tokens sit in each place right now.
 
 Here's the entire engine in TypeScript:
 
