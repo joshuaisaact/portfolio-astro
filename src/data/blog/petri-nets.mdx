@@ -1,0 +1,399 @@
+---
+title: "You're Already Building Petri Nets. You're Just Building Them Badly."
+date: "2026-02-08"
+featured_image: "./firedcheckout.png"
+excerpt: "There's a formalism from 1962 that solves a problem you hit every month. Nobody told you about it."
+tags: ["TypeScript", "concurrency", "state machines", "Petri nets", "computer science"]
+---
+
+import PetriNetCoffeeDemo from '../../components/react/PetriNetCoffeeDemo';
+import ApprovalWorkflowDemo from '../../components/react/ApprovalWorkflowDemo';
+import CheckoutFlowDemo from '../../components/react/CheckoutFlowDemo';
+import Footnote from '../../components/Footnote.astro';
+import FootnoteList from '../../components/FootnoteList.astro';
+import FootnoteItem from '../../components/FootnoteItem.astro';
+
+You have a contract approval workflow. Finance and legal both need to sign off before the contract executes. You model it like this:
+
+```typescript
+if (financeApproved && legalApproved && !cancelled && !expired) {
+  executeContract();
+}
+```
+
+Two booleans. Simple. Ships tomorrow.
+
+Six months later, contracts over £50k also need CEO approval. 
+
+You add a third boolean. 
+
+Someone asks: "What happens if finance approves but legal doesn't?"
+
+Someone discovers a contract executed without CEO approval, because a code path didn't check the new flag.
+
+You're now debugging a system with 32 possible states.
+
+Most of them are invalid, and nothing in the code tells you which ones are reachable.
+
+This problem was solved in 1962.
+
+It's called a [Petri net](https://en.wikipedia.org/wiki/Petri_net). And you've almost certainly never heard of it.<Footnote id="1" />
+
+## You already think in Petri nets
+
+Every time you write `Promise.all`, you're expressing a Petri net join. Every time you model "wait for A and B, then do C," that's a Petri net transition with two inputs. Every approval workflow, every checkout flow, every deployment pipeline where things happen concurrently and then synchronise. That's a Petri net you've modelled with booleans.
+
+The difference is that Petri nets give you something booleans don't: a system where the entire state is visible in one place, invalid states are structurally impossible, and you can prove every reachable state before you run it. Not "the paths I tested." All of them.
+
+I'll show the entire engine (30 lines of TypeScript), walk through three examples (making coffee, concurrent approvals, resource contention in a checkout flow), then prove properties about them before they run.
+
+## The entire engine
+
+A Petri net has three concepts. **Places** hold tokens. They're your states or conditions (`awaitingFinance`, `inventory`, `paymentPending`). **Transitions** are actions (`approveFinance`, `beginCheckout`). A transition has input places it consumes from and output places it produces into. **Firing** is the only thing that happens: when all input places have a token, the transition removes one from each input and adds one to each output.
+
+Here's the entire engine in TypeScript:
+
+```typescript
+/**
+ * A minimal Petri net engine.
+ *
+ * Places are strings. Tokens are counts. Transitions move tokens
+ * from input places to output places. That's the whole thing.
+ */
+export type Marking<Place extends string> = Record<Place, number>;
+
+export type Transition<Place extends string> = {
+  name: string;
+  inputs: Place[];
+  outputs: Place[];
+};
+
+export type PetriNet<Place extends string> = {
+  transitions: Transition<Place>[];
+  initialMarking: Marking<Place>;
+};
+
+export function canFire<Place extends string>(
+  marking: Marking<Place>,
+  transition: Transition<Place>,
+): boolean {
+  return transition.inputs.every((place) => marking[place] > 0);
+}
+
+export function fire<Place extends string>(
+  marking: Marking<Place>,
+  transition: Transition<Place>,
+): Marking<Place> {
+  if (!canFire(marking, transition)) {
+    throw new Error(`Cannot fire transition: ${transition.name}`);
+  }
+  const newMarking = { ...marking };
+  for (const place of transition.inputs) newMarking[place] -= 1;
+  for (const place of transition.outputs) newMarking[place] += 1;
+  return newMarking;
+}
+```
+
+Thirty lines. Types, a check, and a state transition. The generic `Place extends string` means if you define your places as a string union, TypeScript catches any typo at compile time. Correctness from the type system before the net even runs.
+
+## Making coffee (quickly)
+
+Before the real examples, a 60-second vocabulary lesson. Skip ahead if the concepts already click.
+
+```typescript
+type CoffeePlace =
+  | "waterCold" 
+  | "waterHot" 
+  | "beansWhole"
+  | "beansGround" 
+  | "cupEmpty" 
+  | "coffeeReady";
+
+const heatWater = { 
+  name: "heatWater", 
+  inputs: ["waterCold"], 
+  outputs: ["waterHot"] 
+};
+
+const grindBeans = { 
+  name: "grindBeans", 
+  inputs: ["beansWhole"], 
+  outputs: ["beansGround"] 
+};
+
+const pourOver = { 
+  name: "pourOver", 
+  inputs: ["waterHot", "beansGround", "cupEmpty"], 
+  outputs: ["coffeeReady"] 
+};
+```
+
+<PetriNetCoffeeDemo client:visible />
+
+`pourOver` has three inputs. You need hot water AND ground beans AND an empty cup. `heatWater` and `grindBeans` are both enabled from the initial state. They can fire in either order because their inputs are independent. `pourOver` blocks until both complete. Concurrency and synchronisation, expressed in data, no `Promise.all` required.
+
+In fact, `Promise.all([heatWater(), grindBeans()]).then(pourOver)` is the same topology: two independent operations feeding a join. The difference is that `Promise.all` encodes the dependency in control flow that executes and disappears. The Petri net encodes it in structure you can inspect and prove things about. You have `Promise.all` for one join. Now chain six of them together and tell me which states are reachable.
+
+That's the vocabulary. Places hold tokens, transitions move them, firing rules enforce ordering. Now for the systems that actually matter.
+
+## Concurrent approvals
+
+Back to the contract approval from the opening. Finance and legal review in parallel, both must approve before the contract executes. Here's that workflow as a Petri net:
+
+```typescript
+type StandardPlace =
+  | "submitted"
+  | "awaitingFinance" 
+  | "awaitingLegal"
+  | "financeApproved" 
+  | "financeRejected"
+  | "legalApproved" 
+  | "legalRejected"
+  | "contractExecuted";
+```
+
+Submit fans out to two parallel review streams. Each approver independently succeeds or fails:
+
+```typescript
+const submit = {
+  name: "submit",
+  inputs: ["submitted"],
+  outputs: ["awaitingFinance", "awaitingLegal"],
+};
+
+const approveFinance = {
+  name: "approveFinance",
+  inputs: ["awaitingFinance"],
+  outputs: ["financeApproved"],
+};
+
+const rejectFinance = {
+  name: "rejectFinance",
+  inputs: ["awaitingFinance"],
+  outputs: ["financeRejected"],
+};
+
+// Same pattern for legal...
+
+const execute = {
+  name: "execute",
+  inputs: ["financeApproved", "legalApproved"],
+  outputs: ["contractExecuted"],
+};
+```
+
+<ApprovalWorkflowDemo client:visible />
+
+If finance rejects, that token goes to `financeRejected` and stays there. Legal can still approve, and that's fine. But `execute` requires `financeApproved` AND `legalApproved`. If either rejected, execution is structurally impossible. Not because of an `if` statement. Because the token isn't there.
+
+The high-value contract? Separate net, additional approver:
+
+```typescript
+const hvExecute = {
+  name: "execute",
+  inputs: ["financeApproved", "legalApproved", "ceoApproved"],
+  outputs: ["contractExecuted"],
+};
+```
+
+The routing decision ("is this over £50k?") lives in application code. You pick which net to run. The net guarantees that a high-value contract cannot execute without CEO approval. That guarantee is structural, not conditional.
+
+I found a real bug while building this. My first version used a single net for both paths. The `canFire` output showed `executeStandard: true` on the high-value path. A contract could skip CEO approval entirely. The net showed me the vulnerability before anything ran.
+
+## Tokens are numbers, not booleans
+
+Change the initial marking to `submitted: 3`. Three contracts flow through simultaneously:
+
+```
+--- Submit all three ---
+{ submitted: 0, awaitingFinance: 3, awaitingLegal: 3, ... }
+
+--- Finance approves first ---
+{ awaitingFinance: 2, financeApproved: 1, awaitingLegal: 3, ... }
+```
+
+Two still waiting, one approved. You didn't add code. You didn't build a queue. Tokens are counts, so the same 30-line engine handles concurrent workflows naturally. And the entire machine state is that one object. Nothing in a database column, nothing in a boolean you forgot to check. Every piece of state, visible, in one place.
+
+This matters because booleans can't express "3 of 5 contracts are awaiting finance review." You'd build that state tracking from scratch, every time.
+
+## Resource contention
+
+Three customers want to buy the same product. Two items are in stock. What happens when a payment fails? Does the item go back to the pool? What stops you from selling more than you have? In most systems, the answers live in database locks, Redis semaphores, and retry logic. Here's the Petri net version.
+
+```typescript
+type CheckoutPlace =
+  | "cartReady" 
+  | "inventory" 
+  | "inventoryReserved"
+  | "paymentPending" 
+  | "paymentComplete" 
+  | "paymentFailed"
+  | "orderFulfilled" 
+  | "orderCancelled";
+
+const beginCheckout = {
+  name: "beginCheckout",
+  inputs: ["cartReady", "inventory"],
+  outputs: ["inventoryReserved", "paymentPending"],
+};
+```
+
+`beginCheckout` consumes one token from `inventory`. When inventory hits zero, no more checkouts can fire. Sold out, enforced by the topology, not a database lock.
+
+Payment succeeds or fails independently:
+
+```typescript
+const fulfillOrder = {
+  name: "fulfillOrder",
+  inputs: ["paymentComplete", "inventoryReserved"],
+  outputs: ["orderFulfilled"],
+};
+
+const cancelOrder = {
+  name: "cancelOrder",
+  inputs: ["paymentFailed", "inventoryReserved"],
+  outputs: ["orderCancelled", "inventory"],  // <-- inventory goes back
+};
+```
+
+<CheckoutFlowDemo client:visible />
+
+Look at `cancelOrder`. It produces a token back into `inventory`. The item returns to the pool. Another customer can now buy it. Resource contention, release, and reuse, all handled by the structure.
+
+Three customers, two items in stock. The third customer is blocked until a payment fails and inventory returns. Or they stay blocked. The net models both outcomes.
+
+## Proving properties about your system
+
+Everything so far has been modelling. Here's where it becomes a different category of tool.
+
+Because Petri nets are mathematical, you can exhaustively explore every state the system can reach. Not simulate. Not test. Prove.
+
+```typescript
+export function reachableStates<Place extends string>(
+  net: PetriNet<Place>,
+): Marking<Place>[] {
+  const seen: string[] = [];
+  const queue: Marking<Place>[] = [net.initialMarking];
+
+  while (queue.length > 0) {
+    const current = queue.shift()!;
+    const key = JSON.stringify(current);
+    if (seen.includes(key)) continue;
+    seen.push(key);
+
+    for (const t of net.transitions) {
+      if (canFire(current, t)) {
+        queue.push(fire(current, t));
+      }
+    }
+  }
+
+  return seen.map((s) => JSON.parse(s));
+}
+```
+
+Fifteen lines. Breadth-first search of the state space. Start from the initial marking, try every transition, record every new state, repeat until there's nowhere new to go. Same algorithm you'd use to explore a maze, except the maze is every possible configuration of your system.
+
+Run it on the checkout net from above. Three customers, two items:
+
+```
+Total reachable states: 36
+Terminal states: 4
+```
+
+Four terminal states. Every possible business outcome:
+
+1. `orderFulfilled: 2, cartReady: 1`. Two sold, third never checked out (no stock).
+2. `orderFulfilled: 2, orderCancelled: 1`. All checked out, one payment failed.
+3. `orderFulfilled: 1, orderCancelled: 2, inventory: 1`. One sold, two failed, item back on shelf.
+4. `orderFulfilled: 0, orderCancelled: 3, inventory: 2`. All payments failed, all stock returned.
+
+Then:
+
+```typescript
+const oversold = terminalStates.filter((s) => s.orderFulfilled > 2);
+console.log(`Oversold states: ${oversold.length}`);
+```
+
+```
+Oversold states: 0
+```
+
+You cannot sell more items than you have. Not because someone remembered to add a check. Because there are only 2 tokens in `inventory` and the topology won't allow it. We didn't write a test. We proved it.
+
+Run the same analysis on the contract net:
+
+```
+Terminal states: 4
+Stuck contracts: 0
+```
+
+Four outcomes: both approve, finance rejects, legal rejects, both reject. Every contract terminates. Zero stuck forever. Proved, not tested.
+
+And because the net is just data, you can generate diagrams from it too. A `toDot` function turns any net into a Graphviz DOT file. The interactive diagrams in this article were built from the same topology. The model, the runtime, and the documentation are the same thing.
+
+## Why this matters
+
+**Workflow correctness becomes provable, not testable.** Your e2e tests cover the paths your team thought of. The reachability analyser covers all of them. When the product manager asks "can a contract execute without CEO approval?" or "can we oversell inventory?", the answer isn't "we have tests for that." It's "we proved it's impossible. Here's the state space."
+
+**The cost of workflow bugs is disproportionate to their frequency.** A contract executing without CEO approval isn't a 500 error. It's a compliance incident. An oversold inventory item isn't a retry. It's a customer escalation and a trust hit. These bugs are rare enough that they never get prioritised. But the postmortem never says "we should have modelled the state space." It says "we added another boolean check."
+
+**New requirements become structural changes, not surgical ones.** Adding a third approver to a boolean workflow means finding every code path that checks approval status. Missing one is a production incident. Adding an approver to a Petri net means adding a place and a transition. The topology enforces the new constraint everywhere.
+
+**Debugging becomes inspection, not reconstruction.** A stuck boolean workflow means querying the database, checking flags, reading logs, piecing together what happened. A stuck Petri net means looking at the marking. The token is sitting in a place. The transition that should fire can't, and you can see exactly what's missing. The entire system state lives in one data structure, and none of it is hidden.
+
+**Implicit knowledge becomes visible structure.** Boolean workflows encode their constraints in people's heads. Which orderings are safe, which states are invalid, which code paths need an extra check. None of that is in the code. It's in Slack threads and postmortems. A Petri net makes every constraint visible in the topology. If something can't happen, the tokens aren't there. A new engineer can read the net on day one and see every possible path without asking anyone.
+
+**You're already paying for the absence.** Every "impossible state" in your bug tracker is a reachable state nobody mapped. Every status enum with a `PARTIALLY_APPROVED` value that "shouldn't happen but sometimes does" is a token sitting in a place your mental model forgot about. Every sprint that starts with "let's add a flag for..." is another brick in a building with no blueprint. The cost is never dramatic. It compounds.
+
+## The honest tradeoffs
+
+I hit real limitations building these examples. You should know about them.
+
+**Cancellation is hard.** Basic Petri nets don't have a "cancel everything in flight" primitive. If finance rejects, there's no way to sweep up tokens from other places. I designed for independent failure paths: rejection is terminal per approver, and the join simply never fires. Extensions like colored Petri nets and cancellation regions solve this, but they add complexity and erode the formal properties that make analysis possible.
+
+**The verbosity is the price of safety.** The boolean version is one line. The Petri net version is a dozen types and transitions. The formalism doesn't let you take shortcuts. That's a feature when you're debugging at 2am and a cost when you're shipping on Thursday.
+
+**State space explosion is real.** Three contracts give 203 reachable states. A hundred wouldn't finish. In practice, you analyse with 1 token to verify the workflow structure, then trust the topology at scale.
+
+**For sequential workflows, this is overkill.** If step A leads to step B leads to step C, use a state machine.<Footnote id="2" /> Petri nets earn their keep when you have concurrent coordination, shared resources, or need formal guarantees about reachable states.
+
+## Why you haven't heard of this
+
+Nobody built the tooling.
+
+[XState](https://github.com/statelyai/xstate), a statechart library, has 27,000 GitHub stars, visual editors, and framework integrations. Statecharts are state machines: one active state at a time, transitions between them. Petri nets solve a different problem. Multiple tokens, multiple places, concurrent flow. But the most maintained [Petri net package](https://www.npmjs.com/package/petri-net) in TypeScript has 3 npm downloads per month. The academic tooling is Java desktop apps from 2005. The formalism is simple (you've just read the entire engine in 30 lines) but nobody built the bridge between academia and practice. We test if you can invert a binary tree. We don't test if your workflow can deadlock.
+
+The irony is that Petri nets are quietly powering enterprise software already. [BPMN](https://en.wikipedia.org/wiki/Business_Process_Model_and_Notation) engines like [Camunda](https://camunda.com/) run token-based semantics derived directly from Petri net theory.<Footnote id="3" /> The process mining industry uses them as a core formalism.<Footnote id="4" /> But nobody calls them Petri nets. The most successful deployment of the theory is invisible to the people who would benefit most from understanding it.
+
+If you're orchestrating LLM agents with concurrent tool calls and synchronisation points, you're building Petri nets too. That's the next post.
+
+## Try it
+
+```bash
+git clone https://github.com/joshuaisaact/petri-net
+cd petri-net
+bun install
+
+bun run coffee                # walk through the brewing steps
+bun run coffee:analyser       # prove every path ends with coffee
+bun run coffee:dot            # generate net diagram (requires graphviz)
+bun run contract:standard     # three contracts, finance + legal approval
+bun run contract:high-value   # adds CEO approval layer
+bun run contract:analyser     # prove no contract gets stuck
+bun run contract:dot          # generate net diagram
+bun run checkout              # three customers, two items, one fails
+bun run checkout:analyser     # prove inventory can't oversell
+bun run checkout:dot          # generate net diagram
+```
+
+Thirty lines of engine. Fifteen lines of analyser. Three examples that model real systems and prove properties about them before a single line of application code runs.
+
+Next time you're reaching for a boolean to model a workflow, try this instead. The engine is 30 lines. The proof is free.
+
+<FootnoteList>
+  <FootnoteItem id="1">If you have heard of it, well done, I seriously mean that! It comes from Carl Adam Petri's 1962 PhD dissertation at the University of Bonn, "Kommunikation mit Automaten." One of the things I do when I decide what to write is canvas the opinions of friends and colleagues (intelligent people whose opinions I both trust and respect), and none of the people I spoke to had heard of it. So you are in a minority!</FootnoteItem>
+  <FootnoteItem id="2">Maxim Fateev, co-creator of Temporal, has discussed his experience with Amazon's Simple Workflow Service, which used Petri net semantics internally. His assessment was that while it worked, the abstraction level was wrong for most business workflows. He's right when it's step A then step B then step C. Most real workflows aren't that simple.</FootnoteItem>
+  <FootnoteItem id="3">Dijkman, Dumas, and Ouyang formally mapped BPMN to Petri nets in their 2007 paper. Every BPMN construct (sequence flows, parallel gateways, inclusive gateways) has a precise Petri net translation.</FootnoteItem>
+  <FootnoteItem id="4">Wil van der Aalst, widely considered the father of process mining and Chief Scientist at Celonis (valued at $13B+), built the field on Petri net discovery algorithms. His textbook *Process Mining* is essentially applied Petri net theory.</FootnoteItem>
+</FootnoteList>
