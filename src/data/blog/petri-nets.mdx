@@ -31,9 +31,11 @@ Someone asks: "What happens if finance approves but legal doesn't?"
 
 Someone discovers a contract executed without CEO approval, because a code path didn't check the new flag.
 
-You're now debugging a system with 8 possible states. Add two more booleans (`!cancelled`, `!expired`) and it's 32.
+You're now debugging a system with 8 possible states.
 
-Most of them are invalid, and nothing in the code tells you which ones are reachable.
+Add two more booleans (`!cancelled`, `!expired`) and it's 32 possible states.
+
+Most of them are invalid. Nothing in the code tells you which ones are reachable.
 
 This problem was solved in 1962.
 
