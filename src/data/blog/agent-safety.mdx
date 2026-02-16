@@ -116,18 +116,13 @@ Everything in this post - the termination proofs, the human gates, the bounded i
 What I haven't shown you yet: I've spent the last few weeks building something on top of the engine. All of the proofs in this post compile from this:
 
 ```
-map bash.command /rm/ as delete
-map bash.command /cp/ as backup
-require backup before delete
 require human-approval before execute-code
 require search before generate
 limit iterate to 3 per session
-block bash
+block shell
 ```
 
-The `map` lines answer the obvious question: bash is one tool, so how do you control what it does inside? The gate inspects the actual command argument and maps it to a virtual tool name before gating. Unmapped commands are blocked entirely, so `unlink`, `shred`, `find -delete` all fail without being individually listed. It's an allowlist, not a denylist.
-
-Seven lines in a `.rules` file. Seven structural proofs. Each rule compiles to an independent Petri net that's verified at build time. Rules compose via AND: every net must agree for a tool call to proceed, so adding a rule can never weaken an existing guarantee, only make the system stricter. At runtime, your tools are wrapped with safety checks the model cannot bypass - not because of an if-statement, but because the transition doesn't exist.
+Four lines in a `.rules` file. Four structural proofs. Each rule compiles to an independent Petri net that's verified at build time. Rules compose via AND: every net must agree for a tool call to proceed, so adding a rule can never weaken an existing guarantee, only make the system stricter. At runtime, your tools are wrapped with safety checks the model cannot bypass - not because of an if-statement, but because the transition doesn't exist.
 
 It drops tomorrow. It works with the Vercel AI SDK. Think of it as a type system for agent tools - TypeScript catches `undefined is not a function` before your code runs; this catches "agent deleted without backing up" before your agent runs.
 
