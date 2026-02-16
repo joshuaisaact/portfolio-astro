@@ -1,0 +1,140 @@
+---
+title: "Your Agent's Safety Net Is an If-Statement. Mine Is a Proof."
+date: "2026-02-16"
+featured_image: "./safeclaw.png"
+hide_featured_image: true
+excerpt: "Two weeks ago, security researchers found over 1,800 exposed OpenClaw instances. Every vulnerability maps to the same failure mode - a code path that didn't hit the check. Petri nets fix this."
+tags: ["TypeScript", "agents", "Petri nets", "formal verification"]
+---
+
+import Figure from '../../components/Figure.astro';
+import safeclaw from './safeclaw.png';
+import HumanGateDemo from '../../components/react/HumanGateDemo';
+import JoinResultsDemo from '../../components/react/JoinResultsDemo';
+
+<Figure
+  src={safeclaw}
+  alt="SafeClaw agent safety architecture"
+/>
+
+Two weeks ago, security researchers found over 1,800 exposed OpenClaw instances leaking API keys, chat histories, and credentials. Cisco called it "an absolute nightmare." CrowdStrike published a taxonomy of prompt injection attacks against it. Kaspersky found critical vulnerabilities enabling remote code execution.
+
+OpenClaw's security is policy-based: runtime checks, tool allowlists, Docker sandboxing, approval gates. Every vulnerability in those reports maps to the same failure mode - a code path that didn't hit the check. A tool not on the deny list. A race condition in token expiry. An injected prompt that asked the agent nicely and the agent said yes.
+
+The pattern is always the same. Someone writes an if-statement. Someone else finds a way around it.
+
+This isn't an OpenClaw problem. It's an architecture problem. And there's a fix that's been hiding in plain sight since 1962.
+
+## Separating plumbing from thinking
+
+In the [last post](/blog/petri-nets), I showed that every approval workflow, checkout flow, and deployment pipeline is a Petri net you've modelled with booleans. But while I was building those examples, I kept thinking about agents.
+
+Agents are the only software I know of where deterministic and non-deterministic control flow are fused together in the same execution. Some steps are structural - if you dispatched three tools, you wait for all three before continuing. That's not a decision. That's plumbing. Some steps are genuinely semantic - the LLM decides which tools to call, whether the results are good enough, whether to try again or give up.
+
+Every existing framework mushes these together. LangGraph makes the LLM decide at every node, including the ones where there's nothing to decide. ReAct makes the LLM decide at every step, burning API calls on "should I wait for the thing I'm already waiting for?" n8n hardcodes the plumbing into a visual DAG and stuffs the LLM inside nodes. None of them separate the part you can prove from the part you can't.
+
+Petri nets do. The topology handles the plumbing - fan-out, synchronisation, resource budgets, safety gates. The LLM handles the thinking - which tools to call, when to stop. You prove everything about the first half. The second half, you let the LLM cook.
+
+I built the same agent three ways to see what that separation actually buys you.
+
+## One agent, three implementations
+
+Same agent. Three implementations. PetriFlow, n8n workflow, and a vanilla ReAct loop.
+
+The agent receives a user query and has three tools: web search, database lookup, and code execution. Code execution is dangerous, so it requires human approval before running. The agent can iterate up to 3 times before it must respond.
+
+Simple enough to build in an afternoon. Complex enough to go wrong in ways that matter.
+
+## Same efficiency. Different guarantees.
+
+| | PetriFlow | n8n | ReAct |
+| --- | --- | --- | --- |
+| LLM calls (batched) | 2 | 2 (plan + evaluate) | 11 |
+| Termination proven | ✅ <br/> 196 states | ❌ <br/> runtime check | ❌ <br/> hope |
+| Human gate proven | ✅ <br/> structural | ❌ <br/> convention | ❌ <br/> if-statement |
+| No orphaned work | ✅ <br/> join semantics | ❌ <br/> append mode | ❌ <br/> implicit |
+| Bounded iterations | ✅ <br/> budget=3 | ❌ <br/> JS variable | ❌ <br/> counter |
+| Reachable states analysed | 196 | N/A | N/A |
+| Terminal states (all valid) | 4 | N/A | N/A |
+
+Same LLM call efficiency. Only one proves anything.
+
+## What I proved, and how
+
+The agent's Petri net has 16 places and 17 transitions. From the initial marking, there are 196 reachable states. Quick bit of context: 16 binary places would give you 65,536 possible configurations. 196 reachable means the topology eliminates 99.7% of the state space before the agent even runs. The net is doing most of the work.
+
+Four terminal states. Every one is `responseGenerated` with a valid combination of completed, skipped, or rejected tools. No stuck states. No invalid configurations.
+
+### Termination and bounded iterations
+
+Every path through the state space reaches `responseGenerated`. Not "the paths I tested." All of them.
+
+`iterationBudget` starts at 3 tokens. The `iterate` transition consumes one each loop. When they're gone, `iterate` can't fire. The only remaining enabled transition is `generate`. The agent *must* respond. The topology forces it. Across all 196 states, the budget stays in [0, 3] - maintained by structure, not by a variable someone remembers to check.
+
+In n8n, the iteration limit is `const maxIterations = 3` in a Code node. A developer can change it. A refactor can lose it. Nothing in the system knows it matters. In ReAct, it's a counter in a while loop. Same story.
+
+### Human gate
+
+There is no arc in the net from `codePending` to `codeDone`. The only path goes through `humanApproval`:
+
+<HumanGateDemo client:visible />
+
+This isn't a runtime check. It's a topological fact. There is no sequence of firings - in any of the 196 reachable states - that reaches `codeDone` without passing through `humanApproval`. I didn't test this. I enumerated every state and verified it.
+
+In n8n, the approval node exists in the graph. Nothing prevents someone from adding an edge that bypasses it. The graph doesn't know it's a safety gate. It's just a node.
+
+This is exactly the failure mode in the OpenClaw reports. Their approval gates are runtime checks. The Cisco team found skills that bypassed them entirely - not through some exotic exploit, but by calling the underlying API directly instead of going through the gated function. A Petri net doesn't have an underlying API to call. The transition doesn't exist.
+
+### No orphaned work
+
+This is the proof that matters most in production, and nobody talks about it.
+
+`joinResults` requires tokens from `searchDone`, `dbDone`, and `codeDone`. All three. If a tool is dispatched, the corresponding `complete` transition must fire. If a tool is skipped, a `skip` transition places the done token directly. Either way, the join blocks until every path has resolved.
+
+<JoinResultsDemo client:visible />
+
+n8n's merge node uses append mode. If the database branch times out silently, the merge proceeds with whatever arrived. The agent generates a response from partial context, and nothing in your logs tells you it happened. The user gets a confident answer built on half the information it needed.
+
+The Petri net makes this structurally impossible. You can't get to `responseGenerated` with partial results. Not because a check catches it. Because the transition literally can't fire.
+
+### Deferred transitions
+
+The human gate proves ordering: you can't reach `delete` without passing through `backup`. But ordering isn't enough. If `backup` is called and throws, a pure ordering proof still considers the dependency satisfied. The transition fired, even though the tool failed. Deferred transitions don't advance the net's state until the tool succeeds. If `backup` throws, the token stays in `backupPending`. `delete` stays locked. The guarantee isn't "backup must be called before delete." It's "backup must *succeed* before delete." That's a different guarantee, and it's the one you actually want.
+
+## What this doesn't prove
+
+These proofs are about orchestration, not intelligence. PetriFlow proves the agent terminates, hits the human gate, and waits for all tools. It cannot prove the agent gives good answers, calls the right tools, or uses the budget wisely. The net is the safety rails. The LLM is the driver. I'm proving the rails are sound, not that the driver is competent.
+
+But nobody's pointing out the obvious: no existing orchestration framework proves either half. n8n doesn't prove its agents terminate. LangGraph doesn't prove its human gates can't be bypassed. ReAct doesn't prove anything at all. Nobody is proving the LLM makes good decisions - that's an unsolved research problem. But nobody is proving the orchestration is safe either, and that problem *is* solvable. Right now.
+
+PetriFlow proves the half that's provable. As far as I can tell, nothing else does.
+
+## What's coming tomorrow
+
+Everything in this post - the termination proofs, the human gates, the bounded iterations - is real, running, and about to be open source.
+
+What I haven't shown you yet: I've spent the last few weeks building something on top of the engine. All of the proofs in this post compile from this:
+
+```
+map bash.command /rm/ as delete
+map bash.command /cp/ as backup
+require backup before delete
+require human-approval before execute-code
+require search before generate
+limit iterate to 3 per session
+block bash
+```
+
+The `map` lines answer the obvious question: bash is one tool, so how do you control what it does inside? The gate inspects the actual command argument and maps it to a virtual tool name before gating. Unmapped commands are blocked entirely, so `unlink`, `shred`, `find -delete` all fail without being individually listed. It's an allowlist, not a denylist.
+
+Seven lines in a `.rules` file. Seven structural proofs. Each rule compiles to an independent Petri net that's verified at build time. Rules compose via AND: every net must agree for a tool call to proceed, so adding a rule can never weaken an existing guarantee, only make the system stricter. At runtime, your tools are wrapped with safety checks the model cannot bypass - not because of an if-statement, but because the transition doesn't exist.
+
+It drops tomorrow. It works with the Vercel AI SDK. Think of it as a type system for agent tools - TypeScript catches `undefined is not a function` before your code runs; this catches "agent deleted without backing up" before your agent runs.
+
+You won't need to understand Petri nets to use it. If you want to understand them anyway, [start here](/blog/petri-nets).
+
+---
+
+*[1] Neugebauer, A. et al. "Beyond Prompt Chaining: The TB-CSPN Architecture for Agentic AI." Future Internet, August 2025. Their finding of 66.7% fewer LLM calls vs LangGraph aligns with our unbatched result (63.6%). With batching, both PetriFlow and n8n match at 2 calls per iteration - but call efficiency turns out not to be the interesting axis. The interesting axis is what you can prove.*
+
+*[2] In the first post, I argued Petri nets make invalid states structurally impossible. That's still true. But for agents, the stronger claim is that Petri nets make safety properties provable. Invalid states aren't just impossible - you can show they're impossible, exhaustively, before deployment. That's a different category of tool.*
