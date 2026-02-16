@@ -115,12 +115,12 @@ Everything in this post - the termination proofs, the human gates, the bounded i
 
 What I haven't shown you yet: I've spent the last few weeks building something on top of the engine. All of the proofs in this post compile from this:
 
-```
-require human-approval before execute-code
-require search before generate
-limit iterate to 3 per session
-block shell
-```
+<div className="not-prose my-6 rounded-lg bg-[#1e1e2e] border border-gray-700 p-5 font-mono text-sm leading-relaxed overflow-x-auto">
+  <div><span style={{color: '#a78bfa'}}>require</span> <span style={{color: '#34d399'}}>human-approval</span> <span style={{color: '#a78bfa'}}>before</span> <span style={{color: '#34d399'}}>execute-code</span></div>
+  <div><span style={{color: '#a78bfa'}}>require</span> <span style={{color: '#34d399'}}>search</span> <span style={{color: '#a78bfa'}}>before</span> <span style={{color: '#34d399'}}>generate</span></div>
+  <div><span style={{color: '#a78bfa'}}>limit</span> <span style={{color: '#34d399'}}>iterate</span> <span style={{color: '#a78bfa'}}>to</span> <span style={{color: '#fb923c'}}>3</span> <span style={{color: '#a78bfa'}}>per</span> <span style={{color: '#34d399'}}>session</span></div>
+  <div><span style={{color: '#a78bfa'}}>block</span> <span style={{color: '#34d399'}}>shell</span></div>
+</div>
 
 Four lines in a `.rules` file. Four structural proofs. Each rule compiles to an independent Petri net that's verified at build time. Rules compose via AND: every net must agree for a tool call to proceed, so adding a rule can never weaken an existing guarantee, only make the system stricter. At runtime, your tools are wrapped with safety checks the model cannot bypass - not because of an if-statement, but because the transition doesn't exist.
 
