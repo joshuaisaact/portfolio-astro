@@ -1,0 +1,32 @@
+---
+title: "PetriFlow"
+slug: "petriflow"
+projectType: "application"
+order: 0
+description: "A Petri net-based safety layer for AI agents. Uses formal verification to enforce tool access control, sequencing, rate limits, and human approval gates before an agent runs."
+imageSrc: "../../assets/projects/petriflow.png"
+imageAlt: "PetriFlow documentation site"
+links:
+  - type: "live"
+    url: "https://petriflow.joshtuddenham.dev/"
+    label: "Documentation"
+  - type: "github"
+    url: "https://github.com/joshuaisaact/petri-flow"
+    label: "View on GitHub"
+  - type: "live"
+    url: "https://www.npmjs.com/package/@petriflow/rules"
+    label: "View on npm"
+skills:
+  - "TypeScript"
+  - "Bun"
+  - "Vercel AI SDK"
+features:
+  - "Declarative .rules DSL that compiles to independently verified Petri nets"
+  - "Tool access control with sequencing, blocking, rate limits, and human approval gates"
+  - "Framework-agnostic gate with Vercel AI SDK adapter"
+  - "Dot notation tool mapping for action-dispatch tools"
+  - "Cross-domain composition where rules from different domains enforce without interference"
+  - "Interactive net visualiser built with React and xyflow"
+---
+
+PetriFlow is a safety layer for AI agents that uses Petri nets (not DAGs) as the core primitive. A declarative `.rules` DSL compiles each rule into a small, independently verified Petri net. At runtime, every tool call is checked against all nets via AND composition. Rules from different domains (file safety, deployment, messaging) compose automatically without interference. Includes a Vercel AI SDK adapter, an interactive visualiser, and four example agents with real tool implementations.
