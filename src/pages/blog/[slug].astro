@@ -25,12 +25,16 @@ const formattedDate = new Date(post.data.date).toLocaleDateString("en-GB", {
 
 const pageTitle = `${post.data.title} | Josh Tuddenham`;
 const canonicalURL = `https://joshtuddenham.dev/blog/${post.id}`;
+const ogImage = post.data.featured_image
+  ? `https://joshtuddenham.dev${post.data.featured_image.src}`
+  : undefined;
 ---
 
 <Layout
   title={pageTitle}
   description={post.data.excerpt}
   canonicalURL={canonicalURL}
+  image={ogImage}
 >
   <Navbar />
   <div class="pb-16">
