@@ -87,7 +87,7 @@ const canonicalURL = `https://joshtuddenham.dev/blog/${post.id}`;
           (post.data.featured_image || post.data.featured_video) && !post.data.hide_featured_image && (
             <div
               class:list={[
-                "relative overflow-hidden rounded-lg mb-8",
+                "relative overflow-hidden rounded-lg mb-8 lg:-mx-32 xl:-mx-48",
                 post.data.featured_video
                   ? "aspect-square bg-black flex items-center justify-center"
                   : "aspect-video",
