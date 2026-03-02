@@ -109,11 +109,11 @@ But nobody's pointing out the obvious: no existing orchestration framework prove
 
 PetriFlow proves the half that's provable. As far as I can tell, nothing else does.
 
-## What's coming tomorrow
+## PetriFlow
 
-Everything in this post - the termination proofs, the human gates, the bounded iterations - is real, running, and about to be open source.
+Everything in this post - the termination proofs, the human gates, the bounded iterations - is real, running, and [open source](https://petriflow.joshtuddenham.dev/).
 
-What I haven't shown you yet: I've spent the last few weeks building something on top of the engine. All of the proofs in this post compile from this:
+What I haven't shown you yet: I built something on top of the engine. All of the proofs in this post compile from this:
 
 <div className="not-prose my-6 rounded-lg bg-[#1e1e2e] border border-gray-700 p-5 font-mono text-sm leading-relaxed overflow-x-auto">
   <div><span style={{color: '#a78bfa'}}>require</span> <span style={{color: '#34d399'}}>human-approval</span> <span style={{color: '#a78bfa'}}>before</span> <span style={{color: '#34d399'}}>execute-code</span></div>
@@ -124,7 +124,7 @@ What I haven't shown you yet: I've spent the last few weeks building something o
 
 Four lines in a `.rules` file. Four structural proofs. Each rule compiles to an independent Petri net that's verified at build time. Rules compose via AND: every net must agree for a tool call to proceed, so adding a rule can never weaken an existing guarantee, only make the system stricter. At runtime, your tools are wrapped with safety checks the model cannot bypass - not because of an if-statement, but because the transition doesn't exist.
 
-It drops tomorrow. It works with the Vercel AI SDK. Think of it as a type system for agent tools - TypeScript catches `undefined is not a function` before your code runs; this catches "agent deleted without backing up" before your agent runs.
+It's called [PetriFlow](https://petriflow.joshtuddenham.dev/). It works with the Vercel AI SDK. Think of it as a type system for agent tools - TypeScript catches `undefined is not a function` before your code runs; this catches "agent deleted without backing up" before your agent runs.
 
 You won't need to understand Petri nets to use it. If you want to understand them anyway, [start here](/blog/petri-nets).
 
