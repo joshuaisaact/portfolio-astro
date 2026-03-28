@@ -47,4 +47,6 @@ videoPreviewSrc: "/media/projects/videos/wooster-preview.webm"
 posterImage: "../../assets/projects/wooster-poster.webp"
 ---
 
-Wooster is a sophisticated AI travel planning platform built with reliability and scalability at its core. It combines LLM technology with robust distributed architecture, comprehensive monitoring, and thorough testing infrastructure to deliver personalized travel experiences.
+Wooster was an AI travel planner I built before agents existed. Users described a trip and the app generated day-by-day itineraries via LLM API calls, with a React frontend and a Node/Express backend backed by PostgreSQL.
+
+My first time wiring an LLM into a real backend: structured logging, auth, rate limiting, dockerized test environments. The hardest part was the server side, parsing unpredictable LLM output into typed responses and recovering when the model returned garbage JSON.
