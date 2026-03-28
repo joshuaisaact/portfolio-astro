@@ -3,41 +3,25 @@ title: "Maya: A Multi-Agent Architecture for Conversational AI"
 date: "2025-08-26"
 featured_image: "./maya-orchestration.jpg"
 featured_video: "/media/blog/videos/maya-demo.webm"
-excerpt: "How I evolved my AI yoga instructor from a 2000-token monolithic prompt to an orchestrated system of specialized agents - and why separation of concerns might be the most underrated pattern in AI development."
+excerpt: "My AI yoga instructor had a 2000-token monolithic prompt and kept forgetting what it was doing. I split it into five agents. Each one got smaller, faster, and more reliable."
 tags: ["AI", "Multi-Agent", "Architecture", "LLM", "TypeScript", "Orchestration", "Gemini"]
 ---
 
-*How separating concerns across specialized AI agents creates a more reliable, maintainable, and intelligent yoga companion*
+Best resource I found on this topic: [Shrivu's post on building multi-agent systems](https://blog.sshh.io/p/building-multi-agent-systems).
 
-## A Quick Disclaimer
+## The monolithic prompt problem
 
-I'm not yet an AI architecture expert - just a developer who needed to solve a real problem. Building [Maya](https://joshdesk.live) (my AI yoga instructor) taught me that multi-agent systems aren't as intimidating as they seem. I made plenty of mistakes along the way, discovered some approaches that actually work, and learned why separating concerns might be the most underrated pattern in AI development.
+Maya started as one mega-prompt: "You are a yoga instructor who can search poses, create sequences, understand anatomy, be warm and encouraging, don't forget to validate input, oh and also remember to..."
 
-The one resource that saved me from complete chaos was [this excellent post on building multi-agent systems](https://blog.sshh.io/p/building-multi-agent-systems) - absolutely invaluable if you're venturing down this path.
+2000 tokens of instructions. The AI would forget what it was supposed to do halfway through conversations.
 
-## The Problem with Monolithic AI Prompts
+## Why not a framework?
 
-When you first start working with LLMs, the temptation is to create one mega-prompt that does everything. Mine grew to over 2000 tokens of instructions: "You are a yoga instructor who can search poses, create sequences, understand anatomy, be warm and encouraging, don't forget to validate input, oh and also remember to..."
+I looked at LangChain and LangGraph but they felt like overkill. AI models evolve fast, and heavy abstraction layers become tech debt when the underlying models improve every few months. I wanted something simpler: split the monolith into small, focused agents that I could understand and swap out individually.
 
-It was unmaintainable, unreliable, and worst of all - the AI would forget what it was supposed to do halfway through conversations. Classic schoolboy error.
+## The architecture
 
-## Different Approaches to AI Architecture
-
-As I searched for solutions, I discovered there are several ways developers are tackling AI complexity:
-
-1. **The Monolith** - One prompt to rule them all. Everything in a single, massive prompt. Simple to start, nightmare to maintain. Where most of us begin (and quickly regret).
-
-2. **Tool-Calling Agent** - One agent, many capabilities. Single agent that can call different functions. What OpenAI's Assistants API and most tutorials demonstrate. Good for straightforward use cases.
-
-3. **Orchestrated Specialists** - Separate agents for separate concerns. Intent recognition separated from response generation. Each agent optimized for its specific task. What Maya evolved into.
-
-4. **Agent Frameworks** - Pre-built team coordination. Langchain, LangGraph. Agents that delegate to other agents. Powerful but sometimes overkill.
-
-The approach I landed on (orchestrated specialists) emerged from necessity. I needed something more maintainable than a monolith but didn't need the complexity of full agent frameworks. Plus, given how rapidly AI models evolve, heavy abstraction layers often become technical debt. When the underlying models improve every few months, frameworks built around their limitations quickly become obsolete. It turns out this middle ground - understanding exactly what each agent does without layers of abstraction - is exactly right for many real-world applications.
-
-## The Architecture: Specialized Agents in Harmony
-
-Maya now operates as an orchestrated system of specialized agents, each with a focused responsibility:
+Maya is now five agents, each with one job:
 
 ```typescript
 // The conductor: Main orchestration service
@@ -62,11 +46,11 @@ export async function handleMessage(
 }
 ```
 
-Maya's architecture draws inspiration from the [call center pattern](https://blog.sshh.io/p/building-multi-agent-systems) from Shrivu's blog (using an intent agent to route requests to appropriate specialists) but extends it with sequential processing where each agent builds on the previous one's output.
+Based on the [call center pattern](https://blog.sshh.io/p/building-multi-agent-systems) from Shrivu's blog: an intent agent routes requests to specialists, each building on the previous agent's output.
 
-## The Intent Agent: Understanding Before Acting
+## The intent agent
 
-The most critical agent is the intent analyzer. Rather than having one prompt try to both understand AND respond, this agent has one job: figure out what the user actually wants.
+The most important agent. Instead of one prompt trying to understand AND respond, this one does nothing but classify what the user wants.
 
 ```typescript
 const INTENT_ANALYSIS_SCHEMA = {
@@ -126,9 +110,9 @@ Important distinctions:
 Return JSON matching the schema...`;
 ```
 
-By using structured output schemas, the intent agent reliably categorizes requests and extracts parameters. Interestingly, even with constrained JSON output, including concrete examples in the prompt significantly improved classification accuracy - the model benefits from seeing the distinction between "make me a sequence" (create) versus "show me sequences" (search).
+Structured output schemas make classification reliable. One thing I didn't expect: even with constrained JSON output, adding concrete examples to the prompt ("make me a sequence" = create, "show me sequences" = search) improved accuracy a lot.
 
-## Separation of Concerns: Each Agent Does One Thing Well
+## The other agents
 
 ### Intent Agent
 Classifies user intent and extracts parameters
@@ -161,14 +145,9 @@ Creates new yoga sequences
 - Uses function calling to search pose database first
 - Prompt size: ~800 tokens
 
-## The Power of Orchestration
+## Orchestration
 
-The magic happens in the orchestration layer. Instead of one AI agent trying to juggle everything, I have a simple coordinator that:
-
-1. Routes requests to the appropriate specialist
-2. Passes context between agents
-3. Handles errors gracefully
-4. Maintains conversation state
+The coordinator is boring on purpose. Route to the right agent, pass context, handle errors:
 
 ```typescript
 switch (intent.action) {
@@ -193,9 +172,9 @@ switch (intent.action) {
 }
 ```
 
-## Validation: The Unsung Hero
+## Validation
 
-One challenge with AI-generated content is ensuring it uses real data. After the Generation Agent creates a sequence, I run a validation step to ensure every pose actually exists in our database:
+After the generation agent creates a sequence, I validate every pose against the database:
 
 ```typescript
 export async function validateSequencePoses(
@@ -224,9 +203,7 @@ export async function validateSequencePoses(
 }
 ```
 
-This validation layer prevents the AI from hallucinating poses that sound plausible but don't exist in our curated database. You might wonder why I didn't use enums to constrain the AI's choices in the first place - with 300+ poses in the database, I hit a practical limitation: Gemini's enum constraints become unreliable beyond 80-100 values (not to mention the input token cost).
-
-So instead, the Generation Agent uses function calling to search the database first, then I validate its output as a safety net. It's not an agent, just good defensive programming against AI creativity.
+Why not constrain with enums? With 300+ poses, Gemini's enum constraints become unreliable beyond 80-100 values (and the token cost is painful). So the generation agent searches the database via function calling first, then I validate its output as a safety net.
 
 ## Results
 
@@ -237,28 +214,11 @@ While I didn't rigorously benchmark everything, the improvements were clear:
 - Changes are isolated - I can update Maya's personality without breaking search
 - Debugging is straightforward - errors point to specific agents
 
-## Key Learnings
+## What I'd do differently
 
-1. **Structured outputs are crucial**: Using TypeScript types and JSON schemas eliminates parsing errors
-2. **Specialization beats generalization**: Five focused agents outperform one generalist - particularly given smaller context windows.
-3. **Orchestration is simple**: The coordinator doesn't need to be complex - just reliable
-4. **Validation prevents hallucination**: Always verify AI output against your source of truth
-5. **Small prompts are manageable prompts**: 300-token prompts are easier to debug than 2000-token monsters
+Structured output schemas from day one. I wasted time parsing free-text LLM responses before switching to typed JSON. The intent agent alone eliminated the "I don't understand" loops that plagued the monolithic prompt.
 
-## What's Next?
-
-The multi-agent pattern opens up exciting possibilities:
-- **Memory Agent**: Track user preferences and progress over time
-- **Recommendation Agent**: Suggest practices based on history and goals
-- **Personalization Agent**: Adapt Maya's personality to user preferences
-
-The beauty of this architecture is that adding new capabilities doesn't mean rewriting everything - just add another specialized agent to the orchestra.
-
-## The Real Takeaway
-
-Building with multiple specialized agents instead of one mega-prompt isn't just about better performance - it's about maintaining your sanity. When your AI starts suggesting "Downward Facing Elephant" as a real pose, you'll know exactly which 300-token prompt to fix instead of searching through a 2000-token monster.
-
-Is this the right way to build AI systems? Honestly, I have no idea. But it works, it's maintainable, and most importantly - I can actually understand what's happening when things go wrong.
+The 300-token focused prompts are easier to debug than the 2000-token monster. When Maya suggests "Downward Facing Elephant" as a real pose, I know exactly which agent to fix.
 
 ---
 
