@@ -2,6 +2,7 @@
 title: "59% More Code. 30% More Failures. The Toolchain Bottleneck Is Here."
 date: "2026-03-28"
 excerpt: "AI-generated code is flooding pipelines. Main branch success rates hit a five-year low. The Rust rewrite wave accidentally built the verification infrastructure agents need."
+featured_image: "./rust-tools.png"
 tags: ["AI", "software engineering", "developer tools", "CI/CD", "Rust"]
 ---
 
@@ -10,8 +11,6 @@ import FootnoteList from '../../components/FootnoteList.astro';
 import FootnoteItem from '../../components/FootnoteItem.astro';
 
 Neil Kakkar wrote a piece about his Claude Code workflow ("[How I'm Productive with Claude Code](https://neilkakkar.com/productive-with-claude-code.html)") that keeps rattling around in my head. He describes a pattern straight out of Theory of Constraints: fix one bottleneck, the next one appears. PRs got effortless, so rebuild speed became the constraint. Rebuilds got instant, so parallelism became the constraint. Each solved problem revealed the next.
-
-A recent industry report has the numbers to back this up.
 
 ## The verification bottleneck is measurable
 
@@ -79,7 +78,7 @@ Vercel's team started investing in speed for the same reasons everyone else did.
 
 ## The pattern
 
-The Theory of Constraints pattern plays out at the individual level: each constraint you remove reveals the next. Look at CircleCI's 28 million workflows and you see the same pattern at industry scale: teams accelerated code creation by 59%, and verification became the chokepoint. The top 5% of teams were ready for it. Everyone else is watching their main branch success rates crater.
+The Theory of Constraints pattern plays out at the individual level: each constraint you remove reveals the next. Look at CircleCI's 28 million workflows and you see the same pattern at industry scale: teams accelerated code creation by 59%, and verification became the chokepoint. The top 5% of teams were ready for it. The rest are watching their main branch success rates crater.
 
 I think this changes how we evaluate toolchains going forward. "How fast is this in a tight loop?" is an agent capability question. Oxlint at 50x faster than ESLint makes agent workflows practical that were too slow to bother with before.
 
