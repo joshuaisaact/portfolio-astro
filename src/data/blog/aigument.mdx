@@ -2,7 +2,7 @@
 title: "AIgument: The Art of AI Disagreement – Developing a Language Model Debate Platform"
 date: "2025-05-13"
 featured_image: "./aigument-preview.png"
-excerpt: "Beyond bland AI responses: I built a full-stack debate platform where language models adopt vibrant personalities and argue with adjustable intensity."
+excerpt: "I built a platform where LLMs debate each other with custom personalities and adjustable spiciness. A Sassy Drag Queen vs a Noir Detective at Extra Hot is worth watching."
 tags: ["AI", "LLM", "Next.js", "Vercel", "AI SDK", "Frontend", "Backend", "TypeScript"]
 ---
 
@@ -12,28 +12,13 @@ import agentsImg from './agents.png';
 import drakeImg from './drake.png';
 import spicinessImg from './spiciness.png';
 
-Ever feel like [AI benchmarks](https://livebench.ai/#/) are… well, a bit gamed? Like LLMs are trained to ace specific tests rather than truly think or argue? I certainly did. So, instead of developing another analytics dashboard, I decided to build something designed to put these powerful models in a real bind: a head-to-head, no-holds-barred debate. Welcome to AIgument.
+[AI benchmarks](https://livebench.ai/#/) are gamed. LLMs are trained to ace specific tests, not to think or argue. So instead of building another analytics dashboard, I built something to put them in a bind: a head-to-head debate platform. AIgument.
 
-But what's the point if the verbal fireworks just disappear into the digital ether? As the old saying (probably) goes: "If two LLMs have an argument in a serverless forest and only the developer is there to read it, did it really happen?" I wanted these clashes to be shareable and memorable.
+I also wanted to see how far I could push Next.js without a separate backend, try my first edge database with [Neon](https://neon.tech/), and go deep on the [Vercel AI SDK](https://ai-sdk.dev/).
 
-This project wasn't just about seeing who could craft the most eloquent prose; it was an exploration of how far I could push a Next.js application without resorting to a separate backend. I wanted to test the boundaries of what's possible within a unified codebase, diving deep into the [Vercel AI SDK](https://ai-sdk.dev/), work with my first edge database using [Neon](https://neon.tech/), and discover that even the most logical AI models can benefit from a little… or a _lot_ of personality.
+## The debate engine
 
-## The Premise: Beyond Benchmarks (And Into The Social Sphere)
-
-My core idea was simple but ambitious: if LLMs are supposed to be so intelligent, why not let them have a proper debate on a topic of the user's choice? I wanted to see how they'd handle constructing a coherent argument, responding to counter-arguments, and maintaining a stance without just agreeing or summarising. It felt like a more organic, less "benchmarked" way to evaluate their capabilities.
-
-My goals for the build were:
-
-1. **Full-Stack Next.js**: Leverage Next.js's API routes and server actions to handle the "backend" logic without needing a separate Express or Go server.
-2. **Vercel AI SDK**: Simplify interactions with various LLMs using a unified interface.
-3. **Real-time Interaction**: Make it easy for anyone to set up, watch, and _share_ a debate.
-4. **Intuitive UI/UX**: Ensuring the setup and viewing process was intuitive and frictionless.
-5. **Persistent Debates with Neon**: My first (very brief) foray into edge databases, using Neon (a serverless PostgreSQL) to store and retrieve debates, making them shareable.
-
-
-## The Core Engine: Orchestrating Arguments & Archiving Clashes
-
-At the heart of AIgument is a sequential debate flow: Debater 1 makes an argument, then Debater 2 responds, and so on. This meant managing state effectively on the client side and ensuring the LLM interactions were robust.
+The flow is sequential: Debater 1 argues, Debater 2 responds, repeat. State management on the client, LLM calls on the server.
 
 <Figure
   src={diagramImg}
@@ -41,9 +26,7 @@ At the heart of AIgument is a sequential debate flow: Debater 1 makes an argumen
   title="What happens when you ask a developer to 'make it visual'"
 />
 
-One significant hurdle: each LLM provider implements text streaming with its own unique, nightmarish boilerplate. Google alone has multiple Gemini APIs, each with different requirements—making the fast-moving landscape particularly challenging.
-
-This is where the [Vercel AI SDK](https://ai-sdk.dev/) became a lifesaver, abstracting away the differences between OpenAI, Anthropic, Google, and xAI models. It's an open-source abstraction layer maintained by Vercel, who are about as 'open source' as the House of Lords is 'democratically elected'.
+Every LLM provider implements text streaming differently. Google alone has multiple Gemini APIs, each with different requirements. The [Vercel AI SDK](https://ai-sdk.dev/) abstracts all of that away behind a single interface. It's maintained by Vercel, who are about as 'open source' as the House of Lords is 'democratically elected'.
 
 The streamText function in the SDK was key for those live "looks like the AI is typing" responses:
 
@@ -83,7 +66,7 @@ Yes, the eagle-eyed among you will have noticed that essentially, all this is do
   title="When your colleague asks how your AI architecture works"
 />
 
-One early challenge was the **system prompt**. Crafting a prompt that consistently guided the LLMs to stay on topic, adopt a pro/con stance, and build upon previous arguments without just summarizing or getting repetitive was a delicate dance. It involved specifying the debate topic, the debater's position (PRO or CON), and providing the previousArguments as context:
+The system prompt took the most iteration. Getting the LLMs to stay on topic, hold a stance, and build on previous arguments without repeating themselves or going limp:
 
 ```typescript
 const DEBATE_PROMPTS = {
@@ -144,13 +127,13 @@ export async function saveDebate({ /* params */ }) {
 
 This allowed users to save their masterpieces (or trainwrecks) and share them via a unique URL (/debate/[id]), pulling the data using getDebate(id). My first edge DB experience, and definitely not my last!
 
-## The Missing Ingredient: PERSONALITY, DARLING!
+## Personality
 
-My first few debates were… a bit dry. The LLMs were logical, articulate, and utterly devoid of character. They sounded like a Wikipedia entry arguing with another Wikipedia entry. "This isn't a debate," I thought, "it's a joint research paper written by two algorithms trying desperately not to offend each other."
+My first few debates were dry. The LLMs were logical, articulate, and devoid of character. Two Wikipedia entries arguing with each other. A joint research paper written by algorithms trying not to offend each other.
 
-Then it hit me: LLMs are _excellent_ at role-playing! Remember all the prompt engineering tips you read which start: "You are a [insert role here]"? Why not give them distinct personalities? This was my "aha!" moment, immediately followed by my "why didn't I think of this sooner, you absolute muppet" moment.
+LLMs are _excellent_ at role-playing. Why not give them distinct personalities? I felt like an absolute muppet for not thinking of this sooner.
 
-I quickly added a "Personality Selector" (PersonalitySelector.tsx) to the setup, allowing users to choose from pre-defined personas. An "Eccentric Aristocrat" debating a Ken Loach-inspired "Kitchen Sink Realist" about universal basic income creates an interesting class dynamic. Or perhaps "Chef Catastrophe" (my shameless Gordon Ramsay clone) screaming "IT'S RAAAW!" while a "Passive Aggressor" responds with a painfully polite "Oh, I'm sure you didn't mean to be quite so... forceful." The personalities added a layer of social dynamics that standard LLM debates simply lacked.
+I added a personality selector. An "Eccentric Aristocrat" debating a Ken Loach-inspired "Kitchen Sink Realist" about universal basic income creates a class dynamic you wouldn't get otherwise. "Chef Catastrophe" (my shameless Gordon Ramsay clone) screaming "IT'S RAAAW!" while a "Passive Aggressor" responds with "Oh, I'm sure you didn't mean to be quite so... forceful."
 
 <Figure
   src={drakeImg}
@@ -158,7 +141,7 @@ I quickly added a "Personality Selector" (PersonalitySelector.tsx) to the setup,
   title="From dry discourse to digital theatre"
 />
 
-This single change transformed the entire experience. Debates became entertaining, unpredictable, and genuinely funny. The "Pirate" would drop "Ahoy!" and "shiver me timbers," while the "Noir Detective" would ponder the "dark alleys of truth." But the real star, for me, was the "Sassy Drag Queen":
+Debates went from dry to unpredictable. The "Pirate" drops "Ahoy!" and "shiver me timbers," the "Noir Detective" ponders the "dark alleys of truth." But the real star was the "Sassy Drag Queen":
 
 ```typescript
 drag_queen: {
@@ -177,7 +160,7 @@ drag_queen: {
 }
 ```
 
-Suddenly, the LLM wasn't just arguing; it was _performing_. It would address its opponent as "honey," dismiss weak points with a "metaphorical hair flip," and declare its arguments "the gospel truth." The library was officially OPEN, darling.
+The LLM wasn't arguing anymore, it was _performing_. Addressing its opponent as "honey," dismissing weak points with a "metaphorical hair flip," declaring its arguments "the gospel truth." The library was officially OPEN, darling.
 
 Implementing this involved a PersonalityConfig interface that defined the name, description (for the UI), tone, style, humor, intensity_level, and crucially, specific_instructions and catchphrases that get injected into the system prompt.
 
@@ -185,7 +168,7 @@ I ordered the personalities in the selector for comedic effect. It starts with m
 
 ## Turning Up the Heat: The Spiciness Selector
 
-Just having a personality wasn't quite enough. A "Sassy Drag Queen" might be mild mannered or an absolute firebrand. I needed a way to control the _intensity_ of the debate. Enter the "Spiciness Selector":
+Personality alone wasn't enough. A "Sassy Drag Queen" might be mild mannered or an absolute firebrand. I needed a way to control the _intensity_:
 
 <Figure
   src={spicinessImg}
@@ -210,7 +193,7 @@ With this, users can pick from "Lemon & Herb" (Calm and Professional) all the wa
 These spicinessConfig modifiers are injected directly into the system prompt, dynamically altering how the chosen personality behaves. An "Alfred the Butler" at "Extra Hot" is a very different (and hilarious) experience to one at "Lemon & Herb."
 
 
-Beyond the code structure, the real art lay in the prompt engineering, injecting specific instructions into the system prompt based on the chosen personality (as seen in the getSystemPrompt snippet above). But I took it a step further: I made the DebaterResponse component dynamically apply different font styles based on the selected personality, giving a subtle visual cue to the debater's persona:
+I also made the DebaterResponse component apply different font styles per personality, so you get a visual cue alongside the tone:
 
 ```typescript
 // Snippet from DebaterResponse.tsx
@@ -249,7 +232,7 @@ And what if you can't think of a debate topic? Sometimes the best arguments are 
 - "Would Pat Butcher win in a thumb war against a slightly motivated orangutan?"
 - "Should we replace the concept of money with a system where we exchange increasingly elaborate compliments?"
 
-It's amazing how passionately a "Sassy Drag Queen" will argue about cucumber identity issues when set to "Extra Hot."
+A "Sassy Drag Queen" arguing about cucumber identity issues at "Extra Hot" is something you have to see.
 
 ## The Grand Unified Prompt Theory
 
@@ -341,22 +324,13 @@ ${contextInstructions}
 
 The prompt explicitly tells the LLM its role, stance, the debate's intensity, its assigned personality with detailed traits, how spiciness modifies that personality, and the immediate task (respond or open). Critically, it also reminds the LLM to avoid repetition and stay concise. This level of detailed instruction was key to getting consistently engaging and characterful responses.
 
-## Under the Hood: Key Learnings
+## What I learned
 
-AIgument gave me a great opportunity to consolidate skills and explore new tech:
+The prompt above went through dozens of iterations. Multi-turn, persona-driven prompts are hard to get right. The LLM drifts off-persona, repeats itself, or goes limp after a few rounds. Each personality needed different guardrails.
 
-- **Vercel AI SDK as a Universal Adapter**: Invaluable for managing multiple LLM providers.
-- **Full-Stack Next.js (No Separate Backend)**: API Routes and Server Actions handled all logic - massively simplifying deployment.
-- **Neon as an Edge Database**:  My first experience with serverless PostgreSQL at the edge. Storing debates for sharing was surprisingly easy with Neon's DX and Next.js integration. It just worked.
-- **Client-Side API Key Management**: A crucial privacy decision.
-- **Thinking About User Onboarding**: Adding Demo Mode and example topics significantly improved accessibility.
+Neon was the easiest part. Serverless PostgreSQL, plugged into Next.js Server Actions, done. My first edge database and it took less time to set up than the personality system.
 
-## What I Actually Learned
-
-- **Prompt Engineering is Iterative & Nuanced**: Crafting effective prompts for complex, multi-turn, persona-driven interactions is an art. The "final" prompt above went through dozens of iterations.
-- **LLMs + Personality + Spice = Pure Entertainment**: Their ability to embody roles, modified by intensity, is astounding. Watching a "Chef Catastrophe" LLM scream "IT'S RAAAW!" at another LLM's argument is pure gold.
-- **Vercel AI SDK & Neon Simplify Complexity**: These tools abstract away a lot of underlying challenges, letting developers focus on the application logic and user experience.
-- **Side Projects Are the Best Teachers**: What began as a simple debate app became a practical playground for prompt engineering, state management with streaming responses, and personality design. Discovering exactly how much "Noir Detective" personality an LLM can handle before it stops making actual arguments and just describes rain-slicked streets for three paragraphs is both educational and surprisingly entertaining.
+The best discovery: there's a threshold of "Noir Detective" personality an LLM can handle before it stops making arguments and spends three paragraphs describing rain-slicked streets.
 
 ---
 
