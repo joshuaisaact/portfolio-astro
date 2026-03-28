@@ -2,7 +2,7 @@
 title: "Goss"
 order: 6
 slug: "goss"
-description: "Architected a robust real-time social platform featuring WebSocket notifications, social graph management, and file handling. Built with Next.js, TypeScript, and Supabase."
+description: "A voice-first social platform with real-time WebSocket notifications, social graph management, and file handling. Built with Next.js, TypeScript, and Supabase."
 imageSrc: "../../assets/projects/goss-poster.webp"
 imageAlt: "Goss logo"
 links:
@@ -31,6 +31,6 @@ videoPreviewSrc: "/media/projects/videos/goss-preview.webm"
 posterImage: "../../assets/projects/goss-poster.webp"
 ---
 
-I took on the technical challenge of building a voice-first social platform that required real-time capabilities and complex data relationships. I led the development of key infrastructure components, focusing on creating a scalable backend while ensuring a smooth user experience.
+A team project. I owned the backend: real-time WebSocket notifications via Supabase Realtime, a social graph schema in PostgreSQL for bidirectional friend connections, and file uploads with access controls.
 
-The project showcases my ability to architect complex systems, from implementing real-time WebSocket notifications to designing efficient database schemas for social relationships. Working within a team environment, I delivered enterprise-grade features that formed the backbone of the platform.
+The trickiest bit was the notification system. Multiple client sessions per user, each needing consistent real-time delivery without duplicates or dropped messages. WebSocket connection management with automatic reconnection handled most of it, but the edge cases around concurrent sessions took real thought.
