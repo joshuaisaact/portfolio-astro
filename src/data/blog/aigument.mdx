@@ -14,7 +14,9 @@ import spicinessImg from './spiciness.png';
 
 [AI benchmarks](https://livebench.ai/#/) are gamed. LLMs are trained to ace specific tests, not to think or argue. So instead of building another analytics dashboard, I built something to put them in a bind: a head-to-head debate platform. AIgument.
 
-I also wanted to see how far I could push Next.js without a separate backend, try my first edge database with [Neon](https://neon.tech/), and go deep on the [Vercel AI SDK](https://ai-sdk.dev/).
+If two LLMs have an argument in a serverless forest and only the developer is there to read it, did it happen? I wanted these debates to be shareable and memorable.
+
+I also wanted to push Next.js as far as it would go without a separate backend, try my first edge database with [Neon](https://neon.tech/), go deep on the [Vercel AI SDK](https://ai-sdk.dev/), and find out what happens when you give LLMs a _lot_ of personality.
 
 ## The debate engine
 
@@ -326,9 +328,11 @@ The prompt explicitly tells the LLM its role, stance, the debate's intensity, it
 
 ## What I learned
 
-The prompt above went through dozens of iterations. Multi-turn, persona-driven prompts are hard to get right. The LLM drifts off-persona, repeats itself, or goes limp after a few rounds. Each personality needed different guardrails.
+The Vercel AI SDK was invaluable for managing multiple LLM providers. Without it, I'd have written separate streaming implementations for OpenAI, Anthropic, Google, and xAI. Full-stack Next.js with API Routes and Server Actions handled all the backend logic without a separate server, which simplified deployment down to one Vercel project.
 
-Neon was the easiest part. Serverless PostgreSQL, plugged into Next.js Server Actions, done. My first edge database and it took less time to set up than the personality system.
+Neon was the easiest part. Serverless PostgreSQL, plugged into Next.js Server Actions, done. My first edge database and it took less time to set up than the personality system. Storing API keys client-side was a deliberate privacy decision: I never wanted user keys touching my server.
+
+The prompt above went through dozens of iterations. Multi-turn, persona-driven prompts are hard to get right. The LLM drifts off-persona, repeats itself, or goes limp after a few rounds. Each personality needed different guardrails. Adding Demo Mode and random topics made a big difference for onboarding: not everyone has API keys handy, and sometimes people need a silly prompt to get started.
 
 The best discovery: there's a threshold of "Noir Detective" personality an LLM can handle before it stops making arguments and spends three paragraphs describing rain-slicked streets.
 

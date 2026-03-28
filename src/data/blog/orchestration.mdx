@@ -15,9 +15,14 @@ Maya started as one mega-prompt: "You are a yoga instructor who can search poses
 
 2000 tokens of instructions. The AI would forget what it was supposed to do halfway through conversations.
 
-## Why not a framework?
+## Approaches I considered
 
-I looked at LangChain and LangGraph but they felt like overkill. AI models evolve fast, and heavy abstraction layers become tech debt when the underlying models improve every few months. I wanted something simpler: split the monolith into small, focused agents that I could understand and swap out individually.
+1. **The Monolith** - One prompt does everything. Simple to start, nightmare to maintain. Where I began.
+2. **Tool-Calling Agent** - Single agent that calls different functions. What OpenAI's Assistants API demonstrates. Good for simpler use cases.
+3. **Orchestrated Specialists** - Separate agents for separate concerns. Intent recognition split from response generation. What Maya became.
+4. **Agent Frameworks** - LangChain, LangGraph. Agents delegating to agents. Powerful but often overkill.
+
+I landed on orchestrated specialists. AI models evolve fast, and heavy abstraction layers become tech debt when the underlying models improve every few months. I wanted something I could understand and swap out individually.
 
 ## The architecture
 
@@ -214,11 +219,23 @@ While I didn't rigorously benchmark everything, the improvements were clear:
 - Changes are isolated - I can update Maya's personality without breaking search
 - Debugging is straightforward - errors point to specific agents
 
-## What I'd do differently
+## What I learned
 
 Structured output schemas from day one. I wasted time parsing free-text LLM responses before switching to typed JSON. The intent agent alone eliminated the "I don't understand" loops that plagued the monolithic prompt.
 
-The 300-token focused prompts are easier to debug than the 2000-token monster. When Maya suggests "Downward Facing Elephant" as a real pose, I know exactly which agent to fix.
+Five focused agents outperform one generalist, especially with smaller context windows. The coordinator doesn't need to be clever, it needs to be reliable. And 300-token prompts are easier to debug than a 2000-token monster.
+
+Always validate AI output against your source of truth. The generation agent invents plausible-sounding poses. The validation layer catches them before they reach the user.
+
+## What's next
+
+Adding new agents doesn't require rewriting anything, you add another specialist to the chain. The ones I'm planning:
+
+- **Memory Agent** - track user preferences and progress over time
+- **Recommendation Agent** - suggest practices based on history and goals
+- **Personalization Agent** - adapt Maya's tone to user preferences
+
+When Maya suggests "Downward Facing Elephant" as a real pose, I know exactly which agent to fix. That's the whole point of splitting it up.
 
 ---
 
