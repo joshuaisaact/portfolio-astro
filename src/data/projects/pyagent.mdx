@@ -2,7 +2,7 @@
 title: "PyAgent"
 slug: "pyagent"
 projectType: "tool"
-description: "An AI-powered code assistant built with Python and Google's Gemini API. Features file management, code execution, and an agentic loop for completing complex tasks."
+description: "A CLI code assistant in Python using Gemini. Reads and writes files, runs scripts, and loops until the task is done."
 imageSrc: "../../assets/projects/python.svg"
 imageAlt: "Python Logo"
 links:
@@ -22,6 +22,6 @@ architecture:
   backend: "Built with Python using Google Gemini SDK for AI inference. Implements function calling with tools for file operations (get_files_info, get_file_content, write_file) and script execution (run_python_file). Uses UV for package management and environment configuration via .env files."
 ---
 
-PyAgent is a learning project that explores building AI-powered code assistants with Python. It leverages Google's Gemini API to create an agent capable of interacting with filesystems and executing Python code to complete complex tasks autonomously.
+A learning project: a CLI agent that uses Gemini to read files, write files, and run Python scripts in a loop until it finishes the task (or hits 20 iterations). All file operations are sandboxed to a working directory and script execution has a 30-second timeout.
 
-The project implements an agentic loop that can iteratively use its available tools - file reading, writing, and Python script execution - to accomplish multi-step objectives. Safety is a key consideration, with all operations restricted to a designated working directory and execution timeouts in place.
+I built it alongside the Go version to compare how the same agent pattern feels in both languages.
