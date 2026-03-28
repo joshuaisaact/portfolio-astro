@@ -21,13 +21,13 @@ But main branch success rates dropped to 70.8%, a five-year low. The benchmark i
 
 Nearly 3 out of 10 merges into production are failing. Recovery times climbed 13% to 72 minutes on average. Feature branch throughput rose 15%, but main branch throughput for the median team declined 7%.
 
-[Thoughtworks published a response](https://www.thoughtworks.com/insights/blog/generative-ai/a-thoughtworks-perspective-on-circleci-s-2026-state-of-software-) to the report with a line that stuck with me: most organisations' test suites were designed for a world where humans wrote code at human speed. They were never built to validate the volume and velocity of AI-generated changes.
+Thoughtworks published a response<Footnote id="2" /> with a line that stuck with me: most organisations' test suites were designed for a world where humans wrote code at human speed. They were never built to validate the volume and velocity of AI-generated changes.
 
 Teams can generate code faster than their infrastructure can verify it.
 
 ## The accidental agent infrastructure
 
-Over the past few years, the JavaScript ecosystem has been on a quiet Rust rewrite binge. SWC replaced Babel. Turbopack is coming for Webpack. Biome is replacing Prettier and ESLint. Oxlint landed months ago, 50-100x faster than ESLint on real codebases. Rspack, Lightning CSS. Bun (built in Zig, not Rust, but the same instinct) now serves as [Anthropic's execution layer](https://www.anthropic.com/news/anthropic-acquires-bun-as-claude-code-reaches-usd1b-milestone) after they acquired it in December 2025.
+Over the past few years, the JavaScript ecosystem has been on a quiet Rust rewrite binge. SWC replaced Babel. Turbopack is coming for Webpack. Biome is replacing Prettier and ESLint. Oxlint landed months ago, 50-100x faster than ESLint on real codebases. Rspack, Lightning CSS. Bun (built in Zig, not Rust, but the same instinct) now serves as Anthropic's execution layer<Footnote id="3" /> after they acquired it in December 2025.
 
 The original pitch for all of these was developer experience. You don't want to wait 8 seconds for a lint pass.
 
@@ -73,7 +73,7 @@ Vite's team also positioned Vite 8 as the entry point to an end-to-end toolchain
 
 Ten days after Vite 8, [Next.js 16.2 dropped](https://nextjs.org/blog/next-16-2). The headline numbers fit the pattern: 400% faster dev server startup, 50% faster rendering, 200+ Turbopack bug fixes.
 
-But look at [the release notes](https://nextjs.org/blog/next-16-2-ai). Next.js 16.2 ships AGENTS.md in create-next-app. Browser log forwarding for agent-powered debugging. A dev server lock file so parallel agents don't collide on ports. Experimental Agent DevTools that give AI agents terminal access to React DevTools and Next.js diagnostics.
+But look at the AI-specific release notes.<Footnote id="4" /> Next.js 16.2 ships AGENTS.md in create-next-app. Browser log forwarding for agent-powered debugging. A dev server lock file so parallel agents don't collide on ports. Experimental Agent DevTools that give AI agents terminal access to React DevTools and Next.js diagnostics.
 
 Vercel's team started investing in speed for the same reasons everyone else did. Developers hate waiting. Now they're building tooling that exists for agents, not developers. Vercel is turning "accidental agent infrastructure" into a deliberate product strategy.
 
@@ -101,4 +101,7 @@ Teams solved code generation. Now they're staring at verification. The top 5% we
 
 <FootnoteList>
   <FootnoteItem id="1">OpenAI's [Harness Engineering](https://openai.com/index/harness-engineering/) post describes building custom linters with remediation instructions in error messages, injecting context at the exact moment the agent needs it. They went from 20% of engineering time on manual AI-generated code cleanup to automated enforcement.</FootnoteItem>
+  <FootnoteItem id="2">[A Thoughtworks perspective on CircleCI's 2026 State of Software Delivery Report](https://www.thoughtworks.com/insights/blog/generative-ai/a-thoughtworks-perspective-on-circleci-s-2026-state-of-software-). Their framing of the delivery pipeline as the binding constraint on engineering performance is worth reading in full.</FootnoteItem>
+  <FootnoteItem id="3">[Anthropic acquires Bun](https://www.anthropic.com/news/anthropic-acquires-bun-as-claude-code-reaches-usd1b-milestone). Anthropic's first acquisition, announced alongside Claude Code hitting $1B ARR.</FootnoteItem>
+  <FootnoteItem id="4">[Next.js 16.2: AI Improvements](https://nextjs.org/blog/next-16-2-ai). Covers AGENTS.md, browser log forwarding, Agent DevTools, and the research showing bundled docs achieved a 100% pass rate on Next.js evals.</FootnoteItem>
 </FootnoteList>
