@@ -48,9 +48,11 @@ for (let i = 0; i < posts.length; i += maxChunkSize) {
               aria-roledescription="slide"
               aria-label={`Page ${pageIndex + 1} of ${pages.length}`}
             >
-              <div class="grid grid-cols-2 gap-3 sm:gap-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                 {page.map((post, i) => (
-                  <BlogCard slug={post.id} metadata={post.data} index={pageIndex * maxChunkSize + i} />
+                  <div class={i >= 2 ? "hidden md:block" : ""}>
+                    <BlogCard slug={post.id} metadata={post.data} index={pageIndex * maxChunkSize + i} />
+                  </div>
                 ))}
               </div>
             </div>
