@@ -5,9 +5,13 @@ excerpt: "AI-generated code is flooding pipelines. Main branch success rates hit
 tags: ["AI", "software engineering", "developer tools", "CI/CD", "Rust"]
 ---
 
+import Footnote from '../../components/Footnote.astro';
+import FootnoteList from '../../components/FootnoteList.astro';
+import FootnoteItem from '../../components/FootnoteItem.astro';
+
 Neil Kakkar wrote a piece about his Claude Code workflow ("[How I'm Productive with Claude Code](https://neilkakkar.com/productive-with-claude-code.html)") that keeps rattling around in my head. He describes a pattern straight out of Theory of Constraints: fix one bottleneck, the next one appears. PRs got effortless, so rebuild speed became the constraint. Rebuilds got instant, so parallelism became the constraint. Each solved problem revealed the next.
 
-I read that and started connecting it to a trend I've been watching from a different angle. A recent industry report has the numbers to prove it.
+A recent industry report has the numbers to back this up.
 
 ## The verification bottleneck is measurable
 
@@ -19,7 +23,7 @@ Nearly 3 out of 10 merges into production are failing. Recovery times climbed 13
 
 [Thoughtworks published a response](https://www.thoughtworks.com/insights/blog/generative-ai/a-thoughtworks-perspective-on-circleci-s-2026-state-of-software-) to the report with a line that stuck with me: most organisations' test suites were designed for a world where humans wrote code at human speed. They were never built to validate the volume and velocity of AI-generated changes.
 
-Teams can generate code faster than their infrastructure can verify it. Verification is the new bottleneck.
+Teams can generate code faster than their infrastructure can verify it.
 
 ## The accidental agent infrastructure
 
@@ -35,27 +39,25 @@ An agent runs in a loop: write, lint, fix, lint, test, fix, lint, test. Over and
 
 ## Linters as verification oracles
 
-I keep coming back to linters. For agents, a linter is a verification oracle. The agent can't tell if its code is well-structured by reading its own output. It won't catch its own unused imports or type errors through self-review. A linter catches them deterministically, every time.
+For agents, a linter is a verification oracle. The agent can't tell if its code is well-structured by reading its own output. It won't catch its own unused imports or type errors through self-review. A linter catches them on every pass, in the same place, with the same result.
 
 Pass or fail, exact locations, often auto-fixes. That kind of unambiguous signal is gold for an autonomous loop. The agent doesn't reason about whether the code is clean. It runs oxlint and gets a definitive answer.
 
 Speed is only half the linter story. Configuration is the other half. Many teams ran ESLint with minimal rules. A handful of style preferences, maybe an airbnb preset they never updated. Code review and developer judgment covered everything the linter didn't. That worked when humans wrote the code. Agents have no such judgment. Every rule you didn't enable is a category of error the agent will repeat on loop without friction.
 
+Documentation tells agents what to do. Linters force them to.<Footnote id="1" /> If a rule matters, it should be a mechanical check, not a line in a README the agent may or may not read. You can go further: write lint error messages as remediation instructions. When the agent hits a failure, the message itself teaches it how to fix the problem in the same pass it found it. The agent doesn't need to search for context or guess at intent. The linter hands it the fix.
+
 The Rust-based linters made a design choice that looked like a developer preference at the time: opinionated defaults, strict out of the box. Biome ships with formatting and linting opinions baked in. Oxlint enables far more rules by default than ESLint ever did. That strictness is an agent infrastructure decision, whether anyone intended it or not. More rules means more signal per loop iteration. A loose linter gives an agent a green light on code that a senior engineer would flag in review. A strict one catches it on the first pass, before the agent builds three more features on top of it.
 
-Fast linters turn verification from an expensive step into a nearly free one. Free verification means constant verification. Constant verification means agent output quality goes up without touching the model or the prompts.
+When you can run the linter in 200ms, you run it on every pass. Agent output quality goes up without touching the model or the prompts.
 
-You can see this playing out in CircleCI's numbers. The top 5% of teams, the ones who scaled both code creation and code delivery, grew main branch throughput 26% while feature branch activity surged 85%. CircleCI attributes that to strong validation systems and fast feedback loops. These teams invested in verification infrastructure before agents made it urgent, and now they're pulling away from everyone else.
+You can see this playing out in CircleCI's numbers. The top 5% of teams, the ones who scaled both code creation and code delivery, grew main branch throughput 26% while feature branch activity surged 85%. CircleCI attributes that to strong validation systems and fast feedback loops. These teams invested in verification infrastructure before agents made it urgent, and now they're pulling away.
 
 ## The Anthropic signal
 
-I wrote a few weeks ago about Anthropic acquiring Bun. Their first acquisition ever. The company behind Claude looked at the landscape and bought a JavaScript runtime.
+The CircleCI numbers put Anthropic's Bun acquisition in sharper focus. Jarred Sumner [wrote in his announcement](https://bun.com/blog/bun-joins-anthropic) that if most new code is going to be written, tested, and deployed by AI agents, "the runtime and tooling around that code become way more important." He also noted that the GitHub username with the most merged PRs in Bun's repo is now a Claude Code bot.
 
-Jarred Sumner, Bun's creator, [wrote something in his announcement](https://bun.com/blog/bun-joins-anthropic) that stuck with me: if most new code is going to be written, tested, and deployed by AI agents, "the runtime and tooling around that code become way more important."
-
-He also noted that the GitHub username with the most merged PRs in Bun's repo is now a Claude Code bot.
-
-That acquisition made sense through the "harness is the product" lens I keep returning to. The CircleCI numbers sharpen the picture. Anthropic could see the verification bottleneck coming. The company generating more agent-written code than anyone else in the world needs the fastest possible execution environment to validate that code. If your agent writes code and the test suite takes 30 seconds to run, you've lost the tight loop that makes agentic coding work.
+The company generating more agent-written code than anyone else in the world needs the fastest possible execution environment to validate that code. If your agent writes code and the test suite takes 30 seconds to run, you've lost the tight loop that makes agentic coding work. Anthropic saw the verification bottleneck coming and bought the runtime to close it.
 
 ## Vite 8.0 and the Rolldown shift
 
@@ -63,7 +65,7 @@ Two weeks ago, [Vite 8.0 shipped](https://vite.dev/blog/announcing-vite8), repla
 
 Linear reported their production build times dropping from 46 seconds to 6 seconds.
 
-In agent workflows, builds run on repeat. Every verification step, every preview, every test run. A build that took 46 seconds and now takes 6 changes what an agent can accomplish in a given context window.
+In agent workflows, builds run on repeat. Every verification step, every preview, every test run. If your agent was spending 46 seconds per build and now spends 6, it can do more in a given context window.
 
 Vite's team also positioned Vite 8 as the entry point to an end-to-end toolchain, with Rolldown for bundling and Oxc for compilation underneath. Rust from parsing to minifying, with consistent behaviour across the whole pipeline.
 
@@ -73,24 +75,30 @@ Ten days after Vite 8, [Next.js 16.2 dropped](https://nextjs.org/blog/next-16-2)
 
 But look at [the release notes](https://nextjs.org/blog/next-16-2-ai). Next.js 16.2 ships AGENTS.md in create-next-app. Browser log forwarding for agent-powered debugging. A dev server lock file so parallel agents don't collide on ports. Experimental Agent DevTools that give AI agents terminal access to React DevTools and Next.js diagnostics.
 
-Vercel's team started investing in speed for the same reasons everyone else did. Developers hate waiting. Now they're building tooling that exists for agents, not developers. The "accidental agent infrastructure" thesis is becoming an intentional strategy.
+Vercel's team started investing in speed for the same reasons everyone else did. Developers hate waiting. Now they're building tooling that exists for agents, not developers. Vercel is turning "accidental agent infrastructure" into a deliberate product strategy.
 
 ## The pattern
 
-Kakkar describes Theory of Constraints at the individual level: each constraint you remove reveals the next. Look at CircleCI's 28 million workflows and you see the same pattern at industry scale: teams accelerated code creation by 59%, and verification became the chokepoint. The top 5% of teams were ready for it. Everyone else is watching their main branch success rates crater.
+The Theory of Constraints pattern plays out at the individual level: each constraint you remove reveals the next. Look at CircleCI's 28 million workflows and you see the same pattern at industry scale: teams accelerated code creation by 59%, and verification became the chokepoint. The top 5% of teams were ready for it. Everyone else is watching their main branch success rates crater.
 
-I think this changes how we evaluate toolchains going forward. "How fast is this in a tight loop?" is an agent capability question. The 50x speedup from oxlint over ESLint unlocks agent workflows that were too slow to be practical at ESLint speeds.
+I think this changes how we evaluate toolchains going forward. "How fast is this in a tight loop?" is an agent capability question. Oxlint at 50x faster than ESLint makes agent workflows practical that were too slow to bother with before.
 
-## If you're running agents on your codebase today
+## What I'd actually do about it
 
-Swap ESLint for oxlint or Biome. The agent will hit it hundreds of times per session. This is your highest-leverage infrastructure change.
+If I inherited a codebase running agents today, the first thing I'd do is crank up the linter. Not just swap ESLint for oxlint or Biome, but turn on the rules. Most teams I've seen run a handful of style rules and call it done. That was fine when a human with judgment was writing every line. An agent has no judgment. Every rule you left off is a class of mistake it will make on repeat, without hesitation, forever.
 
-Get your dev server restart under 1 second. SWC, Turbopack, Vite 8. The agent's write-verify loop depends on it.
+Enable everything. Unused imports, explicit return types, no floating promises, consistent error handling. The stuff you always meant to enforce but never got around to because the team was "already good about it." The team isn't writing the code anymore. Turn on the rules, let the linter be the quality bar, and let the agent bounce off it until the code is clean. A strict linter isn't friction for an agent. It's a guardrail that costs 200ms per pass.
 
-Make your test suite parallelisable and fast. Vitest over Jest. Agents need sub-second feedback on unit tests to iterate.
+While you're at it, look at [e18e](https://e18e.dev/). The ecosystem performance initiative has been cleaning up the JavaScript dependency graph, replacing bloated packages with lighter alternatives, cutting install times, shrinking node_modules. That might have felt like a nice-to-have when you were the one waiting for `npm install`. When an agent is spinning up environments and running installs in a loop, every unnecessary dependency is time and surface area you're paying for on every iteration. Leaner dependency trees mean faster installs, faster builds, fewer things to go wrong.
 
-Treat CI speed as an agent capability multiplier.
+Speed matters for another reason: agents are time-blind. In [Anthropic's C compiler project](https://www.anthropic.com/engineering/building-c-compiler), Claude burned hours running full test suites when a 1% random sample would have caught the same bugs. Agents have no model of diminishing returns. If the slow path exists, they take it. If `pnpm test` runs 4,000 tests in 90 seconds and you also have a `test:fast` script that runs 200 in 3 seconds, the agent will run the full suite on every iteration unless you tell it not to. You have to build the fast path and make it the default.
 
-"Make your tools faster" has been good advice for a decade. Most teams didn't have a strong enough reason to prioritise it. Agents are that reason. And you can already see which teams took it seriously and which ones didn't.
+The same logic applies everywhere in the toolchain. Get your dev server restart under a second. Use Vitest instead of Jest. Treat CI speed as an agent capability multiplier.
 
-Teams solved code generation. Now they're staring at verification. The top 5% were ready. I'm curious how long it takes everyone else to catch up, and what breaks in the meantime.
+"Make your tools faster" has been good advice for a decade. Most teams didn't have a strong enough reason to prioritise it. Agents are that reason. CircleCI's numbers already show which teams took it seriously and which ones didn't.
+
+Teams solved code generation. Now they're staring at verification. The top 5% were ready. I'm curious how long it takes the rest to catch up, and what breaks in the meantime.
+
+<FootnoteList>
+  <FootnoteItem id="1">OpenAI's [Harness Engineering](https://openai.com/index/harness-engineering/) post describes building custom linters with remediation instructions in error messages, injecting context at the exact moment the agent needs it. They went from 20% of engineering time on manual AI-generated code cleanup to automated enforcement.</FootnoteItem>
+</FootnoteList>
