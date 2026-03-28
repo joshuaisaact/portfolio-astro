@@ -1,0 +1,61 @@
+---
+title: "Anthropic Quietly Killed Three SaaS Categories This Week"
+date: "2026-03-21"
+excerpt: "Most coverage focused on individual features. Nobody zoomed out to see what Anthropic did across the full week: absorb three categories of SaaS tooling into their own surface area."
+featured_image: "./anthropic.png"
+tags: ["AI", "Anthropic", "SaaS", "developer tools"]
+---
+
+Most of the coverage I have seen focused on individual features:
+
+- **Channels** — control Claude Code from Telegram and Discord. MCP servers push events into live sessions.
+- **Dispatch** — send tasks to your desktop agent from your phone, come back to finished work.
+- **MCP Elicitation** — agents pause mid-task, show you a structured form, collect your input, and resume without restarting.
+
+Each one got its own Hacker News thread. Channels hit #4 with 341 points. But I haven't seen anyone zoom out and look at what Anthropic did across the full week.
+
+That's remote agent control (competing with OpenClaw), event-driven automation (competing with n8n and Zapier), and mid-workflow human-in-the-loop orchestration (competing with every visual workflow builder that exists).
+
+Anthropic absorbed three categories of SaaS tooling into their own surface area.
+
+In five days.
+
+## Anthropic is building the whole stack
+
+Look past the individual features and you see Anthropic shipping the orchestration layer.
+
+Remote access, event-driven triggers, scheduling, a plugin marketplace, 38+ native connectors, an MCP protocol that lets any server push events into a running session. Every one of those capabilities used to justify a standalone product. Some of them justified entire venture-backed companies.
+
+If you're building tooling whose value proposition is "we connect the model to everything else," you're competing with the model provider's own roadmap. And they're iterating at model-release speed.
+
+MCP Elicitation is the one I'd personally pay closest attention to. Before this week, if an agent needed human input mid-workflow, you had to break the execution, collect the input separately, and restart. That limitation was one of the main reasons you'd reach for a dedicated orchestration tool like n8n.
+
+Anthropic just turned it into a native runtime capability.
+
+## The AWS play
+
+Buyers stop reaching for alternatives once they're trained and certified on the platform. That kills categories faster than any feature launch.
+
+On March 12th, Anthropic launched the Claude Partner Network backed by $100M. Free Anthropic Academy courses on Skilljar. A Claude Certified Architect exam: proctored, 60 questions, testing production architecture with agentic systems and MCP integration. Accenture is training 30,000 professionals and Cognizant is training 350,000, with Deloitte and Infosys as anchor partners.
+
+If you were around for the AWS certification wave, you've seen this before. Every solution architect in every consulting firm got certified on AWS, built reference architectures on AWS, and defaulted to AWS when scoping enterprise deals. EC2 was good, but the certification flywheel is what made AWS the default substrate for a decade of enterprise IT.
+
+Anthropic is running the same playbook, compressed into months instead of years. And for companies like n8n, that creates a two-front problem. Anthropic is building features that replace their core use cases while simultaneously training the enterprise workforce to build directly on Claude instead of reaching for middleware. The n8n connector already exists on claude.com. At some point you have to ask: why route through a separate orchestration tool when Claude does it natively and your architect is certified on the Claude way of doing it?
+
+## The problem with shipping this fast
+
+PostHog published a piece recently that applies here. They borrow manufacturing's Theory of Constraints: when upstream output exceeds downstream capacity, the system destabilises. In software, users ignore features faster than teams can ship them. Shipped work becomes invisible inventory.
+
+Anthropic has this problem right now. MCP Elicitation is the most consequential release of the week, and it's buried in a changelog entry. Dispatch launched via a tweet from an engineer. Channels got Hacker News traction, but I'd guess most paying Claude users have no idea it exists.
+
+The fact that I'm writing this post is itself evidence of the gap. If Anthropic's product marketing matched their shipping velocity, the pattern would be obvious to everyone. Instead, each feature gets covered in isolation, nobody connects the dots, and most people miss what's happening strategically.
+
+That gap is real breathing room for competitors. You can't eat three SaaS categories in a week if nobody knows you did it. OpenClaw, n8n, and the rest still have a window. Anthropic's adoption pipeline can't keep up with their engineering output.
+
+## Where I think this lands
+
+I don't know if the standalone tools survive by finding niches Anthropic won't serve, or if the certification flywheel eventually makes it irrelevant. OpenClaw still has the always-on daemon and WhatsApp support - until next week, perhaps. Claude Cowork still lacks headless API-first automation, for now.
+
+But the velocity is hard to argue with. A week ago Claude Code couldn't receive events from external systems while a session was running. Now it can, through two different mechanisms, on two different product surfaces, targeting two different user personas.
+
+If you're building developer tools or workflow automation, how do you plan around a model provider that treats the harness as their product and ships at this pace?
