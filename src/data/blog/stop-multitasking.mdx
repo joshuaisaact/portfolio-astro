@@ -78,7 +78,7 @@ Stop telling agents "I think there's a bug in the auth flow." Instead: "Fix the 
 
 Haiku handles 70% of what I throw at agents. Linting, small refactors, test scaffolding, boilerplate. Sonnet covers most of the rest. Most engineers default to the biggest model for everything. That's like driving a lorry to the corner shop.
 
-The better move: Use Haiku by default. UNDERWRITE's testing on 300 tasks found that Haiku used 400 tokens across 4 steps with 1 tool call and got it right, while larger models generated 7k output tokens across 3 steps with zero tool calls and hallucinated the answer.<Footnote id="4" /> Smaller models don't reason worse—they reason more efficiently, with better tool grounding. When you hit something that requires architectural reasoning—you'll know it. You'll feel it. That's when you reach for Opus.
+The better move: Use Haiku by default. Smaller models don't reason worse—they reason more efficiently, with better tool grounding.<Footnote id="4" /> When you hit something that requires architectural reasoning—you'll know it. You'll feel it. That's when you reach for Opus.
 
 ### **Low-reasoning modes wherever possible**
 
@@ -106,5 +106,5 @@ Use a faster model.
   <FootnoteItem id="1">Mark, G. (2008). "The Cost of Interrupted Work: More Speed and Stress." Proceedings of the SIGCHI Conference on Human Factors in Computing Systems. https://ics.uci.edu/~gmark/chi08-mark.pdf</FootnoteItem>
   <FootnoteItem id="2">Software Engineering Institute, Carnegie Mellon University. "Addressing the Detrimental Effects of Context Switching with DevOps." https://www.sei.cmu.edu/blog/addressing-the-detrimental-effects-of-context-switching-with-devops/</FootnoteItem>
   <FootnoteItem id="3">Altmann, E.M., et al. (2013). "Momentary interruptions can derail the train of thought." Journal of Experimental Psychology: General. https://pubmed.ncbi.nlm.nih.gov/23294345/</FootnoteItem>
-  <FootnoteItem id="4">UNDERWRITE evaluation of 13 frontier models on 300 insurance underwriting tasks. Found Claude Haiku achieved higher accuracy with lower token usage and better tool grounding compared to larger models on specialized domain tasks.</FootnoteItem>
+  <FootnoteItem id="4">The architect/editor split pattern (aider/coders/architect_coder.py) uses a stronger model for reasoning and a cheaper model for execution, because reasoning and execution are different skills that fail differently. LangChain's eval results show open models now match frontier models on execution tasks at 20x lower cost, suggesting the split works as a cost optimization: frontier models for planning/reasoning where they have an edge, cheaper models for execution where they're equivalent.</FootnoteItem>
 </FootnoteList>
