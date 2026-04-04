@@ -84,6 +84,16 @@ The better move: Use Haiku by default. Smaller models don't reason worse—they 
 
 Sonnet without extended thinking returns in seconds. The feedback loop gets tight enough that I hold the full mental model of what the agent is building. I catch drift before it compounds. An agent I correct after 30 seconds produces cleaner output than one that wanders for 10 minutes while I'm reviewing three other agents.
 
+## Iteration beats planning for 80% of work
+
+The industry is veering toward spec-driven development—write a detailed specification first, then have models execute against it. This feels rigorous. It's also slow.
+
+For complex, multi-week architectural work, specs make sense. You need to think through tradeoffs, document decisions, get alignment. But for most tasks—the refactor that'll take an hour, the test scaffolding, the bug fix, the feature flag addition—upfront specification costs more than iteration.
+
+Haiku runs at it. You redirect in 30 seconds based on actual output instead of predicted output. The agent's first attempt is often 70% right, and course-correcting the real thing beats planning the perfect thing. You're not smarter planning in advance—you're just slower.
+
+The waterfall impulse is strong. It feels professional to write a spec. But specs are a tax on small work. For tasks under a few hours, iteration with fast feedback beats specification every time.
+
 ## The exception: truly autonomous workflows
 
 Parallel workflows work for fully autonomous tasks. I built [auto-claude](https://github.com/joshuaisaact/auto-claude), an autonomous edit-commit-benchmark-revert loop. It runs for hours without intervention, tries dozens of experiments to complete a goal, and demands zero cognitive load from me. I can be deep in a focused single-agent session while auto-claude chips away at a performance optimisation in the background.
