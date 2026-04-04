@@ -1,0 +1,109 @@
+---
+title: "Stop Multitasking. Parallel Agent Workflows Are a Cognitive Drain."
+date: "2026-04-04"
+excerpt: "I've tested every multi-agent orchestration setup. Conductor, Cursor, Claude Code Max. I was faster single-threaded. The cognitive science on this runs decades deep."
+tags: ["AI", "Agents", "Workflow", "Productivity", "Cognitive Science"]
+---
+
+import Footnote from '../../components/Footnote.astro';
+import FootnoteList from '../../components/FootnoteList.astro';
+import FootnoteItem from '../../components/FootnoteItem.astro';
+
+You're choosing something 3x slower due to model anxiety. While you wait, your brain fragments. That's when parallel agents start looking good. They make it worse.
+
+I've had [Claude Code Max](https://github.com/anthropics/claude-code/releases) since launch. I've been on [Conductor](https://www.conductor.build/) since the alpha. [Cursor 3](https://cursor.com/blog/cursor-3) shipped this week with "run many agents in parallel" as a headline feature. [JetBrains Air](https://air.dev/) launched last month with the same pitch. I ran at parallel workflows for months. Isolated worktrees, different tasks, one dashboard.
+
+I was faster single-threaded.
+
+At a company where the whole engineering team uses AI tooling daily, I consistently ship the most PRs. I got there by maximising single-agent throughput. Not by parallelising.
+
+## The speed tax: model anxiety in numbers
+
+When you default to Opus because you're not confident Haiku will catch the edge case, you wait 50-80 seconds for a response. That dead time feels wasted. Conductor and Cursor 3 say: fill it with another agent.
+
+Real latency across typical tasks:
+
+| Task | Haiku 4.5 | Sonnet 4.6 | Opus 4.6 |
+| --- | --- | --- | --- |
+| **Simple linting fix** | 762ms | 2,199ms | 2,737ms |
+| **Write a test** | 1,417ms | 2,872ms | 3,279ms |
+| **Code review** | 3,330ms | 5,624ms | 5,129ms |
+
+Haiku is **3-4x faster** than Opus. For a 2000-token response, Opus takes 50-80 seconds. Haiku takes 15-25 seconds.
+
+You're paying a 3x latency tax. That's not nothing. But here's what that tax actually costs you.
+
+## The cognitive cost of filling dead time
+
+Gloria Mark at UC Irvine found it takes **23 minutes to recover full focus** after an interruption.<Footnote id="1" />
+
+Carnegie Mellon found engineers on five concurrent workstreams spend **80% of their time on switching overhead**.<Footnote id="2" />
+
+Bug rates **double** under fragmented attention.<Footnote id="3" />
+
+Reviewing code IS cognitive work. You load a mental model of an agent's changes. You check it against your understanding of the system. You decide whether the approach holds. Running five review contexts in rotation degrades each one.
+
+So the equation is:
+- Opus takes 60 seconds (feels unproductive)
+- You spin up four more agents to fill that time
+- You're now context-switching between five problem spaces
+- Your bug rate doubles
+- You take 23 minutes to refocus when you're done
+
+The dead time wasn't the problem.
+
+## Why model anxiety exists (and why it's often wrong)
+
+Opus scores 80.8% on SWE-bench Verified. Haiku scores 73.3%. A 7.5% gap feels significant. You don't know which side of that gap your task falls on, so you default to Opus to be safe.
+
+Here's the problem: that 7.5% gap is concentrated in maybe 5-10% of your actual work. The complex multi-file refactoring. The subtle architectural decision. The bug that requires holding three systems in your head at once.
+
+The other 90%—linting, test writing, error handling, simple refactors, boilerplate—both models handle identically. I benchmarked them on real coding tasks across the full spectrum. Trivial fixes, simple refactors, moderate test writing, complex multi-file work, hard race condition debugging. On every task type, quality was the same. Opus was just slower.
+
+You're paying a 3x latency tax to insure against a failure mode that doesn't happen 90% of the time. And while you're paying that tax, your brain is fragmenting, you're tempted to fill the dead time, and you end up slower and more error-prone.
+
+The tools exploit this. [Conductor](https://www.conductor.build/) and [Cursor 3](https://cursor.com/blog/cursor-3) aren't lying—they're solving for a real problem. Just the wrong one. They see: engineers feel slow, engineers wait 60 seconds. Solution: run agents in parallel.
+
+They miss: engineers feel slow because they're using the wrong model. The fix is model selection, not orchestration.
+
+## Three things that actually work
+
+Three things made me faster than any parallel setup I tried:
+
+### **Precise problem linking**
+
+Stop telling agents "I think there's a bug in the auth flow." Instead: "Fix the race condition in AuthProvider.tsx around line 118 where the token refresh fires twice before the first response returns." The agent starts closer to the answer. Fewer wasted cycles. Faster resolution.
+
+### **Aggressive model selection**
+
+Haiku handles 70% of what I throw at agents. Linting, small refactors, test scaffolding, boilerplate. Sonnet covers most of the rest. I reach for Opus maybe twice a week, for architecture decisions where the model needs to hold a large context and reason about tradeoffs. Most engineers default to the biggest model for everything. That's like driving a lorry to the corner shop.
+
+The better move: Use Haiku by default. When you hit something that requires architectural reasoning—you'll know it. You'll feel it. That's when you reach for Opus. You'll still use it 10% of the time, tops.
+
+### **Low-reasoning modes wherever possible**
+
+Sonnet without extended thinking returns in seconds. The feedback loop gets tight enough that I hold the full mental model of what the agent is building. I catch drift before it compounds. An agent I correct after 30 seconds produces cleaner output than one that wanders for 10 minutes while I'm reviewing three other agents.
+
+## The exception: truly autonomous workflows
+
+Parallel workflows work for fully autonomous tasks. I built [auto-claude](https://github.com/joshuaisaact/auto-claude), an autonomous edit-commit-benchmark-revert loop. It runs for hours without intervention, tries dozens of experiments to complete a goal, and demands zero cognitive load from me. I can be deep in a focused single-agent session while auto-claude chips away at a performance optimisation in the background.
+
+That's what parallel agents should look like. Fully autonomous. No dashboard to check. No "input required" interrupts. No rotation between problem spaces. The agent either passes its own acceptance criteria or it reverts and tries again.
+
+The tools shipping right now sell a different version of parallelism. One where you sit in the middle of five agents, reviewing their output in rotation, context-switching between problem spaces, approving diffs with half your attention.
+
+That's not orchestration. That's managed distraction.
+
+## The real problem
+
+You haven't maxed out single-thread throughput if you're reaching for parallelism now. The tooling makes it look easier than mastering the fundamentals.
+
+The dead time between frontier model responses isn't a scheduling problem.
+
+Use a faster model.
+
+<FootnoteList>
+  <FootnoteItem id="1">Mark, G. (2008). "The Cost of Interrupted Work: More Speed and Stress." Proceedings of the SIGCHI Conference on Human Factors in Computing Systems. https://ics.uci.edu/~gmark/chi08-mark.pdf</FootnoteItem>
+  <FootnoteItem id="2">Software Engineering Institute, Carnegie Mellon University. "Addressing the Detrimental Effects of Context Switching with DevOps." https://www.sei.cmu.edu/blog/addressing-the-detrimental-effects-of-context-switching-with-devops/</FootnoteItem>
+  <FootnoteItem id="3">Altmann, E.M., et al. (2013). "Momentary interruptions can derail the train of thought." Journal of Experimental Psychology: General. https://pubmed.ncbi.nlm.nih.gov/23294345/</FootnoteItem>
+</FootnoteList>
