@@ -87,6 +87,9 @@ const {
       html.dark {
         background-color: #111827;
       }
+      html.theme-ceefax {
+        background-color: #000000 !important;
+      }
       body {
         background-color: inherit;
       }
@@ -103,7 +106,24 @@ const {
       }
     </style>
     <script is:inline>
+      function getSiteTheme() {
+        return new URLSearchParams(window.location.search).get("theme") || "default";
+      }
+
       function applyTheme() {
+        const siteTheme = getSiteTheme();
+
+        // Remove all theme classes
+        document.documentElement.classList.remove("theme-ceefax");
+
+        if (siteTheme === "ceefax") {
+          // Ceefax forces dark mode, strip antialiasing
+          document.documentElement.classList.add("dark", "theme-ceefax");
+          document.documentElement.classList.remove("antialiased");
+          return;
+        }
+
+        // Default theme: respect dark/light preference
         const theme = (() => {
           const localStorageTheme = localStorage?.getItem("theme") ?? "";
           if (["dark", "light"].includes(localStorageTheme)) {
@@ -124,7 +144,129 @@ const {
         window.localStorage.setItem("theme", theme);
       }
 
+      // Append ?theme= to all internal links so it persists on navigation
+      function propagateTheme() {
+        var theme = getSiteTheme();
+        if (theme === "default") return;
+        document.addEventListener("DOMContentLoaded", function () {
+          document.querySelectorAll('a[href^="/"]').forEach(function (a) {
+            var url = new URL(a.href, window.location.origin);
+            url.searchParams.set("theme", theme);
+            a.href = url.toString();
+          });
+        });
+      }
+
       applyTheme();
+      propagateTheme();
+
+      // Ceefax enhancements: scanlines, live clock, image pixelation
+      function ceefaxInit() {
+        if (getSiteTheme() !== "ceefax") return;
+
+        document.addEventListener("DOMContentLoaded", function () {
+          // Page number mapping
+          var path = window.location.pathname.replace(/\/+$/, "") || "/";
+          var pageMap = {
+            "/": "100",
+            "/blog": "200",
+            "/projects": "300"
+          };
+          var pageNum = pageMap[path];
+          if (!pageNum) {
+            // Blog posts get 2xx, project pages get 3xx
+            if (path.startsWith("/blog/")) pageNum = "2" + String(Math.abs(path.split("").reduce(function(a,c){return ((a<<5)-a)+c.charCodeAt(0)|0},0)) % 100).padStart(2,"0");
+            else if (path.startsWith("/projects/")) pageNum = "3" + String(Math.abs(path.split("").reduce(function(a,c){return ((a<<5)-a)+c.charCodeAt(0)|0},0)) % 100).padStart(2,"0");
+            else pageNum = "100";
+          }
+
+          // Header bar with live clock
+          var hdr = document.createElement("div");
+          hdr.id = "ceefax-header";
+          document.body.insertBefore(hdr, document.body.firstChild);
+
+          var days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+          var months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+          var d = new Date();
+          var day = days[d.getDay()];
+          var dt = String(d.getDate()).padStart(2," ");
+          var mon = months[d.getMonth()];
+
+          var leftSpan = document.createElement("span");
+          leftSpan.textContent = "P" + pageNum + " CEEFAX " + pageNum + " " + day + " " + dt + " " + mon;
+          hdr.appendChild(leftSpan);
+
+          var timeSpan = document.createElement("span");
+          timeSpan.className = "ceefax-time";
+          hdr.appendChild(timeSpan);
+
+          function updateTime() {
+            var d = new Date();
+            var h = String(d.getHours()).padStart(2,"0");
+            var m = String(d.getMinutes()).padStart(2,"0");
+            var s = String(d.getSeconds()).padStart(2,"0");
+            timeSpan.textContent = h + ":" + m + "/" + s;
+          }
+          updateTime();
+          setInterval(updateTime, 1000);
+
+          // Scanline overlay
+          var sl = document.createElement("div");
+          sl.id = "ceefax-scanlines";
+          document.body.appendChild(sl);
+
+          // Fastext navigation bar — links carry ?theme=ceefax
+          var ft = document.createElement("div");
+          ft.id = "ceefax-fastext";
+          ft.innerHTML =
+            '<a href="/?theme=ceefax">HOME</a>' +
+            '<a href="/blog?theme=ceefax">BLOG</a>' +
+            '<a href="/projects?theme=ceefax">PROJECTS</a>' +
+            '<a href="#" id="ceefax-theme-btn">DEFAULT</a>';
+          document.body.appendChild(ft);
+          document.getElementById("ceefax-theme-btn").addEventListener("click", function (e) {
+            e.preventDefault();
+            // Strip ?theme param to go back to default
+            var url = new URL(window.location.href);
+            url.searchParams.delete("theme");
+            window.location.href = url.toString();
+          });
+
+          // Pixelate images via canvas downscale
+          document.querySelectorAll("img").forEach(function (img) {
+            var doPixelate = function () {
+              try {
+                var w = img.naturalWidth;
+                var h = img.naturalHeight;
+                if (!w || !h) return;
+                var factor = 12;
+                var sw = Math.max(Math.round(w / factor), 1);
+                var sh = Math.max(Math.round(h / factor), 1);
+                var c = document.createElement("canvas");
+                c.width = sw;
+                c.height = sh;
+                var ctx = c.getContext("2d");
+                if (!ctx) return;
+                ctx.imageSmoothingEnabled = false;
+                ctx.drawImage(img, 0, 0, sw, sh);
+                var c2 = document.createElement("canvas");
+                c2.width = w;
+                c2.height = h;
+                var ctx2 = c2.getContext("2d");
+                if (!ctx2) return;
+                ctx2.imageSmoothingEnabled = false;
+                ctx2.drawImage(c, 0, 0, w, h);
+                img.src = c2.toDataURL();
+                img.srcset = "";
+                img.classList.add("ceefax-pixelated");
+              } catch (e) {}
+            };
+            if (img.complete && img.naturalWidth) doPixelate();
+            else img.addEventListener("load", doPixelate);
+          });
+        });
+      }
+      ceefaxInit();
     </script>
   </head>
   <body class="font-ibm-plex min-h-screen">
