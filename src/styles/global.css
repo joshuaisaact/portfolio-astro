@@ -26,6 +26,11 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Balance all headings to prevent orphans */
+h1, h2, h3, h4 {
+  text-wrap: balance;
+}
+
 html.dark {
   background: linear-gradient(to bottom, #0f172a 0%, #0a0f1a 100%);
   background-attachment: fixed;
@@ -196,6 +201,12 @@ html.dark {
   font-family: var(--font-fraunces);
   font-weight: 600;
   font-variation-settings: "SOFT" 50, "WONK" 1;
+  text-wrap: balance;
+}
+
+/* Avoid orphans in body text */
+.prose p {
+  text-wrap: pretty;
 }
 
 /* Reset headings inside not-prose sections */

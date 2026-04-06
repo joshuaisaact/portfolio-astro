@@ -35,7 +35,7 @@ const formatDate = (dateString: string) => {
         dark:from-gray-800 dark:to-gray-850
         rounded-lg shadow-sm
         ring-1 ring-gray-900/5
-        transition-all duration-300
+        transition-[box-shadow,transform] duration-300
         hover:shadow-md hover:-translate-y-0.5 h-full flex flex-col"
   >
     {metadata.featured_image && (
@@ -48,7 +48,7 @@ const formatDate = (dateString: string) => {
           width={800}
           height={600}
           loading={index < 6 ? "eager" : "lazy"}
-          class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
         />
       </div>
     )}
