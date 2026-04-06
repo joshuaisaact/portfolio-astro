@@ -14,6 +14,10 @@
   --theme-5: #4a6b62; /* Muted sage - primary accent */
 }
 
+.dark {
+  --theme-5: #7ab3a0; /* Lighter, more saturated sage for dark backgrounds */
+}
+
 .dark img[src*="github.svg"],
 .dark img[src*="express.svg"],
 .dark img[src*="nodejs.svg"] {
@@ -230,10 +234,6 @@ html.dark {
 
 .prose a:not(.not-prose a):not([class*="bg-"]):hover {
   text-decoration-color: currentColor;
-}
-
-.dark .prose a:not(.not-prose a):not([class*="bg-"]) {
-  color: #6b9e8f;
 }
 
 .dark .prose a:not(.not-prose a):not([class*="bg-"]):hover {
