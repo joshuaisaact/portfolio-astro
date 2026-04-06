@@ -34,7 +34,7 @@ function getLogoPath(tab: Tab): string | null {
   <div class="flex gap-2 bg-[rgb(36,41,51)] rounded-t-lg px-2">
     {tabs.map((tab, i) => (
       <button
-        class={`tab-btn flex items-center gap-1.5 px-4 text-sm font-medium text-gray-400 bg-transparent border-none border-b-2 border-transparent cursor-pointer transition-all -mb-px hover:text-gray-200 ${i === 0 ? 'active' : ''}`}
+        class={`tab-btn flex items-center gap-1.5 px-4 text-sm font-medium text-gray-400 bg-transparent border-none border-b-2 border-transparent cursor-pointer transition-[color,border-color] -mb-px hover:text-gray-200 ${i === 0 ? 'active' : ''}`}
         data-tab={i}
         type="button"
       >

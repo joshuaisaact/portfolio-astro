@@ -77,7 +77,7 @@ const legacyNode: DataNode = {
   <div class="space-y-10">
     <!-- Original Approach -->
     <div
-      class="bg-white dark:bg-gray-900/50 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
+      class="bg-white dark:bg-gray-900/50 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden"
     >
       <!-- Header -->
       <div
@@ -104,7 +104,7 @@ const legacyNode: DataNode = {
           {
             oldStructureNodes.map((node, index) => (
               <>
-                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600 shadow-sm p-5 hover:shadow-md transition-all duration-200 group">
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600 shadow-sm p-5 hover:shadow-md transition-shadow duration-200 group">
                   <div class="flex items-start space-x-4">
                     <div
                       class={`w-12 h-12 rounded-xl bg-linear-to-br ${node.gradient} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-md`}
@@ -179,7 +179,7 @@ const legacyNode: DataNode = {
 
     <!-- Rebuilt Architecture -->
     <div
-      class="bg-white dark:bg-gray-900/50 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden"
+      class="bg-white dark:bg-gray-900/50 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden"
     >
       <!-- Header -->
       <div
@@ -206,7 +206,7 @@ const legacyNode: DataNode = {
           {
             newStructureNodes.map((node, index) => (
               <>
-                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600 shadow-sm p-5 hover:shadow-md transition-all duration-200 group">
+                <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600 shadow-sm p-5 hover:shadow-md transition-shadow duration-200 group">
                   <div class="flex items-start space-x-4">
                     <div
                       class={`w-12 h-12 rounded-xl bg-gradient-to-br ${node.gradient} flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform duration-300 shadow-md`}
@@ -275,7 +275,7 @@ const legacyNode: DataNode = {
           </div>
           <div class="max-w-md mx-auto opacity-80">
             <div
-              class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600 shadow-sm p-5 hover:shadow-md transition-all duration-200 group"
+              class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-600 shadow-sm p-5 hover:shadow-md transition-shadow duration-200 group"
             >
               <div class="flex items-start space-x-4">
                 <div

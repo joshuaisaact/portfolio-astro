@@ -48,7 +48,7 @@ const { projects } = Astro.props;
         hover:bg-gray-50 dark:hover:bg-gray-700
         hover:text-gray-900 dark:hover:text-white
         disabled:opacity-40 disabled:cursor-not-allowed
-        transition-all duration-200"
+        transition-[background-color,color,opacity] duration-200"
       aria-label="Previous project"
       disabled
     >
@@ -65,7 +65,7 @@ const { projects } = Astro.props;
         hover:bg-gray-50 dark:hover:bg-gray-700
         hover:text-gray-900 dark:hover:text-white
         disabled:opacity-40 disabled:cursor-not-allowed
-        transition-all duration-200"
+        transition-[background-color,color,opacity] duration-200"
       aria-label="Next project"
     >
       <ChevronRight class="w-5 h-5 lg:w-6 lg:h-6" />
@@ -73,7 +73,7 @@ const { projects } = Astro.props;
 
     <!-- Dot Indicators -->
     <div
-      class="embla__dots flex justify-center gap-2 mt-4"
+      class="embla__dots flex justify-center gap-4 mt-4"
       role="tablist"
       aria-label="Slide navigation"
     >
@@ -82,7 +82,7 @@ const { projects } = Astro.props;
           <button
             type="button"
             class:list={[
-              "embla__dot relative w-2.5 h-2.5 rounded-full transition-colors duration-200 after:absolute after:top-1/2 after:left-1/2 after:w-10 after:h-10 after:-translate-1/2",
+              "embla__dot relative w-2.5 h-2.5 rounded-full transition-colors duration-200 after:absolute after:top-1/2 after:left-1/2 after:w-8 after:h-8 after:-translate-1/2",
               index === 0
                 ? "bg-blue-600 dark:bg-blue-500"
                 : "bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500",
