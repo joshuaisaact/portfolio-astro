@@ -193,7 +193,7 @@ const {
           var mon = months[d.getMonth()];
 
           var leftSpan = document.createElement("span");
-          leftSpan.textContent = "P" + pageNum + " CEEFAX " + pageNum + " " + day + " " + dt + " " + mon;
+          leftSpan.textContent = "P" + pageNum + " CEEFAX 1 " + pageNum + " " + day + " " + dt + " " + mon;
           hdr.appendChild(leftSpan);
 
           var timeSpan = document.createElement("span");
@@ -219,10 +219,10 @@ const {
           var ft = document.createElement("div");
           ft.id = "ceefax-fastext";
           ft.innerHTML =
-            '<a href="/?theme=ceefax">HOME</a>' +
-            '<a href="/blog?theme=ceefax">BLOG</a>' +
-            '<a href="/projects?theme=ceefax">PROJECTS</a>' +
-            '<a href="#" id="ceefax-theme-btn">DEFAULT</a>';
+            '<a href="/?theme=ceefax">Home</a>' +
+            '<a href="/blog?theme=ceefax">Blog</a>' +
+            '<a href="/projects?theme=ceefax">Projects</a>' +
+            '<a href="#" id="ceefax-theme-btn">Default</a>';
           document.body.appendChild(ft);
           document.getElementById("ceefax-theme-btn").addEventListener("click", function (e) {
             e.preventDefault();
