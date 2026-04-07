@@ -1,0 +1,604 @@
+/* ==========================================================================
+   Ceefax (BBC Teletext) Theme
+   Scoped entirely under .theme-ceefax — zero cost when inactive.
+   Forces dark mode. Authentic teletext aesthetic.
+
+   Font: Mode7 by Galax (based on ModeSeven by Andrew Bulhak, 1998)
+   MODE7GX0.TTF — 1.0:1 square pixels
+   Source: https://galax.xyz/TELETEXT/
+   ========================================================================== */
+
+/* ---- Mode7 teletext font ---- */
+@font-face {
+  font-family: "Mode7";
+  src: url("/fonts/MODE7GX0.TTF") format("truetype");
+  font-display: swap;
+}
+
+/* ---- Base ---- */
+.theme-ceefax {
+  --ceefax-black: #000000;
+  --ceefax-white: #ffffff;
+  --ceefax-yellow: #ffff00;
+  --ceefax-cyan: #00ffff;
+  --ceefax-green: #00ff00;
+  --ceefax-blue: #0000ff;
+  --ceefax-red: #ff0000;
+  --ceefax-magenta: #ff00ff;
+
+  background: var(--ceefax-black) !important;
+  color: var(--ceefax-white);
+}
+
+/* ---- Everything Mode7, no rounding, no shadows, no transitions ---- */
+.theme-ceefax,
+.theme-ceefax *,
+.theme-ceefax *::before,
+.theme-ceefax *::after {
+  font-family: Mode7, "IBM Plex Mono", "Courier New", monospace !important;
+  font-size: 2.5vw !important;
+  line-height: 1.3 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  transition: none !important;
+  animation: none !important;
+  text-rendering: optimizeSpeed !important;
+  font-feature-settings: normal !important;
+  font-variant-ligatures: none !important;
+}
+
+/* ---- 4:3 Teletext container — font sized to fit 40 chars across ---- */
+.theme-ceefax body {
+  max-width: none;
+  margin: 0 auto;
+  background: var(--ceefax-black) !important;
+  background-image: none !important;
+  min-height: 100vh;
+  padding: 1em;
+  letter-spacing: 0;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  overflow-x: hidden;
+}
+
+/* ---- Welcome component — tighten spacing for teletext feel ---- */
+/* Outer section padding */
+.theme-ceefax #container section[aria-label="Introduction"] {
+  padding: 20px 0 !important;
+}
+
+/* Inner grid: single column, moderate gap */
+.theme-ceefax #container section[aria-label="Introduction"] > section {
+  padding: 0 !important;
+  margin: 0 !important;
+  gap: 20px !important;
+}
+
+/* Text column */
+.theme-ceefax #container .space-y-6 {
+  --tw-space-y-reverse: 0 !important;
+}
+.theme-ceefax #container .space-y-6 > * + * {
+  margin-top: 20px !important;
+}
+/* .prose is a grid item in row 2 alongside the image column — the h1's
+   own margin-bottom already supplies the gap, so don't push it down again */
+.theme-ceefax #container .space-y-6 > .prose {
+  margin-top: 0 !important;
+}
+
+.theme-ceefax #container .space-y-4 {
+  --tw-space-y-reverse: 0 !important;
+}
+.theme-ceefax #container .space-y-4 > * + * {
+  margin-top: 10px !important;
+}
+
+/* Remove internal padding on text container */
+.theme-ceefax #container [class*="p-2"],
+.theme-ceefax #container [class*="p-4"] {
+  padding: 0 !important;
+}
+
+
+
+/* Force all grids/flex to single column — except the welcome section */
+.theme-ceefax [class*="grid-cols"]:not(#container section > section) {
+  grid-template-columns: 1fr !important;
+}
+
+/* Welcome: heading full-width, then text + image side by side */
+.theme-ceefax #container section[aria-label="Introduction"] > section {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  grid-template-rows: auto 1fr !important;
+  gap: 0 1em !important;
+}
+
+/* Text column spans both cols for the heading row, then just col 1 */
+.theme-ceefax #container section[aria-label="Introduction"] > section > div:first-child {
+  grid-column: 1 / -1 !important;
+  display: contents !important;
+}
+
+/* The h1 wrapper (.space-y-4) spans full width */
+.theme-ceefax #container .space-y-4 {
+  grid-column: 1 / -1 !important;
+}
+
+/* The prose text sits in column 1 */
+.theme-ceefax #container .prose {
+  grid-column: 1 !important;
+}
+
+/* Image column on the right */
+.theme-ceefax #container [class*="order-1"][class*="lg:order-2"] {
+  grid-column: 2 !important;
+  grid-row: 2 !important;
+  order: unset !important;
+}
+.theme-ceefax #container [class*="order-1"][class*="lg:order-2"] > div {
+  width: 100% !important;
+  height: auto !important;
+}
+
+.theme-ceefax [class*="flex-row"],
+.theme-ceefax [class*="sm:flex-row"],
+.theme-ceefax [class*="lg:flex-row"] {
+  flex-direction: column !important;
+}
+
+/* Max-width containers should not constrain inside the body */
+.theme-ceefax [class*="max-w-"] {
+  max-width: 100% !important;
+}
+
+
+/* ---- Header line (injected by JS) ---- */
+.theme-ceefax #ceefax-header {
+  display: flex;
+  justify-content: space-evenly;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--ceefax-black);
+  color: var(--ceefax-white);
+  font-weight: bold;
+  padding: 0;
+  margin: 0 0 1em 0;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: pre;
+}
+
+/* Bump header text up so the date and the time nearly meet — like a
+   real teletext page header that fills the row. Overrides the global
+   2.5vw rule from `.theme-ceefax *`. */
+.theme-ceefax #ceefax-header,
+.theme-ceefax #ceefax-header * {
+  font-size: 3.5vw !important;
+}
+
+.theme-ceefax #ceefax-header .ceefax-time {
+  color: var(--ceefax-yellow) !important;
+}
+
+
+/* ---- Hide the normal navbar ---- */
+.theme-ceefax nav,
+.theme-ceefax header {
+  display: none !important;
+}
+
+/* ---- Fastext navigation bar (injected by JS) ---- */
+.theme-ceefax #ceefax-fastext {
+  display: flex;
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+  width: 100%;
+  margin: 0;
+  padding: 2px 0;
+  background: var(--ceefax-black) !important;
+}
+
+.theme-ceefax #ceefax-fastext a {
+  flex: 1;
+  text-align: center;
+  font-weight: bold;
+  letter-spacing: 0;
+  text-decoration: none !important;
+  background: transparent !important;
+  padding: 2px 0;
+}
+
+.theme-ceefax #ceefax-fastext a:nth-child(1) { color: var(--ceefax-red) !important; }
+.theme-ceefax #ceefax-fastext a:nth-child(2) { color: var(--ceefax-green) !important; }
+.theme-ceefax #ceefax-fastext a:nth-child(3) { color: var(--ceefax-yellow) !important; }
+.theme-ceefax #ceefax-fastext a:nth-child(4) { color: var(--ceefax-cyan) !important; }
+
+/* ---- Remove all background gradients on html ---- */
+.theme-ceefax,
+.theme-ceefax.dark {
+  background: var(--ceefax-black) !important;
+  background-image: none !important;
+}
+
+/* ---- Headings — coloured background blocks, tight spacing ---- */
+/* h1 is double-height, as teletext used for page titles */
+.theme-ceefax h1 {
+  color: var(--ceefax-white) !important;
+  background: var(--ceefax-red) !important;
+  font-weight: bold !important;
+  font-variation-settings: normal !important;
+  font-size: 5vw !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  padding: 0 1ch !important;
+  margin: 0 0 20px 0 !important;
+  display: block;
+  width: 100%;
+}
+
+.theme-ceefax h1 * {
+  color: var(--ceefax-white) !important;
+  background: transparent !important;
+  font-weight: bold !important;
+  font-variation-settings: normal !important;
+  font-size: 5vw !important;
+  line-height: 1.2 !important;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.theme-ceefax h2 {
+  color: var(--ceefax-white) !important;
+  background: var(--ceefax-blue) !important;
+  font-weight: bold !important;
+  font-variation-settings: normal !important;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  padding: 0 1ch !important;
+  margin: 20px 0 0 0 !important;
+  display: inline-block;
+}
+
+.theme-ceefax h3,
+.theme-ceefax h4,
+.theme-ceefax h5,
+.theme-ceefax h6 {
+  color: var(--ceefax-yellow) !important;
+  background: transparent !important;
+  font-weight: bold !important;
+  font-variation-settings: normal !important;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  padding: 0 !important;
+  margin: 20px 0 0 0 !important;
+}
+
+/* ---- Body text — cyan on black, line-height matches font size ---- */
+.theme-ceefax p,
+.theme-ceefax li,
+.theme-ceefax td,
+.theme-ceefax th,
+.theme-ceefax label {
+  color: var(--ceefax-cyan) !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* One blank line between paragraphs (20px = 1 teletext row) */
+.theme-ceefax p + p,
+.theme-ceefax .prose p + p {
+  margin-top: 20px !important;
+}
+
+.theme-ceefax .prose p,
+.theme-ceefax .prose ul,
+.theme-ceefax .prose ol,
+.theme-ceefax .prose blockquote,
+.theme-ceefax .prose figure,
+.theme-ceefax .prose h2,
+.theme-ceefax .prose h3,
+.theme-ceefax .prose h4,
+.theme-ceefax .prose hr {
+  margin-top: 20px !important;
+  margin-bottom: 0 !important;
+}
+
+.theme-ceefax span,
+.theme-ceefax div,
+.theme-ceefax time {
+  color: inherit;
+}
+
+/* ---- Links — green, highlight on hover ---- */
+.theme-ceefax a {
+  color: var(--ceefax-green) !important;
+  text-decoration: none !important;
+}
+
+.theme-ceefax a:hover,
+.theme-ceefax a:focus {
+  color: var(--ceefax-black) !important;
+  background: var(--ceefax-green) !important;
+}
+
+
+/* ---- Hide emoji and other non-teletext elements ---- */
+.theme-ceefax .ceefax-hide {
+  display: none !important;
+}
+
+/* ---- Hide dark/light toggle and theme switcher dropdown ---- */
+.theme-ceefax #themeToggle,
+.theme-ceefax .theme-switcher {
+  display: none !important;
+}
+
+/* ---- Sections — black bg, no borders, no spacing ---- */
+.theme-ceefax section,
+.theme-ceefax article {
+  background: var(--ceefax-black) !important;
+  border: none !important;
+}
+
+/* ---- Cards — cyan border, tight padding ---- */
+.theme-ceefax [class*="card"],
+.theme-ceefax [class*="Card"] {
+  background: var(--ceefax-black) !important;
+  border: 1px solid var(--ceefax-cyan) !important;
+  padding: 0 !important;
+}
+
+/* ---- Images — pixelated, cyan border ---- */
+.theme-ceefax img {
+  border: 2px solid var(--ceefax-cyan) !important;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.theme-ceefax img.ceefax-pixelated {
+  filter: contrast(1.3) saturate(2) !important;
+}
+
+/* Hide blog/article publication dates — teletext pages don't carry post dates,
+   the page header already shows today's date */
+.theme-ceefax time {
+  display: none !important;
+}
+
+/* ---- Blog cards — tight teletext spacing ---- */
+.theme-ceefax [role="listitem"] {
+  margin: 0 !important;
+}
+.theme-ceefax [role="listitem"] [class*="p-4"],
+.theme-ceefax [role="listitem"] [class*="p-6"] {
+  padding: 4px 1ch !important;
+}
+.theme-ceefax [role="listitem"] [class*="mb-2"],
+.theme-ceefax [role="listitem"] [class*="mb-4"] {
+  margin-bottom: 4px !important;
+}
+.theme-ceefax [role="list"][aria-label="Article list"] {
+  gap: 8px !important;
+}
+
+/* Profile image — hide the normal photo, show teletext version */
+.theme-ceefax #container .profile-default {
+  display: none !important;
+}
+.theme-ceefax #container .profile-ceefax {
+  display: block !important;
+}
+
+.theme-ceefax img[class*="rounded-full"] {
+  border-radius: 0 !important;
+  border: 3px solid var(--ceefax-yellow) !important;
+}
+
+/* ---- Buttons ---- */
+.theme-ceefax button,
+.theme-ceefax [role="button"],
+.theme-ceefax input[type="submit"] {
+  background: var(--ceefax-black) !important;
+  color: var(--ceefax-white) !important;
+  border: 1px solid var(--ceefax-white) !important;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  padding: 0 1ch;
+}
+
+.theme-ceefax button:hover,
+.theme-ceefax [role="button"]:hover {
+  background: var(--ceefax-white) !important;
+  color: var(--ceefax-black) !important;
+}
+
+/* ---- Code blocks ---- */
+.theme-ceefax pre {
+  background: var(--ceefax-black) !important;
+  color: var(--ceefax-green) !important;
+  border: 1px solid var(--ceefax-green) !important;
+  padding: 0 !important;
+}
+
+.theme-ceefax code {
+  background: transparent !important;
+  color: var(--ceefax-green) !important;
+  border: none !important;
+}
+
+/* ---- Dividers — dots with page number like real Ceefax ---- */
+.theme-ceefax hr {
+  border: none !important;
+  height: 20px;
+  line-height: inherit;
+  font-size: 20px;
+  color: var(--ceefax-white);
+  overflow: hidden;
+  white-space: nowrap;
+  margin: 20px 0 0 0 !important;
+}
+
+.theme-ceefax hr::before {
+  content: "........................................";
+  color: var(--ceefax-white);
+}
+
+/* ---- Blockquotes — magenta accent ---- */
+.theme-ceefax blockquote {
+  border-left: 2px solid var(--ceefax-magenta) !important;
+  background: transparent !important;
+  padding: 0 0 0 2ch !important;
+  margin: 0 !important;
+}
+
+.theme-ceefax blockquote p {
+  color: var(--ceefax-white) !important;
+}
+
+/* ---- Footer — hidden, fastext bar replaces it ---- */
+.theme-ceefax footer {
+  display: none !important;
+}
+
+/* ---- Prose overrides ---- */
+.theme-ceefax .prose a:not(.not-prose a) {
+  color: var(--ceefax-green) !important;
+  text-decoration: none !important;
+}
+
+.theme-ceefax .prose a:not(.not-prose a):hover {
+  color: var(--ceefax-black) !important;
+  background: var(--ceefax-green) !important;
+}
+
+/* ---- Accent colour override ---- */
+.theme-ceefax .text-\(--theme-5\),
+.theme-ceefax [style*="--theme-5"] {
+  color: var(--ceefax-yellow) !important;
+}
+
+/* ---- Tag pills / badges ---- */
+.theme-ceefax [class*="bg-"]:not(nav):not(header):not(footer):not(body) {
+  background: var(--ceefax-blue) !important;
+  color: var(--ceefax-white) !important;
+}
+
+/* ---- Lists — teletext triangle markers, tight ---- */
+.theme-ceefax ul {
+  list-style: none !important;
+  padding: 0 0 0 2ch !important;
+  margin: 0 !important;
+}
+
+.theme-ceefax ul li {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.theme-ceefax ul li::before {
+  content: "\25B6";
+  color: var(--ceefax-yellow);
+  margin-left: -2ch;
+  width: 2ch;
+  display: inline-block;
+}
+
+.theme-ceefax ol {
+  list-style: none !important;
+  padding: 0 0 0 3ch !important;
+  margin: 0 !important;
+  counter-reset: ceefax-counter;
+}
+
+.theme-ceefax ol li {
+  counter-increment: ceefax-counter;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.theme-ceefax ol li::before {
+  content: counter(ceefax-counter) ")";
+  color: var(--ceefax-yellow);
+  font-weight: bold;
+  margin-left: -3ch;
+  width: 3ch;
+  display: inline-block;
+}
+
+/* ---- Selection ---- */
+.theme-ceefax ::selection {
+  background: var(--ceefax-yellow);
+  color: var(--ceefax-black);
+}
+
+/* ---- Border resets ---- */
+.theme-ceefax [class*="border-gray"],
+.theme-ceefax [class*="border-slate"] {
+  border-color: transparent !important;
+}
+
+/* ---- SVG icons ---- */
+.theme-ceefax svg {
+  color: var(--ceefax-white) !important;
+}
+
+/* ---- Scrollbar ---- */
+.theme-ceefax ::-webkit-scrollbar {
+  width: 10px;
+  background: var(--ceefax-black);
+}
+
+.theme-ceefax ::-webkit-scrollbar-thumb {
+  background: var(--ceefax-blue);
+}
+
+/* ---- Theme switcher dropdown ---- */
+.theme-ceefax .theme-switcher button {
+  background: var(--ceefax-black) !important;
+  color: var(--ceefax-cyan) !important;
+  border: 1px solid var(--ceefax-cyan) !important;
+}
+
+.theme-ceefax .theme-switcher button:hover {
+  background: var(--ceefax-cyan) !important;
+  color: var(--ceefax-black) !important;
+}
+
+.theme-ceefax .theme-switcher button[data-active="true"] {
+  background: var(--ceefax-yellow) !important;
+  color: var(--ceefax-black) !important;
+  border-color: var(--ceefax-yellow) !important;
+}
+
+.theme-ceefax .theme-switcher [id="themeSwitcherMenu"] {
+  background: var(--ceefax-black) !important;
+  border: 1px solid var(--ceefax-white) !important;
+}
+
+.theme-ceefax .theme-switcher [id="themeSwitcherMenu"] button {
+  border: none !important;
+  border-bottom: 1px solid #333 !important;
+}
+
+
+/* ---- CRT scanline overlay ---- */
+@supports (background: repeating-linear-gradient(transparent 0 1px, rgba(0,0,0,0.15) 1px 3px)) {
+  .theme-ceefax #ceefax-scanlines {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9999;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent 0px 1px,
+      rgba(0, 0, 0, 0.12) 1px 3px
+    );
+  }
+}
