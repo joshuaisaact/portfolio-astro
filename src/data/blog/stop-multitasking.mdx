@@ -111,15 +111,15 @@ Use a faster model.
 
 ## Update: Comprehension debt and the verification ceiling
 
-Addy Osmani published *Your parallel Agent limit* making a complementary argument. Where I focused on the neuroscience of why parallelism fails in the moment, he names the downstream cost: **comprehension debt**, the growing gap between how much code exists in your system and how much of it any human genuinely understands.
+Addy Osmani published *Your parallel Agent limit* making a complementary argument. I focused on why parallelism fails in the moment. He names the downstream cost: **comprehension debt**, the gap between how much code exists in your system and how much of it any human understands.
 
-This matters because my argument has an implicit assumption: if the tests pass, the code is fine. That's true for correctness. It's not true for maintenance. Agent-generated code that passes every test but that nobody built a mental model of is a liability. A recent study of 110,000 agent-authored PRs found that agent code has higher churn rates than human-authored code — more rework in subsequent commits.<Footnote id="12" /> The code ships. It passes CI. Then it gets rewritten.
+My argument has an implicit assumption: if the tests pass, the code is fine. True for correctness. Not true for maintenance. Agent-generated code that passes every test but that you never built a mental model of is a liability. A study of 110,000 agent-authored PRs found that agent code has higher churn rates than human-authored code, with more rework in subsequent commits.<Footnote id="12" /> The code ships. It passes CI. Then someone rewrites it.
 
-Osmani also names "background vigilance" — the ambient anxiety of *maybe something is going wrong in that other worktree*. This is distinct from context-switching cost. You never switch. It just degrades your primary thread. My post covers the cost of switching; his covers the cost of not switching but knowing you should be.
+Osmani also names "background vigilance," the ambient anxiety of *maybe something is going wrong in that other worktree*. You never switch contexts. Your primary thread degrades anyway. My post covers the cost of switching; his covers the cost of not switching but knowing you should be.
 
-His solution space is management patterns: check-in cadence, predictable status formats, scoped mandates. Mine is model selection and task sizing. I think both miss the deeper variable: **verification strength**.
+His solution space is management patterns: check-in cadence, predictable status formats, scoped mandates. Mine is model selection and task sizing. Both miss the deeper variable: **verification strength**.
 
-The real ceiling on parallelism isn't your cognitive bandwidth or your model's latency. It's how much of the review loop you can close without a human:
+The ceiling on parallelism is how much of the review loop you can close without a human:
 
 | Verification | Parallelism | Human role |
 |---|---|---|
@@ -128,9 +128,9 @@ The real ceiling on parallelism isn't your cognitive bandwidth or your model's l
 | Domain-specific multi-pass review | More | Reviews edge cases |
 | Formal verification (proof checker) | Unlimited | Reviews nothing |
 
-Most of us are in row two. We can parallelize to the extent that our tests are comprehensive, and no further. Mistral's Leanstral demonstrated the extreme end: a formal proof checker as the verifier, enabling parallel speculative generation where you run N candidates and take the first that passes.<Footnote id="13" /> That works because the verifier is sound — passing means correct. Normal test suites aren't sound. Passing tests doesn't guarantee correctness. Which is why "write tests and parallelize" has a ceiling, and we keep hitting it.
+Most of us are in row two. You can parallelise to the extent that your tests are comprehensive, and no further. Mistral's Leanstral demonstrated the extreme end: a formal proof checker as the verifier, enabling parallel speculative generation where you run N candidates and take the first that passes.<Footnote id="13" /> That works because the verifier is sound. Passing means correct. Normal test suites aren't sound. Passing tests doesn't guarantee correctness, which is why "write tests and parallelise" has a ceiling, and you keep hitting it.
 
-The synthesis: parallelism is bounded by verification strength on the correctness axis and comprehension debt on the maintenance axis. No amount of orchestration tooling moves either boundary. Faster models reduce the temptation to parallelize. Stronger verification raises the ceiling on how much you safely can. But comprehension debt accrues either way, and nobody has a good answer for that yet.
+Parallelism is bounded by verification strength on the correctness axis and comprehension debt on the maintenance axis. Buying better orchestration tooling won't move either boundary. Faster models reduce your temptation to parallelise. Stronger verification raises the ceiling on how much you safely can. Comprehension debt accrues either way, and no one has a good answer for it yet.
 
 <FootnoteList>
   <FootnoteItem id="1">Mark, G. (2008). "The Cost of Interrupted Work: More Speed and Stress." Proceedings of the SIGCHI Conference on Human Factors in Computing Systems. https://ics.uci.edu/~gmark/chi08-mark.pdf</FootnoteItem>
