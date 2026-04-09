@@ -10,7 +10,7 @@ import Footnote from '../../components/Footnote.astro';
 import FootnoteList from '../../components/FootnoteList.astro';
 import FootnoteItem from '../../components/FootnoteItem.astro';
 
-You're waiting 60 seconds for your model to respond. Watching the spinner. Fingers drumming. It feels like wasted time. So when Conductor and Cursor 3 say "run other agents in parallel while you wait," it sounds right. Keep your hands moving. Don't sit idle. But you're not getting faster. You're just fragmenting yourself across five problem spaces while your attention thrashes between them. That's not productivity. That's managed anxiety.
+You're waiting 60 seconds for your model to respond, watching the spinner, fingers drumming. It feels like wasted time. So when Conductor and Cursor 3 say "run other agents in parallel while you wait," it sounds right. Keep your hands moving. Don't sit idle. But you're fragmenting yourself across five problem spaces while your attention thrashes between them. You're managing anxiety, not producing work.
 
 I've had [Claude Code Max](https://github.com/anthropics/claude-code/releases) since launch. I've been on [Conductor](https://www.conductor.build/) since the alpha. [Cursor 3](https://cursor.com/blog/cursor-3) shipped this week with "run many agents in parallel" as a headline feature. [JetBrains Air](https://air.dev/) launched last month with the same pitch. I ran at parallel workflows for months. Isolated worktrees, different tasks, one dashboard.
 
@@ -30,7 +30,7 @@ Real latency across typical tasks:
 
 Haiku is **3-4x faster** than Opus. For a 2000-token response, Opus takes 50-80 seconds. Haiku takes 15-25 seconds.
 
-You're paying a 3x latency tax. That's not nothing. But here's what that tax actually costs you.
+You're paying a 3x latency tax. That's not nothing. But the tax costs more than seconds.
 
 ## The cognitive cost of filling dead time
 
@@ -40,7 +40,11 @@ Carnegie Mellon found engineers on five concurrent workstreams spend **80% of th
 
 Bug rates **double** under fragmented attention.<Footnote id="3" />
 
-Reviewing code IS cognitive work. fMRI studies show code comprehension activates the same working memory and executive function regions as writing code—it draws on the same cognitive budget, not a separate one.<Footnote id="6" /> You load a mental model of an agent's changes. You check it against your understanding of the system. You decide whether the approach holds. Running five review contexts in rotation degrades each one.
+Reviewing code IS cognitive work. Siegmund et al.'s 2014 fMRI study showed code comprehension activates five brain regions associated with working memory, attention, and language processing. The same regions active when writing code.<Footnote id="6" /> Their 2017 follow-up found that when programmers could rely on semantic cues (meaningful variable names, familiar patterns), brain activation dropped. The brain worked more efficiently, not less. Strip those cues away and activation spiked, particularly in Brodmann areas 6, 21, and 44 in the left hemisphere. Your brain burns more working memory to compensate.<Footnote id="6b" />
+
+Floyd et al. confirmed this from a different angle. In a 29-participant fMRI study, code review and code comprehension produced distinct but overlapping neural signatures. Reviewers could be distinguished from comprehenders by brain activity alone with 79% accuracy. Code review recruits additional judgment and evaluation processes on top of the comprehension load.<Footnote id="6c" />
+
+You load a mental model of an agent's changes. You check it against your understanding of the system. You decide whether the approach holds. That sequence, comprehend then judge, stacks two expensive operations drawing on the same frontal and parietal regions. Running five review contexts in rotation degrades each one.
 
 So the equation is:
 - Opus takes 60 seconds (feels unproductive)
@@ -55,31 +59,31 @@ The dead time wasn't the problem.
 
 Opus scores 80.8% on SWE-bench Verified. Haiku scores 73.3%. A 7.5% gap feels significant. You don't know which side of that gap your task falls on, so you default to Opus to be safe.
 
-Here's the problem: that 7.5% gap is concentrated in maybe 5-10% of your actual work. The complex multi-file refactoring. The subtle architectural decision. The bug that requires holding three systems in your head at once.
+That 7.5% gap is concentrated in maybe 5-10% of your work. The complex multi-file refactoring. The subtle architectural decision. The bug that requires holding three systems in your head at once.
 
-The other 90%—linting, test writing, error handling, simple refactors, boilerplate—both models handle identically. I benchmarked them on real coding tasks across the full spectrum. Trivial fixes, simple refactors, moderate test writing, complex multi-file work, hard race condition debugging. On every task type, quality was the same. Opus was just slower.
+The other 90% (linting, test writing, error handling, simple refactors, boilerplate) both models handle the same. I benchmarked them on real coding tasks across the full spectrum. Trivial fixes, simple refactors, moderate test writing, complex multi-file work, hard race condition debugging. Across all task types, quality matched. Opus was slower.
 
-If your work is mostly complex multi-file refactoring and subtle architectural decisions, your ratio will look different. But be honest about how much of your day is actually that versus the routine work surrounding it.
+If your work is mostly complex multi-file refactoring and subtle architectural decisions, your ratio will look different. But be honest about how much of your day is that versus the routine work surrounding it.
 
 You're paying a 3x latency tax to insure against a failure mode that doesn't happen 90% of the time. And while you're paying that tax, your brain is fragmenting, you're tempted to fill the dead time, and you end up slower and more error-prone.
 
-The tools exploit this. [Conductor](https://www.conductor.build/) and [Cursor 3](https://cursor.com/blog/cursor-3) aren't lying—they're solving for a real problem. Just the wrong one. They see: engineers feel slow, engineers wait 60 seconds. Solution: run agents in parallel.
+The teams behind [Conductor](https://www.conductor.build/) and [Cursor 3](https://cursor.com/blog/cursor-3) see a real problem. Engineers feel slow. Engineers wait 60 seconds. Their solution: run agents in parallel.
 
-They miss: engineers feel slow because they're using the wrong model. The fix is model selection, not orchestration.
+They're solving the wrong problem. Engineers feel slow because they're using the wrong model. The fix is model selection, not more orchestration.
 
-## Three things that actually work
+## Three things that work
 
 Three things made me faster than any parallel setup I tried:
 
 ### **Precise problem linking**
 
-Stop telling agents "I think there's a bug in the auth flow." Instead: "Fix the race condition in `AuthProvider.tsx` around line 118 where the token refresh fires twice before the first response returns." Tag the files directly. Without a file path, the agent burns cycles grepping through your codebase trying to find the right file. With one, it reads it immediately and starts solving. The agent starts closer to the answer. Fewer wasted cycles. Faster resolution.
+Stop telling agents "I think there's a bug in the auth flow." Instead: "Fix the race condition in `AuthProvider.tsx` around line 118 where the token refresh fires twice before the first response returns." Tag the files. Without a file path, the agent burns cycles grepping through your codebase trying to find the right file. With one, it reads it and starts solving. The agent starts closer to the answer, wastes fewer cycles, and finishes faster.
 
 ### **Aggressive model selection**
 
 Haiku handles 70% of what I throw at agents. Linting, small refactors, test scaffolding, boilerplate. Sonnet covers most of the rest. Most engineers default to the biggest model for everything. That's like driving a lorry to the corner shop.
 
-The better move: Use Haiku by default. Smaller models don't reason worse—they reason more efficiently, with better tool grounding.<Footnote id="4" /> When you hit something that requires architectural reasoning—you'll know it. You'll feel it. That's when you reach for Opus.
+Use Haiku by default. Smaller models don't reason worse. They reason with better tool grounding and less overhead.<Footnote id="4" /> You'll know when something requires architectural reasoning. That's when you reach for Opus.
 
 ### **Low-reasoning modes wherever possible**
 
@@ -89,19 +93,17 @@ Sonnet without extended thinking returns in seconds. The feedback loop gets tigh
 
 Parallel workflows work for fully autonomous tasks. I built [auto-claude](https://github.com/joshuaisaact/auto-claude), an autonomous edit-commit-benchmark-revert loop. It runs for hours without intervention, tries dozens of experiments to complete a goal, and demands zero cognitive load from me. I can be deep in a focused single-agent session while auto-claude chips away at a performance optimisation in the background.
 
-That's what parallel agents should look like. Fully autonomous. No dashboard to check. No "input required" interrupts. No rotation between problem spaces. The agent either passes its own acceptance criteria or it reverts and tries again.
+That's what parallel agents should look like: autonomous, with no dashboard to check and no "input required" interrupts. The agent either passes its own acceptance criteria or it reverts and tries again.
 
-Simon Willison—inventor of Django, 30 years of experience, one of the most effective AI-assisted developers working today—[described exactly this problem](https://simonwillison.net/2026/Apr/2/lennys-podcast/): "I can fire up four agents in parallel and have them work on four different problems. And by like 11 AM, I am wiped out for the day." He warns there's "an element of sort of gambling and addiction to how we're using some of these tools."
+Simon Willison, inventor of Django, [described this problem](https://simonwillison.net/2026/Apr/2/lennys-podcast/): "I can fire up four agents in parallel and have them work on four different problems. And by like 11 AM, I am wiped out for the day." He warns there's "an element of sort of gambling and addiction to how we're using some of these tools."
 
-The tools shipping right now sell a different version of parallelism. One where you sit in the middle of five agents, reviewing their output in rotation, context-switching between problem spaces, approving diffs with half your attention.
-
-That's not orchestration. That's managed distraction.
+Conductor, Cursor, JetBrains Air are shipping a different version of parallelism. One where you sit in the middle of five agents, reviewing their output in rotation, context-switching between problem spaces, approving diffs with half your attention. Managed distraction with a progress dashboard.
 
 ## The real problem
 
 You haven't maxed out single-thread throughput if you're reaching for parallelism now. The tooling makes it look easier than mastering the fundamentals.
 
-Here's a thought experiment: if Opus ran at 10,000 tokens per second, would you parallelise? I wouldn't. I'd do everything sequentially, just fast. The fact that nobody would choose to juggle five contexts if latency disappeared tells you what parallelism actually is. It's not a workflow innovation. It's a coping mechanism for slow models.
+A thought experiment: if Opus ran at 10,000 tokens per second, would you parallelise? I wouldn't. I'd do everything in sequence, fast. If latency disappeared, no one would choose to juggle five contexts. Parallelism is a coping mechanism for slow models.
 
 Use a faster model.
 
@@ -111,4 +113,6 @@ Use a faster model.
   <FootnoteItem id="3">Altmann, E.M., et al. (2013). "Momentary interruptions can derail the train of thought." Journal of Experimental Psychology: General. https://pubmed.ncbi.nlm.nih.gov/23294345/</FootnoteItem>
   <FootnoteItem id="4">The architect/editor split pattern (aider/coders/architect_coder.py) uses a stronger model for reasoning and a cheaper model for execution, because reasoning and execution are different skills that fail differently. LangChain's eval results show open models now match frontier models on execution tasks at 20x lower cost, suggesting the split works as a cost optimization: frontier models for planning/reasoning where they have an edge, cheaper models for execution where they're equivalent. https://github.com/Aider-AI/aider</FootnoteItem>
   <FootnoteItem id="6">Siegmund, J., et al. (2014). "Understanding Understanding Source Code with Functional Magnetic Resonance Imaging." Proceedings of the 36th International Conference on Software Engineering (ICSE). Used fMRI to show that program comprehension activates brain regions for working memory, attention, and language processing—the same regions used when writing code. https://doi.org/10.1145/2568225.2568252</FootnoteItem>
+  <FootnoteItem id="6b">Siegmund, J., Peitek, N., Parnin, C., Apel, S., Hofmeister, J., Kästner, C., Begel, A., Bethmann, A., and Brechmann, A. (2017). "Measuring Neural Efficiency of Program Comprehension." Proceedings of the 11th Joint Meeting on Foundations of Software Engineering (ESEC/FSE). https://doi.org/10.1145/3106237.3106268</FootnoteItem>
+  <FootnoteItem id="6c">Floyd, B., Santander, T., and Weimer, W. (2017). "Decoding the Representation of Code in the Brain: An fMRI Study of Code Review and Expertise." Proceedings of the 39th International Conference on Software Engineering (ICSE). https://doi.org/10.1109/ICSE.2017.24</FootnoteItem>
 </FootnoteList>
