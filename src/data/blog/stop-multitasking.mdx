@@ -109,6 +109,29 @@ A thought experiment: if Opus ran at 10,000 tokens per second, would you paralle
 
 Use a faster model.
 
+## Update: Comprehension debt and the verification ceiling
+
+Addy Osmani published *Your parallel Agent limit* making a complementary argument. Where I focused on the neuroscience of why parallelism fails in the moment, he names the downstream cost: **comprehension debt**, the growing gap between how much code exists in your system and how much of it any human genuinely understands.
+
+This matters because my argument has an implicit assumption: if the tests pass, the code is fine. That's true for correctness. It's not true for maintenance. Agent-generated code that passes every test but that nobody built a mental model of is a liability. A recent study of 110,000 agent-authored PRs found that agent code has higher churn rates than human-authored code — more rework in subsequent commits.<Footnote id="12" /> The code ships. It passes CI. Then it gets rewritten.
+
+Osmani also names "background vigilance" — the ambient anxiety of *maybe something is going wrong in that other worktree*. This is distinct from context-switching cost. You never switch. It just degrades your primary thread. My post covers the cost of switching; his covers the cost of not switching but knowing you should be.
+
+His solution space is management patterns: check-in cadence, predictable status formats, scoped mandates. Mine is model selection and task sizing. I think both miss the deeper variable: **verification strength**.
+
+The real ceiling on parallelism isn't your cognitive bandwidth or your model's latency. It's how much of the review loop you can close without a human:
+
+| Verification | Parallelism | Human role |
+|---|---|---|
+| Agent self-reports "done" | None | Must review everything |
+| Tests + linters | Some | Reviews failures |
+| Domain-specific multi-pass review | More | Reviews edge cases |
+| Formal verification (proof checker) | Unlimited | Reviews nothing |
+
+Most of us are in row two. We can parallelize to the extent that our tests are comprehensive, and no further. Mistral's Leanstral demonstrated the extreme end: a formal proof checker as the verifier, enabling parallel speculative generation where you run N candidates and take the first that passes.<Footnote id="13" /> That works because the verifier is sound — passing means correct. Normal test suites aren't sound. Passing tests doesn't guarantee correctness. Which is why "write tests and parallelize" has a ceiling, and we keep hitting it.
+
+The synthesis: parallelism is bounded by verification strength on the correctness axis and comprehension debt on the maintenance axis. No amount of orchestration tooling moves either boundary. Faster models reduce the temptation to parallelize. Stronger verification raises the ceiling on how much you safely can. But comprehension debt accrues either way, and nobody has a good answer for that yet.
+
 <FootnoteList>
   <FootnoteItem id="1">Mark, G. (2008). "The Cost of Interrupted Work: More Speed and Stress." Proceedings of the SIGCHI Conference on Human Factors in Computing Systems. https://ics.uci.edu/~gmark/chi08-mark.pdf</FootnoteItem>
   <FootnoteItem id="2">Software Engineering Institute, Carnegie Mellon University. "Addressing the Detrimental Effects of Context Switching with DevOps." https://www.sei.cmu.edu/blog/addressing-the-detrimental-effects-of-context-switching-with-devops/</FootnoteItem>
@@ -121,4 +144,6 @@ Use a faster model.
   <FootnoteItem id="9">Leroy, S. (2009). "Why Is It So Hard to Do My Work? The Challenge of Attention Residue When Switching Between Work Tasks." Organizational Behavior and Human Decision Processes. https://doi.org/10.1016/j.obhdp.2009.02.001</FootnoteItem>
   <FootnoteItem id="10">Parnin, C. and Rugaber, S. (2011). "Resumption Strategies for Interrupted Programming Tasks." Software Quality Journal. https://doi.org/10.1007/s11219-010-9104-9</FootnoteItem>
   <FootnoteItem id="11">The architect/editor split pattern (aider/coders/architect_coder.py) uses a stronger model for reasoning and a cheaper model for execution, because reasoning and execution are different skills that fail differently. LangChain's eval results show open models now match frontier models on execution tasks at 20x lower cost, suggesting the split works as a cost optimization: frontier models for planning/reasoning where they have an edge, cheaper models for execution where they're equivalent. https://github.com/Aider-AI/aider</FootnoteItem>
+  <FootnoteItem id="12">Winkler et al. (2026). "Investigating Autonomous Agent Contributions in the Wild: Activity Patterns and Code Change over Time." https://arxiv.org/abs/2604.00917</FootnoteItem>
+  <FootnoteItem id="13">Mistral AI (2025). "Leanstral." https://mistral.ai/news/leanstral</FootnoteItem>
 </FootnoteList>
