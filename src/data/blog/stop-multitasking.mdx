@@ -61,13 +61,13 @@ The teams behind [Conductor](https://www.conductor.build/) and [Cursor 3](https:
 
 They're solving the wrong problem. Engineers feel slow because they're using the wrong model. The fix is model selection, not more orchestration.
 
-## Four things that work
+## Five things that work
 
-Four things made me faster than any parallel setup I tried:
+Five things made me faster than any parallel setup I tried:
 
 ### **Precise problem linking**
 
-Stop telling agents "I think there's a bug in the auth flow." Instead: "Fix the race condition in `AuthProvider.tsx` around line 118 where the token refresh fires twice before the first response returns." Tag the files. Without a file path, the agent burns cycles grepping through your codebase trying to find the right file. With one, it reads it and starts solving. The agent starts closer to the answer, wastes fewer cycles, and finishes faster.
+Stop telling agents "I think there's a bug in the auth flow." Instead: "Fix the race condition in `AuthProvider.tsx` around line 118 where the token refresh fires twice before the first response returns." Tag the files, give it the context, but let it decide the approach. Without a file path, the agent burns cycles grepping through your codebase trying to find the right file. With one, it reads it and starts solving. Over-prescribing the steps ("first do X, then do Y") leads to worse outcomes than giving precise inputs and letting the agent figure out the how.
 
 ### **Aggressive model selection**
 
@@ -79,9 +79,17 @@ Use Haiku by default. Smaller models don't reason worse. They reason with better
 
 A refactor that touches six files tempts you to reach for Opus and wait. Break it into six single-file changes instead. Each one finishes in seconds on Haiku or Sonnet. You review one result, fire the next, review, fire. The gap between tasks shrinks below the threshold where your brain starts looking for something else to do. Parnin and Rugaber's data showed programmers recover fast from short interruptions but poorly from long ones.<Footnote id="10" /> Smaller tasks keep each interruption short enough that you stay in the same problem space.
 
+I learned this building [Ralph](https://github.com/joshuaisaact/ralphv2), an autonomous coding agent. Every layer of task orchestration I added (dependency graphs, parallel tracks, adaptive strategies) was complexity the agent had to work around rather than with. The version that worked best did one feature per session, sequential, committed to git. Don't parallelize.
+
 ### **Low-reasoning modes wherever possible**
 
 Sonnet without extended thinking returns in seconds. The feedback loop gets tight enough that I hold the full mental model of what the agent is building. I catch drift before it compounds. An agent I correct after 30 seconds produces cleaner output than one that wanders for 10 minutes while I'm reviewing three other agents.
+
+### **Verify programmatically, not visually**
+
+The parallel workflow pitch assumes you need to review agent output. You often don't. Write a test, run it, move on. If the test passes, the code works. You skip the most expensive part of the loop: loading the agent's changes into your working memory and judging whether the approach holds.
+
+This is where the fMRI data has practical implications. Every visual review activates your multiple demand network. Every review you replace with a programmatic check is cognitive load you don't spend. The agents that cost me the least mental energy are the ones I never review because they run their own verification and either pass or revert.
 
 ## The exception: truly autonomous workflows
 
