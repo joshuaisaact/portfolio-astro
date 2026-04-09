@@ -34,9 +34,7 @@ You're paying a 3x latency tax. That's not nothing. But the tax costs more than 
 
 ## The cognitive cost of filling dead time
 
-Gloria Mark at UC Irvine found it takes **23 minutes to recover full focus** after an interruption.<Footnote id="1" />
-
-Carnegie Mellon found engineers on five concurrent workstreams spend **80% of their time on switching overhead**.<Footnote id="2" />
+Gloria Mark at UC Irvine found it takes **23 minutes to recover full focus** after an interruption.<Footnote id="1" /> Carnegie Mellon found engineers on five concurrent workstreams spend **80% of their time on switching overhead**.<Footnote id="2" />
 
 Bug rates **double** under fragmented attention.<Footnote id="3" />
 
@@ -44,7 +42,11 @@ Reviewing code IS cognitive work. Siegmund et al.'s 2014 fMRI study showed code 
 
 Floyd et al. confirmed this from a different angle. In a 29-participant fMRI study, code review and code comprehension produced distinct but overlapping neural signatures. Reviewers could be distinguished from comprehenders by brain activity alone with 79% accuracy. Code review recruits additional judgment and evaluation processes on top of the comprehension load.<Footnote id="6c" />
 
+Ivanova et al. at MIT pinned down which system does the heavy lifting. Code comprehension activates the brain's "multiple demand" network, a frontoparietal system shared with math, logic, and executive reasoning. It does not activate the language system.<Footnote id="6d" /> Reading code looks like reading prose. It isn't. Your brain treats it as a problem-solving task, recruiting the same executive resources you need for planning and sustained attention. Peitek et al. confirmed this in a 2021 follow-up (ICSE Distinguished Paper): as code complexity grows, activation increases in BA6, BA21, BA39, and Broca's area (BA44/45), scaling the demand on working memory and attention in proportion to the complexity of what you're reading.<Footnote id="6e" />
+
 You load a mental model of an agent's changes. You check it against your understanding of the system. You decide whether the approach holds. That sequence, comprehend then judge, stacks two expensive operations drawing on the same frontal and parietal regions. Running five review contexts in rotation degrades each one.
+
+Sophie Leroy's research on attention residue puts a name to the mechanism.<Footnote id="7" /> When you switch away from a task before finishing it, cognitive processing from that task persists, consuming working memory you need for the next one. You don't cleanly swap contexts. You drag fragments of the previous review into the next. Parnin and Rugaber measured this in programmers: across 10,000 recorded sessions from 86 developers, only 10% resumed coding within one minute of an interruption, and interrupted tasks took roughly twice as long to complete.<Footnote id="8" />
 
 So the equation is:
 - Opus takes 60 seconds (feels unproductive)
@@ -71,9 +73,9 @@ The teams behind [Conductor](https://www.conductor.build/) and [Cursor 3](https:
 
 They're solving the wrong problem. Engineers feel slow because they're using the wrong model. The fix is model selection, not more orchestration.
 
-## Three things that work
+## Four things that work
 
-Three things made me faster than any parallel setup I tried:
+Four things made me faster than any parallel setup I tried:
 
 ### **Precise problem linking**
 
@@ -84,6 +86,10 @@ Stop telling agents "I think there's a bug in the auth flow." Instead: "Fix the 
 Haiku handles 70% of what I throw at agents. Linting, small refactors, test scaffolding, boilerplate. Sonnet covers most of the rest. Most engineers default to the biggest model for everything. That's like driving a lorry to the corner shop.
 
 Use Haiku by default. Smaller models don't reason worse. They reason with better tool grounding and less overhead.<Footnote id="4" /> You'll know when something requires architectural reasoning. That's when you reach for Opus.
+
+### **Smaller tasks, not parallel tasks**
+
+A refactor that touches six files tempts you to reach for Opus and wait. Break it into six single-file changes instead. Each one finishes in seconds on Haiku or Sonnet. You review one result, fire the next, review, fire. The gap between tasks shrinks below the threshold where your brain starts looking for something else to do. Parnin and Rugaber's data showed programmers recover fast from short interruptions but poorly from long ones.<Footnote id="8" /> Smaller tasks keep each interruption short enough that you stay in the same problem space.
 
 ### **Low-reasoning modes wherever possible**
 
@@ -115,4 +121,8 @@ Use a faster model.
   <FootnoteItem id="6">Siegmund, J., et al. (2014). "Understanding Understanding Source Code with Functional Magnetic Resonance Imaging." Proceedings of the 36th International Conference on Software Engineering (ICSE). Used fMRI to show that program comprehension activates brain regions for working memory, attention, and language processing—the same regions used when writing code. https://doi.org/10.1145/2568225.2568252</FootnoteItem>
   <FootnoteItem id="6b">Siegmund, J., Peitek, N., Parnin, C., Apel, S., Hofmeister, J., Kästner, C., Begel, A., Bethmann, A., and Brechmann, A. (2017). "Measuring Neural Efficiency of Program Comprehension." Proceedings of the 11th Joint Meeting on Foundations of Software Engineering (ESEC/FSE). https://doi.org/10.1145/3106237.3106268</FootnoteItem>
   <FootnoteItem id="6c">Floyd, B., Santander, T., and Weimer, W. (2017). "Decoding the Representation of Code in the Brain: An fMRI Study of Code Review and Expertise." Proceedings of the 39th International Conference on Software Engineering (ICSE). https://doi.org/10.1109/ICSE.2017.24</FootnoteItem>
+  <FootnoteItem id="6d">Ivanova, A.A., Srikant, S., Sueoka, Y., Kean, H.H., Dhamala, R., O'Reilly, U., Bers, M.U., and Fedorenko, E. (2020). "Comprehension of Computer Code Relies Primarily on Domain-General Executive Brain Regions." eLife. https://doi.org/10.7554/eLife.58906</FootnoteItem>
+  <FootnoteItem id="6e">Peitek, N., Siegmund, J., Apel, S., Kastner, C., Parnin, C., Bethmann, A., Leich, T., Saake, G., and Brechmann, A. (2021). "Program Comprehension and Code Complexity Metrics: An fMRI Study." Proceedings of the 43rd International Conference on Software Engineering (ICSE). ACM SIGSOFT Distinguished Paper Award. https://doi.org/10.1109/ICSE43902.2021.00056</FootnoteItem>
+  <FootnoteItem id="7">Leroy, S. (2009). "Why Is It So Hard to Do My Work? The Challenge of Attention Residue When Switching Between Work Tasks." Organizational Behavior and Human Decision Processes. https://doi.org/10.1016/j.obhdp.2009.02.001</FootnoteItem>
+  <FootnoteItem id="8">Parnin, C. and Rugaber, S. (2011). "Resumption Strategies for Interrupted Programming Tasks." Software Quality Journal. https://doi.org/10.1007/s11219-010-9104-9</FootnoteItem>
 </FootnoteList>
