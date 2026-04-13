@@ -121,7 +121,7 @@ With prompt caching, the static compacted context caches at a 90% discount acros
 
 ## What moved the needle
 
-I ran 45 automated optimization experiments iterating on prompt, format, descriptions, and thresholds. Most changes were neutral or harmful. Three things mattered:
+I ran 45 automated optimization experiments iterating on prompt, format, descriptions, and thresholds. Most changes were neutral or harmful. Five things mattered:
 
 **1. Reference descriptions.** Changing from generic labels (`"Tool result for tool_05"`) to semantic descriptions (`"File: src/config.ts"`, `"Command output: npx vitest run"`, `"Error: database connection timeout"`) improved grounding by ~5 points. The model's retrieval behaviour responds more to what it sees in `list_refs` than to system prompt instructions. Good descriptions beat good prompts.
 
