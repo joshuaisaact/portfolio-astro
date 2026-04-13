@@ -1,0 +1,202 @@
+---
+title: "Lossless Compaction for AI Agents"
+date: "2026-04-13"
+excerpt: "Claude Code, Codex, and Cursor all handle context limits differently. I tested an alternative, pointer-based compaction, and it beats summarization by 18 points on grounding after two compactions."
+tags: ["AI", "Agents", "Context Management", "LLM", "Benchmarks"]
+featured_image: "./press.png"
+---
+
+import Footnote from '../../components/Footnote.astro';
+import FootnoteList from '../../components/FootnoteList.astro';
+import FootnoteItem from '../../components/FootnoteItem.astro';
+
+Run a coding agent long enough and it hits a wall. The conversation gets too long for the context window. Claude Code triggers auto-compaction at around 167k tokens into a 200k window (context window minus reserved output tokens minus a 13k buffer). That threshold arrives faster than you'd think when tool results are verbose. The harness has to compress what happened so far to make room for what comes next.
+
+Every major agent harness handles this. Claude Code calls it compaction. Cursor calls it context management. They all do some version of the same thing: an LLM rewrites your conversation history as a condensed summary, and that summary becomes the new "memory."
+
+This works. Most of the time.
+
+The problem is the second compaction. And the third. By that point the agent's understanding of your early session is a summary of a summary of a summary. Specific values, exact error messages, the particular type that was failing, all paraphrased away. The agent doesn't know it's lost anything. It starts stating things that aren't quite right.
+
+I spent three weeks testing an alternative and measuring how bad the problem is.
+
+## How compaction works today
+
+Every harness does this differently, and the differences matter.
+
+**Claude Code** has two layers. The first is microcompaction: as the conversation grows, large tool results from file reads, shell output, grep, glob, web fetches, and file edits get their content replaced with `[Old tool result content cleared]`. The model knows it ran the tool but can't see the output. Only specific tool types are eligible, and the clearing targets older results first.
+
+When that's not enough and the token count still crosses the threshold, full compaction kicks in. A separate LLM call (with all tools disabled so it can't wander off) reads the conversation and produces a structured summary. The prompt asks for nine sections: the user's requests and intent, technical concepts discussed, files and code sections touched (with snippets), errors encountered and how they were fixed, problems solved, all user messages verbatim, pending tasks, a description of the current work, and an optional next step with direct quotes from the most recent exchange. The model first drafts its thinking in an `<analysis>` block (which gets stripped before the summary enters context) and then writes the actual `<summary>`. The summary replaces the entire conversation history and becomes the new starting point, framed as "this session is being continued from a previous conversation that ran out of context."
+
+Users can also provide custom compaction instructions that get appended to the prompt, like "focus on test output and code changes" or "include file reads verbatim." But the base prompt is fixed and optimised for preserving structure over specific values. It asks for code snippets and file names, but a summary is still a summary. The exact error message on line 43 becomes "encountered a type error in the auth middleware." Close enough to continue working. Not close enough to debug from.
+
+**Cursor** took a different approach: train the model itself to compress better. They RL-trained a model on self-summarization that reduces context to roughly 1/5 the tokens with a claimed 50% error reduction over naive summarization.<Footnote id="1" /> Cursor has millions of coding sessions to train on, so they can post-train a model that learns which details matter in practice and which can be dropped. That dataset is a genuine moat. But the output is still lossy compression. A better-trained summarizer loses less, but it still loses. The model decides what matters and throws the rest away.
+
+**Open Code** has two layers too, but structured differently. The first is session pruning: in-memory, per-request, non-persistent. Large tool results older than 5 minutes get soft-trimmed (first 1,500 chars and last 1,500 chars kept, middle replaced with an ellipsis) or hard-cleared to a placeholder. The last 3 assistant messages are never touched. This only affects the current request context, not the transcript on disk.
+
+When token usage crosses the threshold (context window minus a 20k reserve floor), full compaction fires. Open Code splits the conversation at an adaptive ratio: roughly 40% of recent messages are preserved intact, 60% of older messages are summarized into a persistent compaction entry. The ratio adapts based on message size. If individual messages are large relative to the context window, the preserved portion shrinks (down to a floor of 15%) so the summary has room. The compaction prompt is minimal: "merge these partial summaries into a single cohesive summary, preserve decisions, TODOs, open questions, and any constraints." Before compaction, Open Code can run a "memory flush," a silent agentic turn that writes durable state to disk so important context survives even if the summary loses it.
+
+All three approaches share an assumption: when you need to shrink the conversation, the right move is to rewrite it shorter. Lossy compression. You could store the full content somewhere and leave a pointer to it instead.
+
+## Pointers instead of summaries
+
+The idea is stolen from how memory hierarchies work in hardware. Hot data lives in registers, warm data in cache, cold data on disk. Nothing gets destroyed. Everything is addressable.
+
+A JavaScript developer thinking about pointers. I'm aware of the irony. But I've spent the last few months [building hash tables in Zig](/blog/hashmaps/) and spending more time thinking about cache lines and memory layout than anyone writing TypeScript professionally has any right to. That detour is why "store the content and keep a reference to it" was the first thing I reached for, not "rewrite it shorter." When you've been manually managing memory, pointers stop being an abstraction and start being the obvious default.
+
+The other influence was [Agentic RAG](https://arxiv.org/pdf/2602.03442), which argues you should give models retrieval primitives and trust them to fetch what they need, rather than building pipelines that pre-select context. That paper is about external corpora, but the principle transfers to compaction.
+
+Applied to agent context: when a tool result is large, don't summarize it. Store the full content in a key-value store, replace it in the conversation with a lightweight reference (a chunk ID and a short description), and give the agent a `read_ref` tool to retrieve the original when it needs it.
+
+The agent keeps a compact reference table in context. When it needs the exact error message from that test run 40 minutes ago, it dereferences the pointer and gets the original bytes. No paraphrasing. The full content survives.
+
+Claude Code's microcompaction does this in spirit already, saving content to disk with a preview. The difference is making it systematic: every large tool result gets pointerized, a reference index is maintained, and the agent has first-class tools to browse and retrieve.
+
+## The experiments
+
+I ran five experiments.
+
+**Summarize** — the baseline. An LLM rewrites the conversation as a condensed summary. What Claude Code does today.
+
+**Pointerize** — replace large tool results with references, store originals in SQLite, give the agent `read_ref` and `list_refs` tools plus a markdown reference table.
+
+**Hybrid** — LLM summary with the pointer table appended. Both the narrative summary and the ability to retrieve originals.
+
+Eight synthetic fixtures modeled on real agent sessions: database migrations, auth middleware debugging, webhook configuration, performance profiling. Each fixture had a conversation, a compaction event, and then recall questions targeting specific details from before the compaction.
+
+Evaluation used claim extraction and source-grounded adjudication. Every factual claim in the model's response was traced back to the source material to check whether it was supported. The metric is "grounding rate": what percentage of the model's claims can you verify against the original content.
+
+## Single compaction: summarization is fine
+
+After one compaction:
+
+| Strategy | Grounding Rate | Tokens |
+|---|---|---|
+| Summarize | 80% | 2,366 |
+| Pointerize | 84% | 5,949 |
+| Hybrid | 84% | 7,768 |
+
+A 4-point improvement for 2.5x the token cost. Not compelling on its own. If your agent sessions are short enough that compaction only happens once, summarization is good enough and cheaper.
+
+But most of the gap showed up on specific fixture types. Database migration grounding: 72% with summaries, 96% with pointers. Auth middleware: 89% vs 97%. These are the sessions where exact error messages and type names matter, and those are the details that get paraphrased away in a summary.
+
+## The hybrid trap
+
+I expected hybrid to be the best of both worlds. A summary for narrative flow, plus pointers for when the agent needs exact details. More information should mean better answers.
+
+It didn't. Hybrid matched pointerize on grounding (84%) but cost 30% more tokens and generated 28% more claims. On the auth-middleware fixture, pointerize hallucinated 0 out of 3 runs. Hybrid hallucinated 3 out of 3. Every time.
+
+The model read the correct information from the reference, but the summary had planted a plausible-sounding detail that wasn't in the source. Summaries are clean, narrative, authoritative. Retrieved content is raw, verbose, harder to parse. When both are present, the model anchors on the summary's interpretation and uses the refs for confirmation rather than correction. Details from the summary that don't appear in the refs aren't questioned. They're treated as additional context the summary preserved.
+
+This is an anchoring effect, and it generalizes beyond compaction. Any RAG system that prepends a "context summary" before retrieved chunks may be undermining the retrieval grounding it was designed to provide. A-RAG avoids this. The model starts with nothing and progressively retrieves, so there's no pre-loaded narrative to anchor on. The A-RAG paper frames this as giving the model agency over its own information needs. The hybrid result is evidence for why that matters: pre-loaded context doesn't add information neutrally, it shapes how the model interprets everything it retrieves afterward. Make retrieval the only path to information and the model trusts what it retrieves.
+
+**General principle: giving a model both a lossy interpretation and lossless source data doesn't get the best of both. The model over-trusts the interpretation.**
+
+## Cascaded compaction: where it matters
+
+One compaction is manageable. Two is where summarization breaks.
+
+I ran the same fixtures through 1, 2, and 3 compaction cycles, simulating long autonomous sessions.
+
+| Strategy | x1 | x2 | x3 |
+|---|---|---|---|
+| Summarize | 84% | 74% | 79% |
+| Pointerize | 85% | **92%** | **87%** |
+
+(The x1 numbers here differ slightly from the single-compaction table above because the cascaded experiment used a different fixture subset and run conditions. The direction is consistent; the absolute values shift a few points between runs.)
+
+At the first compaction, the difference is 1 point. Noise.
+
+At the second compaction, it's 18 points. Summarize drops from 84% to 74%, losing 10 points as details from the first summary get re-summarized and degraded again. Database migration grounding craters from 81% to 63%. Webhook configuration drops from 84% to 66%.
+
+Pointerize *improves* at x2, going from 85% to 92%. More text gets pushed into refs, the conversation gets less noisy, and the originals stay retrievable. Cleaner working context, same access to full details.
+
+The x3 numbers are noisier (small sample), but the pattern holds: pointerize stays in the high 80s while summarize oscillates around the mid-70s.
+
+## Token cost
+
+Pointerize costs 2.5x what summarize costs in raw tokens. The agentic retrieval loop re-sends context on each dereference call.
+
+With prompt caching, the static compacted context caches at a 90% discount across loop round-trips. Effective cost drops to 1.3-1.5x. For an 18-point grounding advantage at the second compaction, that's a good trade.
+
+## What moved the needle
+
+I ran 45 automated optimization experiments iterating on prompt, format, descriptions, and thresholds. Most changes were neutral or harmful. Five things mattered:
+
+**1. Reference descriptions.** Changing from generic labels (`"Tool result for tool_05"`) to semantic descriptions (`"File: src/config.ts"`, `"Command output: npx vitest run"`, `"Error: database connection timeout"`) improved grounding by ~5 points. The model's retrieval behaviour responds more to what it sees in `list_refs` than to system prompt instructions. Good descriptions beat good prompts.
+
+**2. The reference table format.** I tested four pointer formats: opaque IDs, titled (ID + description inline), preview (first 200 chars + retrieval instruction), and a markdown table at the end of context listing all refs. The table format halved hallucination rates compared to opaque IDs (25% vs 50-75%). The model needs structure, not the content alone.
+
+**3. Storing assistant messages as refs.** The biggest single win: ~11 points. When the model's own analysis and conclusions survive compaction alongside their evidence, cascaded grounding jumps. Most compaction implementations only preserve or summarize tool results. The model's reasoning about those results matters just as much.
+
+**4. The retrieval interface.** I tested four tool configurations: `read_ref` alone, `read_ref` + `list_refs`, `read_ref` + `search_refs`, and all three. `read_ref` + `list_refs` won outright: 100% success, 0% hallucination. Adding search on top didn't help and may have added noise. At the scale of a single session (5-10 refs), the ability to browse the full index is enough. The model doesn't need search; it needs to see what's available. This reinforces the A-RAG principle: give the model simple primitives and trust it to use them.
+
+**5. Prescriptive prompting.** Switching from passive instructions ("use read_ref if you need more detail") to a prescriptive retrieval loop ("read the ref, evaluate whether you have enough, read more if not, then answer") increased the dereference rate. The model is more likely to retrieve when the prompt frames retrieval as the expected workflow rather than an optional fallback.
+
+Everything else hurt or was neutral. Cautionary instructions ("only state what you retrieved") made the model too conservative. Richer inline descriptions caused the model to use the description as a substitute for reading the actual ref. 300 tokens was the sweet spot for the pointerization threshold; 150 and 500 both performed worse.
+
+## Realistic testing
+
+The synthetic benchmarks use shorter conversations than real agent sessions. I also tested against Open Code's actual pruning behaviour (60% compacted, 40% recent preserved) on longer fixtures including a full 18-part session.
+
+| Fixture | Summarize | Pointerize | Delta |
+|---|---|---|---|
+| migration-error | 47% | 83% | +36 |
+| perf-debug | 72% | 50% | -22 |
+| lock-timeout | 80% | 83% | +3 |
+| full-18-part | 70% | 78% | +8 |
+| **Mean** | **67%** | **74%** | **+7** |
+
+The mean improvement is +7 points on realistic-scale sessions. Most of the gain comes from fixtures with ephemeral content: one-time command output, test failures from changed code, API responses from specific state. These results can't be re-obtained by re-running the tool, because the code or environment has changed since.
+
+The perf-debug regression (-22 points) is worth noting. That fixture involved iterative profiling where the narrative flow of what was tried and why mattered more than exact numbers. Summaries preserve narrative well. Pointers preserve facts but lose the thread. This is a real tradeoff, not a clean win.
+
+The fix is probably not "better pointers." The two approaches solve different problems. Summaries preserve *why*: the reasoning chain, the sequence of decisions, what was tried and ruled out. Pointers preserve *what*: the exact output, the specific error, the value that matters three steps later. A smarter compaction system would classify content before compressing it. Narrative reasoning gets summarized, factual artifacts get pointerized. The experiment 5 finding that storing assistant messages as refs improved grounding by 11 points hints at this. The model's reasoning *is* the kind of content that benefits from lossless preservation, not just the tool outputs it was reasoning about.
+
+## What this means for agent harness design
+
+Summarization is good enough for most sessions. A well-prompted summary preserves what matters ~80% of the time. The agent can re-read files, re-run commands, re-query APIs. Most post-compaction interactions are "continue the task," not "recall a specific value from 30 minutes ago."
+
+Pointers are insurance for hard cases:
+
+- **Ephemeral content** that can't be re-obtained. One-time command output, test failures from code that's since changed, API responses from specific state.
+- **Exact-detail recall.** The specific error message, the type signature, the migration SQL.
+- **Cascaded compaction.** Multi-turn long autonomy where the agent compounds context loss across multiple compression cycles.
+
+Narrow use cases, but real ones, and they become more common as autonomous sessions get longer. If agents are heading toward multi-hour sessions (and the trajectory suggests they are) compaction quality becomes a scaling bottleneck the same way [toolchain speed became one for verification](/blog/toolchain-bottleneck/).
+
+Compaction quality also affects agent behaviour: Cognition found that Sonnet 4.5 tracked its remaining context and started cutting corners when it sensed the window filling up, even when there was plenty of room.<Footnote id="2" />
+
+After I ran these experiments, Anthropic published their [managed agents architecture](https://docs.anthropic.com/en/docs/build-with-claude/managed-agents), which decouples durable storage from context management. An append-only event log stores everything that happened, never lossy. The context layer retrieves from that log via `getEvents()` with a transformation layer for cache efficiency. Store everything, retrieve selectively. Anthropic landed on the same separation independently, which suggests the pattern is sound even if the implementation details differ.
+
+## Implementation cost
+
+The implementation is light. For a harness like Open Code that already persists tool results in SQLite, the core change is 80 lines of new tool code and one line changed in the compaction path. Feature-flagged, zero cost when unused.
+
+For Claude Code, you'd need a storage layer since microcompaction discards content rather than indexing it. The hooks infrastructure (`PostToolUse`, `PreCompact`) already exists to intercept tool results and inject context before compaction. An MCP server exposing `read_ref` and `list_refs` gives the model retrieval access without modifying the core harness.
+
+I'm not arguing every harness should ship pointer-based compaction tomorrow. Lossy summarization has a measurable failure mode that compounds over time, and the fix is architecturally simple. Store the bytes instead of throwing them away. Let the model ask for what it needs.
+
+## Limitations
+
+This is small-scale research, not a production study. Eight synthetic fixtures, 3 runs per condition. Evaluation is LLM-as-judge (claim extraction + source-grounded adjudication), not human validation. All experiments ran on Sonnet 4.6; different models may dereference more or less reliably. Token costs are raw counts, not cache-adjusted. The recall questions target exact-detail retrieval where pointers shine. Real post-compaction usage is more varied and more favourable to summaries.
+
+The findings are directional, not definitive. But the direction is consistent across every fixture and compaction depth I tested.
+
+## What I'd build
+
+If I were adding this to a harness today:
+
+1. A `PostToolUse` hook that intercepts tool results exceeding 300 tokens, stores the full content in SQLite keyed by content hash, replaces the result with a preview and reference ID.
+2. A `PreCompact` hook that generates a reference index (markdown table of all active refs with semantic descriptions) and injects it into the context before compaction runs.
+3. An MCP server exposing `read_ref(id)` and `list_refs()` for retrieval.
+4. Session-scoped cleanup: SQLite entries expire when the session ends.
+
+No new infrastructure, no model changes, no training. A content-addressable store, two hooks, and a retrieval tool.
+
+The code for the experiments is on [GitHub](https://github.com/joshuaisaact/pointer-experiments).
+
+<FootnoteList>
+  <FootnoteItem id="1">Cursor's approach is detailed in their [Context Management blog post](https://cursor.com/blog/context-management). They frame it as a model capability problem: train the model to compress better rather than building storage and retrieval infrastructure around it. Both are valid approaches, and they're not mutually exclusive.</FootnoteItem>
+  <FootnoteItem id="2">Cognition observed that Sonnet 4.5 prematurely wrapped up tasks when it perceived context running low, skipping verification steps and declaring victory early. The model's perception of remaining context affects its behaviour independently of actual token usage. Better compaction means the model spends less of the window on stale content, giving it more room to work without triggering this anxiety.</FootnoteItem>
+</FootnoteList>
