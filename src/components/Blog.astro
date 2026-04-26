@@ -37,7 +37,9 @@ const createPageURL = (page: number) => `/?page=${page}#blog`;
   >
     {
       paginatedPosts.map((post) => (
-        <BlogCard slug={post.id} metadata={post.data} />
+        <div role="listitem">
+          <BlogCard slug={post.id} metadata={post.data} />
+        </div>
       ))
     }
   </div>
