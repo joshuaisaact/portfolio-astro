@@ -43,7 +43,7 @@ const socialLinks = [
           width={24}
           height={24}
           loading="eager"
-          class="rounded-full outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
+          class="rounded-full outline -outline-offset-1 outline-black/10 dark:outline-white/10"
         />
         Joshua Tuddenham
       </a>
@@ -64,7 +64,9 @@ const socialLinks = [
         }
       </ul>
 
-      {/* Right side: socials (desktop only), theme toggle (always), hamburger (mobile only) */}
+      {
+        /* Right side: socials (desktop only), theme toggle (always), hamburger (mobile only) */
+      }
       <div class="flex items-center gap-3 md:gap-6">
         <div class="hidden items-center gap-6 md:flex">
           {
@@ -120,7 +122,9 @@ const socialLinks = [
     class="md:hidden absolute top-full left-0 right-0 grid grid-rows-[0fr] transition-[grid-template-rows] duration-200 ease-in data-[state=open]:grid-rows-[1fr] data-[state=open]:duration-300 data-[state=open]:ease-[cubic-bezier(0.2,0,0,1)]"
   >
     <div class="overflow-hidden">
-      <div class="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-4 space-y-3">
+      <div
+        class="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-4 space-y-3"
+      >
         <ul class="space-y-1">
           {
             navLinks.map(({ href, label }) => (
@@ -187,11 +191,21 @@ const socialLinks = [
       filter 300ms cubic-bezier(0.2, 0, 0, 1);
   }
 
-  #mobileMenuPanel[data-state="open"] ul li:nth-child(1) a { transition-delay: 60ms; }
-  #mobileMenuPanel[data-state="open"] ul li:nth-child(2) a { transition-delay: 110ms; }
-  #mobileMenuPanel[data-state="open"] ul li:nth-child(3) a { transition-delay: 160ms; }
-  #mobileMenuPanel[data-state="open"] ul li:nth-child(4) a { transition-delay: 210ms; }
-  #mobileMenuPanel[data-state="open"] [data-mobile-socials] { transition-delay: 260ms; }
+  #mobileMenuPanel[data-state="open"] ul li:nth-child(1) a {
+    transition-delay: 60ms;
+  }
+  #mobileMenuPanel[data-state="open"] ul li:nth-child(2) a {
+    transition-delay: 110ms;
+  }
+  #mobileMenuPanel[data-state="open"] ul li:nth-child(3) a {
+    transition-delay: 160ms;
+  }
+  #mobileMenuPanel[data-state="open"] ul li:nth-child(4) a {
+    transition-delay: 210ms;
+  }
+  #mobileMenuPanel[data-state="open"] [data-mobile-socials] {
+    transition-delay: 260ms;
+  }
 </style>
 
 <script>

@@ -26,9 +26,11 @@ const utilityProjects = allProjects
   .map((p) => p.data);
 
 const allPosts = await getCollection("blog");
-const blogPosts = allPosts.sort(
-  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
-);
+const blogPosts = allPosts
+  .sort(
+    (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
+  )
+  .slice(0, 6);
 ---
 
 <a

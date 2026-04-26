@@ -19,14 +19,6 @@ interface Props {
 }
 
 const { posts } = Astro.props;
-
-const mobileChunkSize = 2;
-const desktopChunkSize = 4;
-const maxChunkSize = Math.max(mobileChunkSize, desktopChunkSize);
-const pages: BlogPost[][] = [];
-for (let i = 0; i < posts.length; i += maxChunkSize) {
-  pages.push(posts.slice(i, i + maxChunkSize));
-}
 ---
 
 <section aria-label="Blog Posts Carousel" class="space-y-6 sm:space-y-8">
@@ -40,21 +32,16 @@ for (let i = 0; i < posts.length; i += maxChunkSize) {
   <div class="embla-blog relative" aria-roledescription="carousel">
     <!-- Carousel Viewport -->
     <div class="embla-blog__viewport overflow-hidden py-2">
-      <div class="embla-blog__container flex" role="list">
+      <div class="embla-blog__container flex gap-3 sm:gap-4" role="list">
         {
-          pages.map((page, pageIndex) => (
+          posts.map((post, index) => (
             <div
-              class="embla-blog__slide flex-[0_0_100%] min-w-0"
+              class="embla-blog__slide flex-[0_0_90%] md:flex-[0_0_calc(50%-0.5rem)] min-w-0"
+              role="listitem"
               aria-roledescription="slide"
-              aria-label={`Page ${pageIndex + 1} of ${pages.length}`}
+              aria-label={`${index + 1} of ${posts.length}: ${post.data.title}`}
             >
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                {page.map((post, i) => (
-                  <div class={i >= 2 ? "hidden md:block" : ""}>
-                    <BlogCard slug={post.id} metadata={post.data} index={pageIndex * maxChunkSize + i} />
-                  </div>
-                ))}
-              </div>
+              <BlogCard slug={post.id} metadata={post.data} index={index} />
             </div>
           ))
         }
@@ -102,7 +89,7 @@ for (let i = 0; i < posts.length; i += maxChunkSize) {
       aria-label="Slide navigation"
     >
       {
-        pages.map((_, index) => (
+        posts.map((_, index) => (
           <button
             type="button"
             class:list={[
@@ -112,7 +99,7 @@ for (let i = 0; i < posts.length; i += maxChunkSize) {
                 : "bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500",
             ]}
             role="tab"
-            aria-label={`Go to page ${index + 1}`}
+            aria-label={`Go to post ${index + 1}`}
             aria-selected={index === 0 ? "true" : "false"}
             data-index={index}
           />
@@ -132,7 +119,7 @@ for (let i = 0; i < posts.length; i += maxChunkSize) {
     const embla = EmblaCarousel(emblaNode as HTMLElement, {
       loop: false,
       align: "start",
-      containScroll: false,
+      containScroll: "trimSnaps",
     });
 
     const prevBtn = document.querySelector(".embla-blog__prev");
