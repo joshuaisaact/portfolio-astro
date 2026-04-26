@@ -5,16 +5,18 @@ import { Sun, Moon } from "lucide-astro";
 <button
   id="themeToggle"
   aria-label="Toggle theme"
-  class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-(--theme-5)"
+  class="relative w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-(--theme-5) after:absolute after:top-1/2 after:left-1/2 after:size-10 after:-translate-1/2 after:content-['']"
 >
-  <Sun
-    class="w-5 h-5 text-gray-900 cursor-pointer dark:text-gray-200 transition-transform hover:rotate-45 duration-200 hidden dark:block"
-    aria-hidden="true"
-  />
-  <Moon
-    class="w-5 h-5 text-gray-900 cursor-pointer dark:text-gray-200 transition-transform hover:rotate-12 duration-200 block dark:hidden"
-    aria-hidden="true"
-  />
+  <span class="relative inline-flex size-5">
+    <Sun
+      class="absolute inset-0 size-5 text-gray-900 dark:text-gray-200 transition-[opacity,filter,scale,rotate] duration-300 ease-[cubic-bezier(0.2,0,0,1)] scale-[0.25] opacity-0 blur-[4px] hover:rotate-45 dark:scale-100 dark:opacity-100 dark:blur-[0px]"
+      aria-hidden="true"
+    />
+    <Moon
+      class="absolute inset-0 size-5 text-gray-900 dark:text-gray-200 transition-[opacity,filter,scale,rotate] duration-300 ease-[cubic-bezier(0.2,0,0,1)] scale-100 opacity-100 blur-[0px] hover:rotate-12 dark:scale-[0.25] dark:opacity-0 dark:blur-[4px]"
+      aria-hidden="true"
+    />
+  </span>
 </button>
 
 <script>

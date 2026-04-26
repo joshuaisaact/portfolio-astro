@@ -97,7 +97,7 @@ for (let i = 0; i < posts.length; i += maxChunkSize) {
 
     <!-- Dot Indicators -->
     <div
-      class="embla-blog__dots flex justify-center gap-4 mt-4"
+      class="embla-blog__dots flex justify-center gap-8 mt-4"
       role="tablist"
       aria-label="Slide navigation"
     >
@@ -106,7 +106,7 @@ for (let i = 0; i < posts.length; i += maxChunkSize) {
           <button
             type="button"
             class:list={[
-              "embla-blog__dot relative w-2.5 h-2.5 rounded-full transition-colors duration-200 after:absolute after:top-1/2 after:left-1/2 after:w-8 after:h-8 after:-translate-1/2",
+              "embla-blog__dot relative w-2.5 h-2.5 rounded-full transition-colors duration-200 after:absolute after:top-1/2 after:left-1/2 after:size-10 after:-translate-1/2 after:content-['']",
               index === 0
                 ? "bg-blue-600 dark:bg-blue-500"
                 : "bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500",
