@@ -1,5 +1,6 @@
 ---
 import { Image } from "astro:assets";
+import { Menu, X } from "lucide-astro";
 import ThemeIcon from "./ThemeIcon.astro";
 
 const navLinks = [
@@ -42,7 +43,7 @@ const socialLinks = [
           width={24}
           height={24}
           loading="eager"
-          class="rounded-full outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
+          class="rounded-full outline -outline-offset-1 outline-black/10 dark:outline-white/10"
         />
         Joshua Tuddenham
       </a>
@@ -63,32 +64,188 @@ const socialLinks = [
         }
       </ul>
 
-      {/* Social links & theme toggle */}
-      <div class="hidden items-center gap-6 md:flex">
-        {
-          socialLinks.map(({ href, icon, label }) => (
-            <a
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              class="relative opacity-80 hover:opacity-100 transition-opacity after:absolute after:top-1/2 after:left-1/2 after:size-10 after:-translate-1/2 after:content-['']"
-            >
-              <Image
-                src={icon}
-                alt={label}
-                width={20}
-                height={20}
-                loading="eager"
-                class={label === "GitHub" ? "dark:invert" : ""}
-              />
-            </a>
-          ))
-        }
+      {
+        /* Right side: socials (desktop only), theme toggle (always), hamburger (mobile only) */
+      }
+      <div class="flex items-center gap-3 md:gap-6">
+        <div class="hidden items-center gap-6 md:flex">
+          {
+            socialLinks.map(({ href, icon, label }) => (
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="relative opacity-80 hover:opacity-100 transition-opacity after:absolute after:top-1/2 after:left-1/2 after:size-10 after:-translate-1/2 after:content-['']"
+              >
+                <Image
+                  src={icon}
+                  alt={label}
+                  width={20}
+                  height={20}
+                  loading="eager"
+                  class={label === "GitHub" ? "dark:invert" : ""}
+                />
+              </a>
+            ))
+          }
+        </div>
         <ThemeIcon />
-      </div>
 
-      {/* Mobile menu component */}
-      <!-- <MobileMenu navLinks={navLinks} socialLinks={socialLinks} /> -->
+        <button
+          id="mobileMenuToggle"
+          type="button"
+          aria-label="Toggle navigation menu"
+          aria-expanded="false"
+          aria-controls="mobileMenuPanel"
+          data-state="closed"
+          class="md:hidden group relative w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-(--theme-5) after:absolute after:top-1/2 after:left-1/2 after:size-10 after:-translate-1/2 after:content-['']"
+        >
+          <span class="relative inline-flex size-5">
+            <Menu
+              class="absolute inset-0 size-5 text-gray-900 dark:text-gray-200 transition-[opacity,filter,scale,rotate] duration-300 ease-[cubic-bezier(0.2,0,0,1)] scale-100 opacity-100 blur-[0px] group-data-[state=open]:scale-[0.25] group-data-[state=open]:opacity-0 group-data-[state=open]:blur-[4px]"
+              aria-hidden="true"
+            />
+            <X
+              class="absolute inset-0 size-5 text-gray-900 dark:text-gray-200 transition-[opacity,filter,scale,rotate] duration-300 ease-[cubic-bezier(0.2,0,0,1)] scale-[0.25] opacity-0 blur-[4px] group-data-[state=open]:scale-100 group-data-[state=open]:opacity-100 group-data-[state=open]:blur-[0px]"
+              aria-hidden="true"
+            />
+          </span>
+        </button>
+      </div>
     </nav>
   </div>
+
+  {/* Mobile menu panel */}
+  <div
+    id="mobileMenuPanel"
+    data-state="closed"
+    inert
+    class="md:hidden absolute top-full left-0 right-0 grid grid-rows-[0fr] transition-[grid-template-rows] duration-200 ease-in data-[state=open]:grid-rows-[1fr] data-[state=open]:duration-300 data-[state=open]:ease-[cubic-bezier(0.2,0,0,1)]"
+  >
+    <div class="overflow-hidden">
+      <div
+        class="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 px-4 py-4 space-y-3"
+      >
+        <ul class="space-y-1">
+          {
+            navLinks.map(({ href, label }) => (
+              <li>
+                <a
+                  href={href}
+                  class="block px-3 py-2 rounded-md text-base text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-gray-100 transition-colors"
+                >
+                  {label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+        <div
+          data-mobile-socials
+          class="flex items-center gap-4 px-3 pt-3 border-t border-gray-200 dark:border-gray-800"
+        >
+          {
+            socialLinks.map(({ href, icon, label }) => (
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="relative opacity-80 hover:opacity-100 transition-opacity after:absolute after:top-1/2 after:left-1/2 after:size-10 after:-translate-1/2 after:content-['']"
+              >
+                <Image
+                  src={icon}
+                  alt={label}
+                  width={20}
+                  height={20}
+                  loading="eager"
+                  class={label === "GitHub" ? "dark:invert" : ""}
+                />
+              </a>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+  </div>
 </header>
+
+<style>
+  #mobileMenuPanel ul a,
+  #mobileMenuPanel [data-mobile-socials] {
+    opacity: 0;
+    transform: translateY(4px);
+    filter: blur(2px);
+    transition:
+      opacity 180ms ease-in,
+      transform 180ms ease-in,
+      filter 180ms ease-in;
+  }
+
+  #mobileMenuPanel[data-state="open"] ul a,
+  #mobileMenuPanel[data-state="open"] [data-mobile-socials] {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+    transition:
+      opacity 300ms cubic-bezier(0.2, 0, 0, 1),
+      transform 300ms cubic-bezier(0.2, 0, 0, 1),
+      filter 300ms cubic-bezier(0.2, 0, 0, 1);
+  }
+
+  #mobileMenuPanel[data-state="open"] ul li:nth-child(1) a {
+    transition-delay: 60ms;
+  }
+  #mobileMenuPanel[data-state="open"] ul li:nth-child(2) a {
+    transition-delay: 110ms;
+  }
+  #mobileMenuPanel[data-state="open"] ul li:nth-child(3) a {
+    transition-delay: 160ms;
+  }
+  #mobileMenuPanel[data-state="open"] ul li:nth-child(4) a {
+    transition-delay: 210ms;
+  }
+  #mobileMenuPanel[data-state="open"] [data-mobile-socials] {
+    transition-delay: 260ms;
+  }
+</style>
+
+<script>
+  const button = document.getElementById("mobileMenuToggle");
+  const panel = document.getElementById("mobileMenuPanel");
+
+  if (button && panel) {
+    const open = () => {
+      button.dataset.state = "open";
+      panel.dataset.state = "open";
+      button.setAttribute("aria-expanded", "true");
+      panel.removeAttribute("inert");
+    };
+    const close = () => {
+      button.dataset.state = "closed";
+      panel.dataset.state = "closed";
+      button.setAttribute("aria-expanded", "false");
+      panel.setAttribute("inert", "");
+    };
+
+    button.addEventListener("click", () => {
+      if (button.dataset.state === "open") close();
+      else open();
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && button.dataset.state === "open") close();
+    });
+
+    document.addEventListener("click", (e) => {
+      if (button.dataset.state !== "open") return;
+      const target = e.target as Node | null;
+      if (!target) return;
+      if (button.contains(target) || panel.contains(target)) return;
+      close();
+    });
+
+    panel.querySelectorAll("a").forEach((a) => {
+      a.addEventListener("click", close);
+    });
+  }
+</script>
