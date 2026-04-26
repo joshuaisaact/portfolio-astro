@@ -29,7 +29,8 @@ const { posts } = Astro.props;
         {
           posts.map((post, index) => (
             <div
-              class="embla-blog__slide flex-[0_0_90%] md:flex-[0_0_calc(50%-0.5rem)] min-w-0"
+              class="embla-blog__slide flex-[0_0_90%] md:flex-[0_0_calc(50%-0.5rem)] min-w-0 stagger-in"
+              data-stagger-delay={index * 100}
               role="listitem"
               aria-roledescription="slide"
               aria-label={`${index + 1} of ${posts.length}: ${post.data.title}`}

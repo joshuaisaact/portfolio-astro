@@ -18,7 +18,8 @@ const { projects } = Astro.props;
         {
           projects.map((project, index) => (
             <div
-              class="embla__slide flex-[0_0_90%] md:flex-[0_0_calc(50%-0.5rem)] min-w-0"
+              class="embla__slide flex-[0_0_90%] md:flex-[0_0_calc(50%-0.5rem)] min-w-0 stagger-in"
+              data-stagger-delay={index * 100}
               role="listitem"
               aria-roledescription="slide"
               aria-label={`${index + 1} of ${projects.length}: ${project.title}`}

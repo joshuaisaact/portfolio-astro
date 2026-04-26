@@ -39,10 +39,9 @@ const linkTarget = isMinimal && githubLink ? "_blank" : "_self";
         relative overflow-hidden
         bg-linear-to-b from-white to-gray-50
         dark:from-gray-800 dark:to-gray-850
-        rounded-lg shadow-sm
-        ring-1 ring-gray-900/5
-        transition-[box-shadow,transform] duration-300
-        hover:shadow-md hover:-translate-y-0.5 ${isMinimal ? "hover:bg-gray-50 dark:hover:bg-gray-800/60" : ""}`}
+        rounded-lg shadow-(--shadow-card)
+        transition-[box-shadow] duration-300
+        hover:shadow-(--shadow-card-hover) ${isMinimal ? "hover:bg-gray-50 dark:hover:bg-gray-800/60" : ""}`}
   >
     {
       !isMinimal && (project.imageSrc || project.posterImage) && (
@@ -53,7 +52,7 @@ const linkTarget = isMinimal && githubLink ? "_blank" : "_self";
             widths={[320, 560, 800]}
             sizes="(max-width: 640px) 320px, (max-width: 1024px) 560px, 800px"
             loading="lazy"
-            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
+            class="w-full h-full object-cover outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
           />
         </div>
       )
@@ -132,7 +131,7 @@ const linkTarget = isMinimal && githubLink ? "_blank" : "_self";
       </div>
 
       <p
-        class={`text-sm ${isMinimal ? "text-gray-500 dark:text-gray-400 line-clamp-3" : "text-gray-600 dark:text-gray-300 line-clamp-4"}`}
+        class={`text-sm ${isMinimal ? "text-gray-500 dark:text-gray-400 line-clamp-4" : "text-gray-600 dark:text-gray-300 line-clamp-4"}`}
       >
         {project.description}
       </p>

@@ -5,7 +5,7 @@ projectType: "tool"
 order: 0
 imageSrc: "../../assets/projects/shell.svg"
 imageAlt: "Shell Terminal"
-description: "An autonomous research harness for Claude Code that runs iterative optimization experiments. Define a problem, an editable file, and a measurement command — the agent loops through hypotheses, edits, benchmarks, and git-backed rollbacks until it converges on a faster solution."
+description: "A shell harness that lets Claude Code optimize code autonomously. Point it at a file, give it a benchmark, and it loops -editing, measuring, committing or rolling back -until it beats the baseline. Built 53% faster JSON serialization and 3.7x faster glob matching this way."
 links:
   - type: "github"
     url: "https://github.com/joshuaisaact/auto-claude"
@@ -21,4 +21,4 @@ features:
   - "Claude Code skill compatible"
 ---
 
-Inspired by Karpathy's autoresearch but generalized beyond ML training. You define a problem in a `program.md` file — the editable source, a measurement command, and a metric to optimize — then the agent loops autonomously: reading the current state, proposing an edit, committing, measuring, and keeping or rolling back. Results so far include a 26% faster LRU cache than mnemonist, 3.7x faster glob matching than picomatch, and 53% faster JSON serialization than native `JSON.stringify`.
+Inspired by Karpathy's autoresearch but generalized beyond ML training. You define a problem in a `program.md` file -the editable source, a measurement command, and a metric to optimize -then the agent loops autonomously: reading the current state, proposing an edit, committing, measuring, and keeping or rolling back. Results so far include a 26% faster LRU cache than mnemonist, 3.7x faster glob matching than picomatch, and 53% faster JSON serialization than native `JSON.stringify`.

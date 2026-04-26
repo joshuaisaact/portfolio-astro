@@ -12,10 +12,14 @@
 
 :root {
   --theme-5: #4a6b62; /* Muted sage - primary accent */
+  --shadow-card: 0 0 0 1px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --shadow-card-hover: 0 0 0 1px rgba(0, 0, 0, 0.03), 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .dark {
   --theme-5: #7ab3a0; /* Lighter, more saturated sage for dark backgrounds */
+  --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-card-hover: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 0 16px rgba(255, 255, 255, 0.03);
 }
 
 .dark img[src*="github.svg"],

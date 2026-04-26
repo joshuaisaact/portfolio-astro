@@ -58,8 +58,8 @@ const { projects, projectType, cardType = "full" } = Astro.props;
     aria-label="Project list"
   >
     {
-      projects.map((project) => (
-        <div role="listitem" class="w-full">
+      projects.map((project, i) => (
+        <div role="listitem" class="w-full stagger-in" data-stagger-delay={i * 100}>
           <ProjectCard project={project} variant={cardType} />
         </div>
       ))
