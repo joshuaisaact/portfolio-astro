@@ -3,6 +3,7 @@ import Layout from "../../layouts/Layout.astro";
 import Navbar from "../../components/Navbar.astro";
 import BlogCard from "../../components/BlogCard.astro";
 import Subscribe from "../../components/Subscribe.astro";
+import { LayoutGrid, List } from "lucide-astro";
 import { getCollection } from "astro:content";
 
 // Get all blog posts
@@ -23,6 +24,14 @@ const paginatedPosts = sortedPosts.slice(
   currentPage * postsPerPage,
 );
 
+const formatDate = (dateString: string) => {
+  return new Date(dateString).toLocaleDateString("en-GB", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
 // Helper to create page URLs
 const createPageURL = (page: number) => {
   return `/blog?page=${page}`;
@@ -31,9 +40,17 @@ const createPageURL = (page: number) => {
 
 <Layout
   title="Blog | Josh Tuddenham"
-  description="Deep dives into technical challenges I've tackled, from teaching an AI yoga instructor new tricks to wrestling with WebSockets. These posts explore the reality of software development - accidental rabbit holes and JSON-induced existential crisis."
+  description="Engineering posts on AI agents, knowledge debt, systems programming, and software practice."
   canonicalURL="https://joshtuddenham.dev/blog"
 >
+  <!-- Set blog view from localStorage before paint to prevent flash -->
+  <script is:inline>
+    (function () {
+      const view = localStorage.getItem("blog-view") === "grid" ? "grid" : "list";
+      document.documentElement.setAttribute("data-blog-view", view);
+    })();
+  </script>
+
   <!-- Skip to main content -->
   <a
     href="#main-content"
@@ -50,23 +67,52 @@ const createPageURL = (page: number) => {
       class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16"
     >
       <!-- Header -->
-      <div class="mb-12">
-        <h1 class="text-4xl font-bold text-gray-900 dark:text-gray-100 mb-4">
+      <div class="mb-12 flex items-center justify-between gap-4">
+        <h1
+          class="font-fraunces text-3xl sm:text-4xl text-gray-900 dark:text-gray-100"
+          style="font-variation-settings: 'SOFT' 50, 'WONK' 0;"
+        >
           Blog
         </h1>
-        <p class="text-lg text-gray-700 dark:text-gray-300">
-          Deep dives into technical challenges I've tackled, from teaching an AI
-          yoga instructor new tricks to wrestling with WebSockets. These posts
-          explore the reality of software development - accidental rabbit holes
-          and JSON-induced existential crisis.
-        </p>
+
+        <div
+          class="relative flex items-center rounded-lg border border-gray-200 dark:border-gray-700 p-1"
+          role="group"
+          aria-label="View mode"
+        >
+          <div
+            data-blog-pill
+            aria-hidden="true"
+            class="absolute top-1 left-1 size-7 rounded-md bg-gray-100 dark:bg-gray-700 transition-transform duration-200 ease-[cubic-bezier(0.2,0,0,1)]"
+          >
+          </div>
+          <button
+            id="viewToggleList"
+            type="button"
+            aria-label="List view"
+            aria-pressed="true"
+            class="relative z-10 rounded-md p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--theme-5)"
+          >
+            <List class="w-4 h-4" />
+          </button>
+          <button
+            id="viewToggleGrid"
+            type="button"
+            aria-label="Grid view"
+            aria-pressed="false"
+            class="relative z-10 rounded-md p-1.5 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--theme-5)"
+          >
+            <LayoutGrid class="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
-      <!-- Blog Grid -->
+      <!-- Grid view -->
       <div
+        data-view="grid"
         class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12"
         role="list"
-        aria-label="Blog posts"
+        aria-label="Blog posts grid"
       >
         {
           paginatedPosts.map((post, index) => (
@@ -75,10 +121,41 @@ const createPageURL = (page: number) => {
         }
       </div>
 
+      <!-- List view -->
+      <ol
+        data-view="list"
+        class="space-y-6 mb-12"
+        aria-label="Blog posts list"
+      >
+        {
+          sortedPosts.map((post) => (
+            <li class="border-b border-gray-200 dark:border-gray-800 pb-6 last:border-0">
+              <a href={`/blog/${post.id}`} class="group block">
+                <div class="flex items-baseline justify-between gap-4">
+                  <h2 class="font-fraunces text-lg sm:text-xl text-gray-900 dark:text-gray-100 group-hover:text-(--theme-5) transition-colors">
+                    {post.data.title}
+                  </h2>
+                  <time
+                    datetime={post.data.date}
+                    class="shrink-0 text-xs sm:text-sm text-gray-500 dark:text-gray-400 tabular-nums"
+                  >
+                    {formatDate(post.data.date)}
+                  </time>
+                </div>
+                <p class="mt-1.5 text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+                  {post.data.excerpt}
+                </p>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+
       <!-- Pagination -->
       {
         totalPages > 1 && (
           <nav
+            data-view="grid"
             class="flex justify-center gap-2 mt-12"
             aria-label="Blog posts pagination"
           >
@@ -117,3 +194,44 @@ const createPageURL = (page: number) => {
     </main>
   </div>
 </Layout>
+
+<style is:global>
+  html[data-blog-view="grid"] [data-view="list"],
+  html[data-blog-view="list"] [data-view="grid"] {
+    display: none;
+  }
+
+  html[data-blog-view="grid"] [data-blog-pill] {
+    transform: translateX(100%);
+  }
+
+  html[data-blog-view="grid"] #viewToggleGrid,
+  html[data-blog-view="list"] #viewToggleList {
+    color: rgb(17 24 39);
+  }
+
+  html.dark[data-blog-view="grid"] #viewToggleGrid,
+  html.dark[data-blog-view="list"] #viewToggleList {
+    color: rgb(243 244 246);
+  }
+</style>
+
+<script>
+  const gridBtn = document.getElementById("viewToggleGrid");
+  const listBtn = document.getElementById("viewToggleList");
+
+  function setView(view: "grid" | "list") {
+    document.documentElement.setAttribute("data-blog-view", view);
+    localStorage.setItem("blog-view", view);
+    gridBtn?.setAttribute("aria-pressed", view === "grid" ? "true" : "false");
+    listBtn?.setAttribute("aria-pressed", view === "list" ? "true" : "false");
+  }
+
+  gridBtn?.addEventListener("click", () => setView("grid"));
+  listBtn?.addEventListener("click", () => setView("list"));
+
+  // Sync aria-pressed with the view set by the inline pre-paint script
+  const initialView = document.documentElement.getAttribute("data-blog-view");
+  gridBtn?.setAttribute("aria-pressed", initialView === "grid" ? "true" : "false");
+  listBtn?.setAttribute("aria-pressed", initialView === "list" ? "true" : "false");
+</script>
