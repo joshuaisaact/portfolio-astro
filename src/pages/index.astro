@@ -16,6 +16,7 @@ const allProjects = await getCollection("projects");
 const applicationProjects = allProjects
   .filter((p) => !p.data.projectType || p.data.projectType === "application")
   .sort((a, b) => (a.data.order ?? 999) - (b.data.order ?? 999))
+  .slice(0, 6)
   .map((p) => p.data);
 
 const utilityProjects = allProjects

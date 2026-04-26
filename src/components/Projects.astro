@@ -41,20 +41,17 @@ const { projects, projectType, cardType = "full" } = Astro.props;
 ---
 
 <section aria-label="Projects Section" class="space-y-6 sm:space-y-8">
-  <div>
-    <p
-      class="text-base sm:text-lg text-gray-700 dark:text-gray-300 leading-relaxed"
-    >
-      {
-        projectType === "application" &&
-          `Side projects where I dig into whatever's caught my interest - AI agents, systems programming, tools that solve problems I've actually had.`
-      }
-      {
-        projectType === "tool" &&
-          `Smaller tools and starter kits I've built along the way.`
-      }
-    </p>
-  </div>
+  {
+    projectType === "application" && (
+      <div>
+        <p class="text-base sm:text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
+          Side projects where I dig into whatever's caught my interest - AI
+          agents, systems programming, tools that solve problems I've actually
+          had.
+        </p>
+      </div>
+    )
+  }
   <div
     class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8"
     role="list"
