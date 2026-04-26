@@ -1,0 +1,24 @@
+---
+title: "Auto Claude"
+slug: "auto-claude"
+projectType: "tool"
+order: 0
+imageSrc: "../../assets/projects/shell.svg"
+imageAlt: "Shell Terminal"
+description: "An autonomous research harness for Claude Code that runs iterative optimization experiments. Define a problem, an editable file, and a measurement command — the agent loops through hypotheses, edits, benchmarks, and git-backed rollbacks until it converges on a faster solution."
+links:
+  - type: "github"
+    url: "https://github.com/joshuaisaact/auto-claude"
+    label: "View on GitHub"
+skills:
+  - "Shell"
+features:
+  - "Autonomous experiment loop: read state, generate idea, edit code, commit, measure, accept or reject"
+  - "Git-based experiment tracking with automatic rollback on failure"
+  - "Single metric optimization with fixed experiment budgets"
+  - "Markdown-driven configuration via program.md"
+  - "TSV result logging for experiment history"
+  - "Claude Code skill compatible"
+---
+
+Inspired by Karpathy's autoresearch but generalized beyond ML training. You define a problem in a `program.md` file — the editable source, a measurement command, and a metric to optimize — then the agent loops autonomously: reading the current state, proposing an edit, committing, measuring, and keeping or rolling back. Results so far include a 26% faster LRU cache than mnemonist, 3.7x faster glob matching than picomatch, and 53% faster JSON serialization than native `JSON.stringify`.
