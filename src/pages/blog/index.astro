@@ -128,7 +128,7 @@ const createPageURL = (page: number) => {
         aria-label="Blog posts list"
       >
         {
-          paginatedPosts.map((post) => (
+          sortedPosts.map((post) => (
             <li class="border-b border-gray-200 dark:border-gray-800 pb-6 last:border-0">
               <a href={`/blog/${post.id}`} class="group block">
                 <div class="flex items-baseline justify-between gap-4">
@@ -155,6 +155,7 @@ const createPageURL = (page: number) => {
       {
         totalPages > 1 && (
           <nav
+            data-view="grid"
             class="flex justify-center gap-2 mt-12"
             aria-label="Blog posts pagination"
           >
