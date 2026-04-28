@@ -1,0 +1,163 @@
+---
+title: "Forks and Locks: Why Smarter Decoding Can't Fix a Model's Distributions"
+date: "2026-04-28"
+featured_image: "./fork.webp"
+excerpt: "I tried to make a code model smarter at inference time. Adaptive decoding, entropy thresholds, the works. It made things worse. Then self-distillation fixed it in four minutes."
+tags: ["LLM", "inference", "decoding", "self-distillation", "AI"]
+---
+
+import Footnote from '../../components/Footnote.astro';
+import FootnoteList from '../../components/FootnoteList.astro';
+import FootnoteItem from '../../components/FootnoteItem.astro';
+import EntropyExplorer from '../../components/react/EntropyExplorer';
+import SSDResultsDemo from '../../components/react/AdaptiveDecodingDemo';
+import LogitsDemo from '../../components/react/LogitsDemo';
+import TemperatureDemo from '../../components/react/TemperatureDemo';
+
+What happens when you ask an LLM to write code?
+
+You type a prompt, hit enter, and tokens start appearing. It looks like the model is "writing," one word at a time, the way you'd type a sentence. But that's a UI choice, not a description of what's happening. The model doesn't have a plan for the function it's about to write. It doesn't "think" about the problem and then "express" a solution. Each token is an independent prediction: given everything so far, what comes next?
+
+That prediction is a probability distribution over the model's entire vocabulary. For a code model, that's roughly 150,000 tokens: every keyword, every variable name fragment, every bracket and whitespace character. The model assigns a score to each one, and a **decoding strategy** picks one.
+
+Temperature, top-k, top-p, min-p. You've seen these settings. You may have tuned them. But what are they doing, and what *can't* they do? That question turns out to be load-bearing.
+
+A recent Apple paper, ["Embarrassingly Simple Self-Distillation Improves Code Generation"](https://arxiv.org/abs/2604.01193),<Footnote id="1" /> showed that you can improve a code model's performance by fine-tuning it on its own correct outputs. The paper includes theoretical analysis of *why* decode-time tricks hit a ceiling. I wanted to test that claim: could I beat their results by being smarter about decoding, without any fine-tuning? I built an entropy-adaptive decoder that adjusts temperature and min-p per-token based on the model's uncertainty, calibrated it on real data, and ran it against a competitive programming benchmark. The results surprised me. But to explain them, I need to show you what the model is doing at each step.
+
+## From logits to tokens
+
+If you already know how inference works, [skip to the experiments](#the-experiment).
+
+When the model processes your prompt, it runs a forward pass through its neural network and produces a raw score for every token in the vocabulary. These scores are called **logits**. Not probabilities, just numbers, some positive, some negative, one per possible next token.
+
+<LogitsDemo client:visible />
+
+150,000 scores. The uncertain case shows what happens when the model picks a function name: `solve`, `find`, `check` are all close together. Toggle to "Confident" to see the opposite: the model assigns a logit of 8.7 to `(` and everything else is far behind. Hit "Apply softmax" to see what happens next.
+
+Those raw logits don't mean anything on their own. 8.7 is high compared to -0.3, but you can't interpret a single logit without seeing the rest. To turn them into probabilities, we apply **softmax**: exponentiate each score (so they're all positive), then divide by the sum (so they add up to 1).
+
+```python
+import math
+
+def softmax(logits):
+    exps = [math.exp(x) for x in logits]
+    total = sum(exps)
+    return [e / total for e in exps]
+```
+
+The exponentiation amplifies differences. A logit of 8.7 vs 2.1 becomes e^8.7 vs e^2.1, which is 6,000 vs 8. Small gaps in the logits become large gaps in probability. The model's slight preferences become strong opinions. Hit "Apply softmax" in the confident case to see this: `(` goes from a logit lead of 6.6 points to 99.8% probability. The gap explodes.
+
+After softmax, you have a proper probability distribution. Most of the time, one token dominates. The model is 99.8% sure the next character is `(`. You take the top token and move on. Greedy, sampling, beam search, they'd all pick `(`. Decoding strategy is irrelevant.
+
+Now apply softmax on the "Uncertain" case. The model assigns 18% to `solve`, 14% to `find`, 11% to `check`, and scatters the rest across dozens of alternatives. You're making a real choice. The model has several plausible continuations, and whichever one you pick determines the next forward pass, which determines the next distribution, and so on. A single token choice early in a function can cascade through the entire completion.
+
+This is where decoding strategy matters, and temperature is the main lever you get.
+
+## Temperature: the only knob
+
+Temperature divides the logits *before* softmax. One line of code: `scaled = [x / temperature for x in logits]`. Then softmax runs on the scaled values.
+
+Low temperature sharpens: the top token pulls further ahead. High temperature flattens: lower-ranked tokens catch up. Drag the slider to see it:
+
+<TemperatureDemo client:visible />
+
+Try the "Uncertain" case at 0.1 and 2.0. At 0.1, `solve` jumps from 18% to near-certain. At 2.0, it drops to 10% and `min` rises to 8%. The distribution flattens toward uniform. Now try "Confident" at the same settings. At 0.1, `(` stays at ~100%. At 2.0, it's still 89%. When the model is confident, temperature barely matters. When it's uncertain, temperature changes everything.
+
+Notice what *doesn't* change: the ranking. No matter where you drag the slider, `solve` stays #1. `find` stays #2. Temperature can widen or narrow the gaps between candidates, but it can never reorder them. If the model ranks a bad token above a good one, no temperature setting fixes that.
+
+Top-k and top-p truncate the distribution (remove the tail), but temperature is the only thing that reshapes it. And it can only reshape uniformly. If the model gives 0.1% to a great alternative and 0.1% to garbage, high temperature promotes both. Low temperature kills both. You can't say "I want more of token #3 and less of token #7."
+
+A token the model assigns 0.001 probability? Temperature can make that 0.005 or 0.0002, but it can't make it 0.15. The relative ordering stays the same. The support set, which tokens have meaningful probability, stays the same. Temperature reshapes what the model already believes. It can't add new beliefs.
+
+## Forks and locks
+
+You saw two kinds of token position in the demos above: ones where the model is sure, and ones where it isn't. The SSD paper<Footnote id="1" /> gives these names. A **lock** is a position where the model has a clear top choice, low entropy.<Footnote id="2" /> A **fork** is a position where probability is spread across several candidates, high entropy.
+
+How common is each? I measured entropy on 5,786 tokens from 20 LiveCodeBench problems using Qwen2.5-Coder-7B-Instruct. About 75% of tokens had entropy below 0.23 nats. Three-quarters of every completion is syntax, boilerplate, common patterns. The model isn't making a choice, it's filling in the only plausible answer.
+
+The remaining 25% is where the model hesitates: which algorithm, which variable name, which edge case to handle first. Click through the tokens below to see the split:
+
+<EntropyExplorer client:visible />
+
+Most of a code completion is locks. The forks are sparse but consequential, because a wrong choice at a fork cascades through every token that follows.
+
+This gave me an idea. Fixed temperature treats every token the same, but the model's uncertainty varies wildly from one position to the next. What if I could raise temperature at forks, the positions where the model needs to explore, and keep it near-greedy at locks, where it already knows the answer? Adapt per-token instead of using one fixed setting for the whole generation. I built it.
+
+## The adaptive temperature experiment
+
+**Setup**: Qwen2.5-Coder-7B-Instruct on LiveCodeBench v6 (175 problems, 10 samples each). NVIDIA RTX 4090.
+
+**Baseline**: Fixed decoding, T=0.7, top_k=20, top_p=0.8 (the settings from the SSD paper<Footnote id="1" />).
+
+**Adaptive**: Per-token entropy-adaptive decoding. At each position, I compute two signals: Shannon entropy (how spread out the distribution is) and the probability gap between the top two tokens (how much the winner leads). I blend these into a single uncertainty score, then use it to smoothly slide between two extremes. At a lock, the model gets near-greedy decoding (T=0.05, min-p=0.3): take the top token and move on. At a fork, temperature rises and min-p drops (T=1.2, min-p=0.02), letting the model explore alternatives it would otherwise suppress. Positions in between get proportional settings. I calibrated the crossover point on the entropy distribution from 20 problems (the same data behind the component above).
+
+The latency overhead is zero. Per-token entropy computation is negligible compared to the model forward pass (~47 tok/s both ways on a 4090).
+
+### The results
+
+It made things worse.
+
+152 of 175 problems scored 0/10 on all samples in both configs. The model either solves a problem or it doesn't. Of the 17 problems where baseline got at least one right, adaptive decoding gained +4 samples on hard problems (minimum-cost-good-caption 5→8, longest-special-path 1→2) and lost -10 on easy/medium ones (reverse-degree 4→1, shortest-matching-substring 7→5). **Net: -6 correct samples.** I'd built a system that knew exactly where the model was uncertain, adjusted temperature at each position, and the result was strictly worse than a fixed number.
+
+The frustrating part: it worked on hard problems. minimum-cost-good-caption went from 5/10 to 8/10. The extra exploration at fork positions let the model find paths that fixed temperature missed. But on problems the model already solved reliably, that same exploration was poison. reverse-degree dropped from 4/10 to 1/10. The model had a good solution, and adaptive temperature nudged it off course at a fork where the "creative" alternative was worse. You can't have one without the other. Raising temperature at forks promotes good alternatives and bad alternatives in equal measure.
+## Why the ceiling exists
+
+After the results came in, I went back to the SSD paper.<Footnote id="1" /> Section B.5 lays out a theoretical argument for why decode-time tricks hit a ceiling. My data matched their prediction exactly.
+
+Think about what temperature can do. It widens or narrows the gaps between candidates, but it can't reorder them. If the model assigns 0.001 probability to a token, temperature can make that 0.005 or 0.0002. It can't make it 0.15. The ranking stays fixed. The set of tokens the model considers plausible stays fixed. You're adjusting the volume on the same signal.
+
+Min-p filtering goes one step further: it can remove cards from the deck. Low-probability distractors that temperature can't touch get cut entirely. That's why min-p helped on hard fork positions (minimum-cost-good-caption +3). But the same pruning that removes distractors on hard problems removes viable alternatives on easier ones. There's no way to tell them apart from the probabilities alone.
+
+The fundamental problem: you'd need to know which tokens to promote. Boosting good alternatives at fork positions while suppressing bad ones requires information that only comes from seeing correct completions. My entropy signal told me *where* the forks were. It told me nothing about *which direction to take at each fork*.
+
+Every decode-time strategy hits this wall. Temperature, top-k, top-p, min-p, adaptive blending. They all operate on the distribution the model produces. To change which tokens get high probability in the first place, you need to change the model's weights.
+
+Which is what the SSD paper does.
+
+## Simple Self-Distillation: changing the model
+
+The SSD paper<Footnote id="1" /> takes a different approach. Instead of being smarter about choosing from the model's existing distribution, it changes the distribution itself:
+
+1. Generate many samples from the model
+2. Keep the ones that produce correct output
+3. Fine-tune the model on its own correct outputs (LoRA, a few minutes of training)
+
+Read that again. The training data is the model's own output. No human-written solutions, no stronger teacher model, no new information from outside. The model generates code, you check which samples pass the tests, and you train the model on those samples. It learns from its own successes.
+
+The paper calls the mechanism "lock sharpening." When the model produces a correct solution, it was already leaning toward the right tokens at most positions. SSD reinforces those leanings. The forks become more decisive: probability mass shifts toward the paths that led to working code. The lock positions, already near-certain, stay locked.
+
+The surprising part is that this works at all. The model isn't learning new algorithms or seeing novel solutions. Every correct completion it trains on is something it already produced. SSD just makes the model more consistent at reproducing its own best work.
+
+I replicated this with Qwen2.5-Coder-1.5B-Instruct (smaller model, faster iteration):
+
+1. Generated 50 samples per problem (2,500 total), 97 seconds
+2. Kept correct completions, 267 from 9 problems
+3. LoRA fine-tune (r=16, α=32, 3 epochs), 141 seconds
+
+Four minutes of GPU time.
+
+<SSDResultsDemo client:visible />
+
+**SSD gains +4.6% pass@1.** Four minutes of fine-tuning on the model's own output, and first-try accuracy jumps from 26.7% to 31.3%.
+
+Look at pass@5: it stays at ~40% for both configs. The model can solve the same set of problems with or without SSD. It doesn't gain new capabilities. What changes is consistency. The baseline model solves a problem 3 out of 5 times. The SSD model solves it 4 or 5 out of 5. The lock sharpening makes the model commit harder to paths that work, so it stumbles into the wrong fork less often on the first try.
+
+## The interesting finding: generalisation
+
+SSD was trained on correct outputs from only 50 problems but evaluated on all 175. If the model were memorising solutions, you'd expect the gains to concentrate on the 50 training problems. The opposite happens:
+
+| Split | Baseline | SSD | Delta |
+|---|---|---|---|
+| Train (50 problems) | 10.8% | 13.6% | +2.8% |
+| **Test (125 unseen)** | **33.1%** | **38.4%** | **+5.3%** |
+
+The improvement nearly doubles on problems the model never trained on. +2.8% on the training set, +5.3% on unseen problems. The model isn't memorising solutions to the 50 problems it saw. It's picking up general patterns from its own correct code: which data structure to reach for, which loop pattern fits, which edge case to handle first. Those patterns transfer. A model that learned to commit to `defaultdict` over `{}` on one problem makes the same better choice on a different problem.
+
+This is what makes SSD different from the decode-time approach. My adaptive temperature could only redistribute probability mass at individual token positions. SSD changes the model's learned preferences across all positions, including positions in problems it's never seen.
+
+The code and full results are on [GitHub](https://github.com/joshuaisaact/forks-locks).
+
+<FootnoteList>
+  <FootnoteItem id="1">Zhang et al., ["Embarrassingly Simple Self-Distillation Improves Code Generation"](https://arxiv.org/abs/2604.01193), 2026. SSD gains across multiple models and benchmarks, with theoretical analysis of why decode-time approaches hit a ceiling (Section B.5, Figure 4).</FootnoteItem>
+  <FootnoteItem id="2">Shannon entropy: H(X) = -Σ p(x) log p(x). For a distribution concentrated on one token, entropy approaches 0. For a uniform distribution over k tokens, entropy = log(k). The unit depends on the log base: nats for natural log, bits for log2. I use nats throughout because that's what you get from `torch.log`.</FootnoteItem>
+</FootnoteList>
