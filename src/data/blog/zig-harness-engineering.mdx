@@ -21,11 +21,15 @@ When I hit the context compaction problem, my first instinct was: store the cont
 
 **Pointers and document IDs**
 
-I covered this in detail [in a post on pointer-based compaction](/blog/compaction/). A document ID in context is a pointer. Store the document elsewhere (SQLite, a key-value store), embed the ID in the LLM's context, give it a retrieval tool to dereference. The ID is cheap to hold and copy; the content it points to isn't. Multiple agents or conversation turns can reference the same document without duplication. Retrieval costs what a pointer dereference costs, scaled from nanoseconds to tool-call latency.
+TypeScript doesn't have pointers. Neither does Python, or JavaScript, or most languages people use to build AI tooling. References exist, but abstracted: you pass objects around without thinking about what that means in memory. Nobody forces you to care whether you're holding content or a reference to it.
 
-The instinct to reach for this came from Zig. When you've chased a pointer through memory, "store once, reference many" stops being a pattern you read about and becomes what you reach for when content is expensive relative to references.
+Zig makes you care, every time. You decide whether you're passing a value or a pointer, and you feel the difference when you get it wrong. After enough of that, reaching for a reference instead of copying content becomes automatic.
 
-The decision criteria are the same as passing by value vs. passing by reference. Content that fits in context and gets read once: embed it inline. Content that's large, referenced by multiple agents, or needs to stay consistent across references: store it and keep a pointer. The fetch cost scales with how often you dereference. The storage cost scales with how many copies you'd otherwise be holding.
+That reflex fired when I hit the context compaction problem. The naive approach is to dump the full document content into context every turn: it's available, it's simple, the model has what it needs. But dumping content into context is passing by value. It fills the ring buffer faster. When the buffer overflows, compaction kicks in. Compaction is lossy. Information that was there is now gone, degraded, or summarized past usefulness.
+
+Storing a pointer instead breaks the chain before it starts. Store the document in SQLite or a key-value store. Embed the ID in context. Give the agent a retrieval tool to dereference it when it needs the content. The ID costs a few tokens, stays stable across turns, and doesn't age out. The content lives outside the ring buffer entirely. Multiple agents or conversation turns can reference the same document without any of them holding a copy. You only pay the retrieval cost when you actually need the bytes.
+
+I wrote about [implementing this in more detail here](/blog/compaction/). But the instinct came from Zig, from having to think about the difference between holding content and holding a reference to it until the distinction became automatic. In a language that hides it, you copy by value by default because it's the path of least resistance. In a context window with a hard limit, you pay for that later.
 
 **Ring buffers and conversation memory**
 
