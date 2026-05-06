@@ -5,6 +5,8 @@ excerpt: "Months of building in Zig changed what I reach for first when I hit an
 tags: ["AI", "systems", "Zig", "agents", "harness"]
 ---
 
+import RingBufferDemo from '../../components/react/RingBufferDemo';
+
 Remember when you had to start a new chat in Claude because you'd hit the context limit? You'd been building up context for an hour: the codebase structure, the decisions you'd already made, what the model had tried and ruled out. Then the window filled and it was gone.
 
 The context window is fixed. Tokens accumulate and stay — they don't scroll out as new ones arrive. The context just fills. When it hits the limit, most interfaces compact: they summarize the oldest content to make room. The summary is cheaper to hold than the original, but it's lossy. Details that didn't make it into the summary are gone. Either way, the conversation becomes shallower as it gets longer.
@@ -40,6 +42,8 @@ When a chat interface hits the context limit, it compacts: summarises the oldest
 The ring buffer model gives you a different handle. You maintain a head and a tail pointer. New messages write to the tail and advance it. When the tail catches up to the head, you're about to overwrite the oldest content: that's the wrap point. In a naive implementation, you just overwrite. But the wrap point is a boundary you can design around.
 
 You could flush before the wrap.
+
+<RingBufferDemo client:visible />
 
 Before a region gets evicted, you know it's about to be evicted. Summarise that region, store the summary somewhere accessible, then evict the originals. Three things are different from reactive compaction: the timing is proactive, the scope is bounded to the region about to leave, and you decide what the summary contains. Recent context stays verbatim. You only pay the compression cost at the designed boundary, not continuously, and not for content that doesn't need it yet.
 
