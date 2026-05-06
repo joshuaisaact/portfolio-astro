@@ -9,9 +9,9 @@ Remember when you had to start a new chat in Claude because you'd hit the contex
 
 That was a ring buffer overflowing.
 
-The context window is fixed. New tokens come in, old tokens go out. Most chat interfaces handle this with a lossy ring buffer: drop everything past the limit, keep the recent messages. The dropped content is gone. The model might see a truncation marker; you probably don't. Either way, the conversation becomes shallower as it gets longer.
+The context window is fixed. Tokens accumulate and stay — they don't scroll out as new ones arrive. The context just fills. When it hits the limit, most interfaces compact: they summarize the oldest content to make room. The summary is cheaper to hold than the original, but it's lossy. Details that didn't make it into the summary are gone. Either way, the conversation becomes shallower as it gets longer.
 
-A ring buffer is a circular data structure with a fixed capacity. Write to the tail. When it fills, the tail wraps around and overwrites the head. The critical question, the one most implementations skip, is what to do at the wrap point. That question is where building systems from scratch turns out to matter.
+Right. A ring buffer is a circular data structure with a fixed capacity. Write to the tail. When it fills, the tail wraps around and overwrites the head. The critical question, the one most implementations skip, is what to do at the wrap point. That question is where building systems from scratch turns out to matter.
 
 ## The mapping
 
