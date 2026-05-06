@@ -1,0 +1,80 @@
+---
+title: "I Learned Zig. Turns Out I Was Learning Harness Engineering."
+date: "2026-05-06"
+excerpt: "Months of building in Zig changed what I reach for first when I hit an AI engineering problem. The constraints turn out to rhyme."
+tags: ["AI", "systems", "Zig", "agents", "harness"]
+---
+
+Remember when you had to start a new chat in Claude because you'd hit the context limit? You'd been building up context for an hour: the codebase structure, the decisions you'd already made, what the model had tried and ruled out. Then the window filled and it was gone.
+
+That was a ring buffer overflowing.
+
+The context window is fixed. New tokens come in, old tokens go out. Most chat interfaces handle this with a lossy ring buffer: drop everything past the limit, keep the recent messages. The dropped content is gone. The model might see a truncation marker; you probably don't. Either way, the conversation becomes shallower as it gets longer.
+
+A ring buffer is a circular data structure with a fixed capacity. Write to the tail. When it fills, the tail wraps around and overwrites the head. The critical question, the one most implementations skip, is what to do at the wrap point. That question is where building systems from scratch turns out to matter.
+
+## The mapping
+
+Several months of building in Zig changed something about how I approach these problems. Not by giving me patterns to apply. More like changing what comes to mind first.
+
+When I hit the context compaction problem, my first instinct was: store the content somewhere and keep a reference. Not: what do other harnesses do? Just: don't throw away the bytes. That instinct came from months of manual memory management, where you learn that pointers are cheap and content is expensive. When I hit the long-document analysis problem, I thought: fixed budget, circular overwrite, flush before eviction. The Zig vocabulary just came first.
+
+**Pointers and document IDs**
+
+I covered this in detail [in a post on pointer-based compaction](/blog/compaction/). A document ID in context is a pointer. Store the document elsewhere (SQLite, a key-value store), embed the ID in the LLM's context, give it a retrieval tool to dereference. The ID is cheap to hold and copy; the content it points to isn't. Multiple agents or conversation turns can reference the same document without duplication. Retrieval costs what a pointer dereference costs, scaled from nanoseconds to tool-call latency.
+
+The instinct to reach for this came from Zig. When you've chased a pointer through memory, "store once, reference many" stops being a pattern you read about and becomes what you reach for when content is expensive relative to references.
+
+The decision criteria are the same as passing by value vs. passing by reference. Content that fits in context and gets read once: embed it inline. Content that's large, referenced by multiple agents, or needs to stay consistent across references: store it and keep a pointer. The fetch cost scales with how often you dereference. The storage cost scales with how many copies you'd otherwise be holding.
+
+**Ring buffers and conversation memory**
+
+Back to the truncation problem. Most chat interfaces treat the context window as a FIFO queue: new messages come in at the front, old ones drop off the back when you exceed the limit. This works, but it discards everything past the limit without any awareness of what was dropped or why.
+
+A proper ring buffer has more structure. You maintain a head and a tail pointer. New messages write to the tail and advance it. When the tail catches up to the head, you're about to overwrite the oldest content: that's the wrap point. A naive implementation just overwrites. But knowing where the wrap is happening gives you a choice.
+
+You could flush before the wrap.
+
+Before a message region gets evicted, you know it's about to be evicted. You can summarize that region into a compressed form, store the summary somewhere accessible, and then evict the originals. The summary becomes a pointer to what was there, lossier than the original but not gone. This is different from continuous summarization, where you're constantly rewriting the whole history. Here, you only trigger summarization at the wrap point, the natural eviction boundary, and only for the region about to be overwritten.
+
+Recent context is retained verbatim. Older context is compressed at the moment it would otherwise be lost, not proactively. You only pay the compression cost when you have to.
+
+For memory that persists across sessions, this could extend further. Summaries from multiple wrap events could feed into a longer-term store, creating a hierarchy: verbatim recent context at the top, progressively compressed older context below. A ring buffer feeding a ledger. I haven't built this. But the structure suggests itself once you're thinking in terms of the primitive.
+
+**Ring buffers and sequential corpus analysis**
+
+An LLM analyzing a multi-day congressional hearing (testimony running to thousands of pages, where a witness on day 10 refers to evidence from day 3) can't fit the full transcript in context. It also can't process each day in isolation. That's map-reduce, and map-reduce loses the sequential dependencies. Day 10 testimony without day 3 context is a different document. The analysis is wrong in ways the model won't notice.
+
+The approach that works: maintain a fixed-budget evolving markdown. For each day of testimony, update it with key claims, named entities, cross-references, emerging themes, what shifted relative to prior testimony. When the markdown exceeds budget, flush the about-to-be-evicted region into a denser summary before overwriting. Process the next day's testimony with the current markdown as context.
+
+The system can read a document longer than its own memory. The oldest detail from three days ago may be gone, but the important threads were compressed at the eviction boundary rather than just dropped. Explicit lossy compression, with full awareness of where the loss happens.
+
+This beats map-reduce because the loss is designed, not because it's lossless. You can inspect the budget, tune the eviction criteria, decide what gets written into the markdown before something gets dropped. Map-reduce buries the same tradeoff and calls the result a summary.
+
+**Cache hierarchy and context tiers**
+
+L1 cache is small and directly accessible. L2 is larger and slightly slower. L3 is larger still. Fetching from main memory is orders of magnitude slower than L1. A cache miss means a fetch from the next tier down, with real latency.
+
+The context window is L1. Whatever lives there, the model can use directly. Retrieval (a vector search, a tool call, a lookup) is a cache miss: costs a round-trip, adds tokens, slows the response.
+
+The tiers map cleanly:
+
+- **L1 (context window).** Fast, tiny, expensive per token. What the model currently holds.
+- **L2 (retrievable summaries).** Slower to access, larger, compressed. Structured reference pulled on demand.
+- **L3 (full document store).** Slowest, unlimited. The source of truth.
+
+A cache miss is a design parameter, not a failure mode. In hardware, you architect access patterns to keep hot data in L1. In a harness, you make the same choice: which information needs to live in context at all times, which can sit in L2 until needed, which can stay in L3 until explicitly requested.
+
+Hallucinations are often a cache miss problem. The model needs a specific fact, it's not in context, and instead of returning uncertainty it fills in something plausible. The fix isn't always a better model. Sometimes it's architecture: get the right information into L1 at the right time.
+
+An agent debugging a test failure three hours into a session references a config value from a file it read at the start. That file was evicted from context twenty tool calls ago. The model doesn't know it's working from memory: it just doesn't have the data. The answer it produces is subtly wrong in a way that's hard to trace back. A harness designed around the cache hierarchy would have kept that file in L2 and re-fetched it at the right moment. Same model, different architecture, different result.
+
+## Why this matters
+
+Systems programming builds vocabulary for constraints that show up everywhere: bounded memory, bounded compute, the cost of crossing a boundary, what happens when a buffer overflows. These aren't specific to hardware. They're properties of any system where resources are finite and operations can fail. LLM harnesses have every one of them.
+
+AI engineering is new enough that this vocabulary is still being developed. Problems that systems engineers named and solved decades ago are getting encountered fresh, documented in AI terms, and solved by rediscovery. It's where the field is. But there's a lot of free prior art sitting in operating systems textbooks and distributed systems papers that applies more directly than it looks.
+
+Several months of Zig didn't produce a list of patterns to apply. The vocabulary just starts to feel natural. When the constraints rhyme, you reach for ring buffers and pointers before you've made the connection.
+
+The only path to that is building the primitives by hand, without the abstractions that make them invisible. Use every abstraction available to ship fast. But understand the layer below, somewhere. The understanding compounds in ways that don't show up until the constraints bite. And then it's already there.
