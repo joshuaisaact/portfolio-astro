@@ -29,7 +29,7 @@ That reflex fired when I hit the context compaction problem. The naive approach 
 
 Storing a pointer instead breaks the chain before it starts. Store the document in SQLite or a key-value store. Embed the ID in context. Give the agent a retrieval tool to dereference it when it needs the content. The ID costs a few tokens, stays stable across turns, and doesn't age out. The content lives outside the ring buffer entirely. Multiple agents or conversation turns can reference the same document without any of them holding a copy. You only pay the retrieval cost when you actually need the bytes.
 
-I wrote about [implementing this in more detail here](/blog/compaction/). But the instinct came from Zig, from having to think about the difference between holding content and holding a reference to it until the distinction became automatic. In a language that hides it, you copy by value by default because it's the path of least resistance. In a context window with a hard limit, you pay for that later.
+I wrote about [implementing this in more detail here](/blog/compaction/). But the instinct came from Zig, from having to think about the difference between holding content and holding a reference to it until the distinction became automatic. In a language that hides the distinction, you never develop the habit of asking the question. You embed content into context without it registering as a choice. In a context window with a hard limit, you pay for that later.
 
 **Ring buffers and conversation memory**
 
