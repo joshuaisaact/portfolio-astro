@@ -220,10 +220,10 @@ const {
           var ft = document.createElement("div");
           ft.id = "ceefax-fastext";
           ft.innerHTML =
-            '<a href="/?theme=ceefax">Home</a>' +
-            '<a href="/blog?theme=ceefax">Blog</a>' +
-            '<a href="/projects?theme=ceefax">Projects</a>' +
-            '<a href="#" id="ceefax-theme-btn">Default Theme</a>';
+            '<a class="ceefax-key-red" href="/?theme=ceefax">Home</a>' +
+            '<a class="ceefax-key-green" href="/blog?theme=ceefax">Blog</a>' +
+            '<a class="ceefax-key-yellow" href="/projects?theme=ceefax">Projects</a>' +
+            '<a class="ceefax-key-cyan" href="#" id="ceefax-theme-btn">Default Theme</a>';
           document.body.appendChild(ft);
           document.getElementById("ceefax-theme-btn").addEventListener("click", function (e) {
             e.preventDefault();

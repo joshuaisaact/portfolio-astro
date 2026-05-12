@@ -110,8 +110,7 @@
 }
 
 /* Remove internal padding on text container */
-.theme-ceefax #container [class*="p-2"],
-.theme-ceefax #container [class*="p-4"] {
+.theme-ceefax #container .welcome-content-col {
   padding: 0 !important;
 }
 
@@ -132,7 +131,7 @@
 }
 
 /* Text column spans both cols for the heading row, then just col 1 */
-.theme-ceefax #container section[aria-label="Introduction"] > section > div:first-child {
+.theme-ceefax #container .welcome-content-col {
   grid-column: 1 / -1 !important;
   display: contents !important;
 }
@@ -150,12 +149,12 @@
 }
 
 /* Image column on the right */
-.theme-ceefax #container [class*="order-1"][class*="lg:order-2"] {
+.theme-ceefax #container .welcome-image-col {
   grid-column: 2 !important;
   grid-row: 2 !important;
   order: unset !important;
 }
-.theme-ceefax #container [class*="order-1"][class*="lg:order-2"] > div {
+.theme-ceefax #container .welcome-image-col > div {
   width: 100% !important;
   height: auto !important;
 }
@@ -230,10 +229,10 @@
   padding: 2px 0;
 }
 
-.theme-ceefax #ceefax-fastext a:nth-child(1) { color: var(--ceefax-red) !important; }
-.theme-ceefax #ceefax-fastext a:nth-child(2) { color: var(--ceefax-green) !important; }
-.theme-ceefax #ceefax-fastext a:nth-child(3) { color: var(--ceefax-yellow) !important; }
-.theme-ceefax #ceefax-fastext a:nth-child(4) { color: var(--ceefax-cyan) !important; }
+.theme-ceefax #ceefax-fastext a.ceefax-key-red    { color: var(--ceefax-red) !important; }
+.theme-ceefax #ceefax-fastext a.ceefax-key-green  { color: var(--ceefax-green) !important; }
+.theme-ceefax #ceefax-fastext a.ceefax-key-yellow { color: var(--ceefax-yellow) !important; }
+.theme-ceefax #ceefax-fastext a.ceefax-key-cyan   { color: var(--ceefax-cyan) !important; }
 
 /* ---- Remove all background gradients on html ---- */
 .theme-ceefax,
@@ -407,12 +406,11 @@
 .theme-ceefax [role="listitem"] {
   margin: 0 !important;
 }
-.theme-ceefax [role="listitem"] [class*="p-4"],
-.theme-ceefax [role="listitem"] [class*="p-6"] {
+.theme-ceefax [role="listitem"] .card-body {
   padding: 4px 1ch !important;
 }
-.theme-ceefax [role="listitem"] [class*="mb-2"],
-.theme-ceefax [role="listitem"] [class*="mb-4"] {
+.theme-ceefax [role="listitem"] .card-title,
+.theme-ceefax [role="listitem"] .card-excerpt {
   margin-bottom: 4px !important;
 }
 .theme-ceefax [role="list"][aria-label="Article list"] {
