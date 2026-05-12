@@ -121,12 +121,12 @@
   display: none !important;
 }
 
-/* ---- Contact section: hide grid and duplicate heading ---- */
+/* ---- Contact section: hide grid and injected box header ---- */
 .theme-myspace #contact .grid {
   display: none !important;
 }
 
-.theme-myspace #contact > div > h2 {
+.theme-myspace #contact .ms-box-header {
   display: none !important;
 }
 
