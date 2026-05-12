@@ -496,7 +496,7 @@
 
 /* ---- Friends grid ---- */
 .theme-myspace .ms-friends-count {
-  font-size: 11px !important;
+  font-size: 12px !important;
   margin-bottom: 6px;
   color: var(--ms-text) !important;
 }
@@ -504,7 +504,7 @@
 .theme-myspace .ms-friends-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 4px;
+  gap: 6px;
   margin-bottom: 4px;
 }
 
@@ -513,29 +513,29 @@
 }
 
 .theme-myspace .ms-friend-avatar {
-  width: 52px;
-  height: 52px;
-  margin: 0 auto 2px;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 3px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: bold !important;
-  font-size: 14px !important;
+  font-size: 16px !important;
   color: #ffffff !important;
   border: 1px solid var(--ms-border);
 }
 
 .theme-myspace .ms-friend-avatar-img {
-  width: 52px;
-  height: 52px;
+  width: 64px;
+  height: 64px;
   object-fit: cover;
   display: block;
-  margin: 0 auto 2px;
+  margin: 0 auto 3px;
   border: 1px solid var(--ms-border) !important;
 }
 
 .theme-myspace .ms-friend-name {
-  font-size: 10px !important;
+  font-size: 12px !important;
   color: var(--ms-link) !important;
   text-decoration: underline;
   cursor: pointer;
