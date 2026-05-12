@@ -1,5 +1,6 @@
 ---
 import { Image } from "astro:assets";
+import Button from "./Button.astro";
 import profilePicture from "../assets/focused.png";
 import teletextPicture from "../assets/teletext.svg";
 ---
@@ -44,12 +45,9 @@ import teletextPicture from "../assets/teletext.svg";
         </div>
 
         <!-- Theme picker -->
-        <button
-          id="welcomeThemeBtn"
-          class="theme-switcher inline-flex items-center justify-center gap-2 px-6 py-3 text-base font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800 rounded-md hover:border-(--theme-5) hover:text-(--theme-5) dark:hover:border-(--theme-5) dark:hover:text-(--theme-5) active:scale-[0.96] transition-[border-color,color,scale] duration-200"
-        >
+        <Button id="welcomeThemeBtn" class="theme-switcher">
           Change Theme
-        </button>
+        </Button>
       </div>
 
       <div class="order-1 lg:order-2 flex justify-center items-start lg:justify-self-center stagger-in" data-stagger-delay="100">
