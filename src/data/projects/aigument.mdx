@@ -2,7 +2,7 @@
 title: "AIgument"
 slug: "aigument"
 order: 1
-description: "Watch AI models debate! AIgument pits LLMs (GPT-4o, Claude, Gemini) against each other with unique personalities. Built with Next.js, Vercel AI SDK, and Neon DB."
+description: "Watch AI models debate! AIgument pits LLMs (GPT-4o, Claude, Gemini) against each other with unique personalities. Built with Next.js and Neon DB."
 imageSrc: "../../assets/projects/aigument-preview.webp"
 imageAlt: "AIgument application interface showing two AIs debating"
 links:
@@ -26,9 +26,9 @@ features:
   - "Interactive debate progression with user voting."
   - "Persistent storage of debates using Neon Serverless DB."
   - "Responsive interface built with Next.js and Tailwind CSS."
-  - "Streamed responses for real-time debate feel using Vercel AI SDK."
+  - "Streamed responses for real-time debate feel."
 architecture:
-  frontend: "Next.js 15 (App Router) with TypeScript for a type-safe, performant user interface. Tailwind CSS for styling. Vercel AI SDK for seamless streaming of LLM responses and UI helpers."
+  frontend: "Next.js 15 (App Router) with TypeScript for a type-safe, performant user interface. Tailwind CSS for styling."
   backend: "Leverages Next.js API Routes for backend logic. Integrates multiple LLM APIs (OpenAI, Anthropic, Google, xAI). Uses Neon Serverless DB (PostgreSQL) for storing debate topics, rounds, votes, and user data."
   infrastructure: "Deployed on Vercel with CI/CD via GitHub. Edge functions for API routes where applicable. Scalable serverless database (Neon)."
 videoSrc: "/media/projects/videos/aigument.webm"

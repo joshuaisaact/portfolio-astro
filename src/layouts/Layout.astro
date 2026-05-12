@@ -2,6 +2,8 @@
 import "../styles/global.css";
 import "@fontsource-variable/fraunces";
 import "@fontsource-variable/ibm-plex-sans";
+import ThemeModal from "../components/ThemeModal.astro";
+import { validThemeIds } from "../config/themes";
 
 interface Props {
   title?: string;
@@ -87,6 +89,9 @@ const {
       html.dark {
         background-color: #111827;
       }
+      html.theme-ceefax {
+        background-color: #000000 !important;
+      }
       body {
         background-color: inherit;
       }
@@ -102,25 +107,25 @@ const {
         border-width: 0;
       }
     </style>
-    <script is:inline>
+    <script is:inline define:vars={{ validThemeIds }}>
+      function getSiteTheme() {
+        var theme = new URLSearchParams(window.location.search).get("theme") || "default";
+        return validThemeIds.includes(theme) ? theme : "default";
+      }
+
       function applyTheme() {
-        const theme = (() => {
-          const localStorageTheme = localStorage?.getItem("theme") ?? "";
-          if (["dark", "light"].includes(localStorageTheme)) {
-            return localStorageTheme;
-          }
-          if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-            return "dark";
-          }
-          return "light";
-        })();
-
-        if (theme === "light") {
-          document.documentElement.classList.remove("dark");
-        } else {
-          document.documentElement.classList.add("dark");
+        var siteTheme = getSiteTheme();
+        document.documentElement.classList.remove("theme-ceefax");
+        if (siteTheme === "ceefax") {
+          document.documentElement.classList.add("dark", "theme-ceefax");
+          document.documentElement.classList.remove("antialiased");
+          return;
         }
-
+        var stored = localStorage?.getItem("theme") ?? "";
+        var theme = ["dark", "light"].includes(stored)
+          ? stored
+          : window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        document.documentElement.classList.toggle("dark", theme === "dark");
         window.localStorage.setItem("theme", theme);
       }
 
@@ -129,5 +134,80 @@ const {
   </head>
   <body class="font-ibm-plex min-h-screen">
     <slot />
+    <ThemeModal />
   </body>
+  <script>
+    import { validThemeIds } from '../config/themes';
+
+    function getSiteTheme(): string {
+      const theme = new URLSearchParams(window.location.search).get('theme') || 'default';
+      return validThemeIds.includes(theme) ? theme : 'default';
+    }
+
+    const siteTheme = getSiteTheme();
+
+    // Propagate ?theme= through all internal links
+    if (siteTheme !== 'default') {
+      document.querySelectorAll<HTMLAnchorElement>('a[href^="/"]').forEach((a) => {
+        const url = new URL(a.href, window.location.origin);
+        url.searchParams.set('theme', siteTheme);
+        a.href = url.toString();
+      });
+    }
+
+    // Ceefax enhancements: header bar, scanlines, fastext, dithering
+    if (siteTheme === 'ceefax') {
+      const path = window.location.pathname.replace(/\/+$/, '') || '/';
+      const pageMap: Record<string, string> = { '/': '100', '/blog': '200', '/projects': '300' };
+      const hashSuffix = (p: string) =>
+        String(Math.abs(p.split('').reduce((a, c) => (((a << 5) - a) + c.charCodeAt(0)) | 0, 0)) % 100).padStart(2, '0');
+      const pageNum = pageMap[path]
+        ?? (path.startsWith('/blog/') ? '2' + hashSuffix(path)
+          : path.startsWith('/projects/') ? '3' + hashSuffix(path)
+          : '100');
+
+      const hdr = document.createElement('div');
+      hdr.id = 'ceefax-header';
+      document.body.insertBefore(hdr, document.body.firstChild);
+
+      const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      const now = new Date();
+      const leftSpan = document.createElement('span');
+      leftSpan.textContent = `P${pageNum} CEEFAX 1 ${pageNum} ${days[now.getDay()]} ${String(now.getDate()).padStart(2, ' ')} ${months[now.getMonth()]}`;
+      hdr.appendChild(leftSpan);
+
+      const timeSpan = document.createElement('span');
+      timeSpan.className = 'ceefax-time';
+      hdr.appendChild(timeSpan);
+
+      const updateTime = () => {
+        const d = new Date();
+        timeSpan.textContent = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}/${String(d.getSeconds()).padStart(2, '0')}`;
+      };
+      updateTime();
+      setInterval(updateTime, 1000);
+
+      const sl = document.createElement('div');
+      sl.id = 'ceefax-scanlines';
+      document.body.appendChild(sl);
+
+      const ft = document.createElement('div');
+      ft.id = 'ceefax-fastext';
+      ft.innerHTML =
+        '<a class="ceefax-key-red" href="/?theme=ceefax">Home</a>' +
+        '<a class="ceefax-key-green" href="/blog?theme=ceefax">Blog</a>' +
+        '<a class="ceefax-key-yellow" href="/projects?theme=ceefax">Projects</a>' +
+        '<a class="ceefax-key-cyan" href="#" id="ceefax-theme-btn">Default Theme</a>';
+      document.body.appendChild(ft);
+      document.getElementById('ceefax-theme-btn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        const url = new URL(window.location.href);
+        url.searchParams.delete('theme');
+        window.location.href = url.toString();
+      });
+
+      import('../scripts/ceefaxDither').then(({ ceefaxDitherImages }) => ceefaxDitherImages());
+    }
+  </script>
 </html>

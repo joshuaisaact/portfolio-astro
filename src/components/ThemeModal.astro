@@ -1,0 +1,135 @@
+---
+import Button from "./Button.astro";
+import { themes } from "../config/themes";
+---
+
+<dialog
+  id="themeModal"
+  aria-label="Select theme"
+  class="m-auto p-0 rounded-xl shadow-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 backdrop:bg-black/50 backdrop:backdrop-blur-sm w-[calc(100%-2rem)] max-w-[600px] max-h-[calc(100dvh-2rem)] overflow-y-auto"
+>
+  <div class="p-4 sm:p-5 w-full">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+      {
+        themes.map(({ id, label, flavour, preview }) => (
+          <button
+            data-nav-theme={id}
+            data-flavour={flavour}
+            class="group flex flex-col rounded-lg border-2 border-gray-200 dark:border-gray-700 overflow-hidden cursor-pointer transition-colors hover:border-gray-400 dark:hover:border-gray-500 data-[active]:border-(--theme-5) data-[active]:dark:border-(--theme-5)"
+          >
+            <div class="w-full" set:html={preview} />
+            <span class="text-base font-semibold text-gray-700 dark:text-gray-300 px-3 py-2 text-left group-data-[active]:text-gray-900 group-data-[active]:dark:text-white">
+              {label}
+            </span>
+          </button>
+        ))
+      }
+    </div>
+
+    <p
+      id="themeFlavour"
+      class="mt-4 px-2 text-base text-gray-500 dark:text-white min-h-[4.5rem] sm:min-h-[3rem]"
+    >
+    </p>
+
+    <div class="flex justify-end mt-4">
+      <Button id="themeConfirmBtn" variant="primary">Apply</Button>
+    </div>
+  </div>
+</dialog>
+
+<script define:vars={{ themes }}>
+  const modal = document.getElementById("themeModal");
+  const flavourEl = document.getElementById("themeFlavour");
+  const confirmBtn = document.getElementById("themeConfirmBtn");
+
+  if (modal) {
+    const validThemes = themes.map((t) => t.id);
+    const raw = new URLSearchParams(window.location.search).get("theme") ?? "default";
+    const current = validThemes.includes(raw) ? raw : "default";
+    let selected = current;
+
+    const cards = modal.querySelectorAll("[data-nav-theme]");
+
+    // Set initial active state and flavour text
+    cards.forEach((btn) => {
+      if (btn.dataset.navTheme === current) {
+        btn.dataset.active = "";
+        if (flavourEl) flavourEl.textContent = btn.dataset.flavour ?? "";
+      }
+    });
+
+    // Card selection — update state without navigating
+    cards.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        cards.forEach((b) => delete b.dataset.active);
+        btn.dataset.active = "";
+        selected = btn.dataset.navTheme ?? "default";
+        if (flavourEl) flavourEl.textContent = btn.dataset.flavour ?? "";
+      });
+    });
+
+    // Confirm — navigate to selected theme
+    confirmBtn?.addEventListener("click", () => {
+      const url = new URL(window.location.href);
+      if (selected === "default") {
+        url.searchParams.delete("theme");
+      } else {
+        url.searchParams.set("theme", selected);
+      }
+      window.location.href = url.toString();
+    });
+
+    function closeModal() {
+      modal.classList.add("modal-closing");
+      modal.addEventListener(
+        "animationend",
+        () => {
+          modal.classList.remove("modal-closing");
+          modal.close();
+        },
+        { once: true }
+      );
+    }
+
+    // Close on backdrop click
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) closeModal();
+    });
+
+    // Intercept Escape key close
+    modal.addEventListener("cancel", (e) => {
+      e.preventDefault();
+      closeModal();
+    });
+  }
+</script>
+
+<style>
+  @keyframes modal-in {
+    from { opacity: 0; filter: blur(4px); transform: scale(0.97); }
+    to   { opacity: 1; filter: blur(0);   transform: scale(1); }
+  }
+
+  @keyframes modal-out {
+    from { opacity: 1; filter: blur(0);   transform: scale(1); }
+    to   { opacity: 0; filter: blur(6px); transform: scale(0.97); }
+  }
+
+  @keyframes backdrop-out {
+    from { background: rgb(0 0 0 / 0.5); backdrop-filter: blur(4px); }
+    to   { background: rgb(0 0 0 / 0);   backdrop-filter: blur(0); }
+  }
+
+  dialog[open] {
+    animation: modal-in 0.2s ease-out forwards;
+  }
+
+  dialog.modal-closing {
+    animation: modal-out 0.25s ease-in forwards;
+  }
+
+  dialog.modal-closing::backdrop {
+    animation: backdrop-out 0.25s ease-in forwards;
+  }
+</style>

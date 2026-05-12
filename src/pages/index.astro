@@ -1,5 +1,6 @@
 ---
 import BlogCarousel from "../components/BlogCarousel.astro";
+import Button from "../components/Button.astro";
 import Contact from "../components/Contact.astro";
 import Navbar from "../components/Navbar.astro";
 import Subscribe from "../components/Subscribe.astro";
@@ -52,25 +53,19 @@ const blogPosts = allPosts
     <Section id="blog" title="Blog">
       <BlogCarousel posts={blogPosts} />
       <div class="mt-6 text-center">
-        <a
-          href="/blog"
-          class="inline-flex items-center justify-center gap-2 px-6 py-3 text-base font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800 rounded-md hover:border-(--theme-5) hover:text-(--theme-5) dark:hover:border-(--theme-5) dark:hover:text-(--theme-5) active:scale-[0.96] transition-[border-color,color,scale] duration-200"
-        >
+        <Button href="/blog">
           <span>View all posts</span>
           <ArrowRight class="w-4 h-4" />
-        </a>
+        </Button>
       </div>
     </Section>
     <Section id="projects" title="Featured Projects">
       <ProjectCarousel projects={applicationProjects} />
       <div class="mt-6 text-center">
-        <a
-          href="/projects"
-          class="inline-flex items-center justify-center gap-2 px-6 py-3 text-base font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800 rounded-md hover:border-(--theme-5) hover:text-(--theme-5) dark:hover:border-(--theme-5) dark:hover:text-(--theme-5) active:scale-[0.96] transition-[border-color,color,scale] duration-200"
-        >
+        <Button href="/projects">
           <span>View all projects</span>
           <ArrowRight class="w-4 h-4" />
-        </a>
+        </Button>
       </div>
     </Section>
     <Section id="dev-tools" title="Developer Tools & Utilities" cardType="full">

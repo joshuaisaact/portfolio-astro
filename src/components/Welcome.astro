@@ -1,6 +1,9 @@
 ---
 import { Image } from "astro:assets";
+import { Palette } from "lucide-astro";
+import Button from "./Button.astro";
 import profilePicture from "../assets/focused.png";
+import teletextPicture from "../assets/teletext.svg";
 ---
 
 <div id="container">
@@ -12,7 +15,7 @@ import profilePicture from "../assets/focused.png";
       class="grid grid-cols-1 lg:grid-cols-2 gap-8 justify-center lg:justify-items-end lg:items-center py-8 sm:py-12 md:py-16 lg:py-24 mx-0 sm:mx-4 lg:mx-8"
     >
       <div
-        class="order-2 lg:order-1 p-2 sm:p-4 justify-self-center lg:justify-self-end space-y-6 stagger-in"
+        class="welcome-content-col order-2 lg:order-1 p-2 sm:p-4 justify-self-center lg:justify-self-end space-y-6 stagger-in"
         data-stagger-delay="0"
       >
         <div class="space-y-4">
@@ -20,7 +23,7 @@ import profilePicture from "../assets/focused.png";
             class="text-xl sm:text-2xl md:text-3xl lg:text-4xl dark:text-gray-200 leading-normal font-semibold"
           >
             Hi, I&apos;m{" "}
-            <span class="text-(--theme-5) font-bold">Josh</span> 👋
+            <span class="text-(--theme-5) font-bold">Josh</span><span class="ceefax-hide"> 👋</span>
           </h1>
         </div>
 
@@ -41,9 +44,15 @@ import profilePicture from "../assets/focused.png";
             >.
           </p>
         </div>
+
+        <!-- Theme picker -->
+        <Button id="welcomeThemeBtn" variant="primary" class="theme-switcher">
+          <Palette class="w-4 h-4" />
+          Change Theme
+        </Button>
       </div>
 
-      <div class="order-1 lg:order-2 flex justify-center items-start lg:justify-self-center stagger-in" data-stagger-delay="100">
+      <div class="welcome-image-col order-1 lg:order-2 flex justify-center items-start lg:justify-self-center stagger-in" data-stagger-delay="100">
         <div
           class="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 lg:w-80 lg:h-80 shrink-0"
         >
@@ -54,10 +63,22 @@ import profilePicture from "../assets/focused.png";
             height={400}
             loading="eager"
             fetchpriority="high"
-            class="w-full h-full rounded-full border-4 border-(--theme-5) dark:brightness-90 object-cover"
+            class="profile-default w-full h-full rounded-full border-4 border-(--theme-5) dark:brightness-90 object-cover"
+          />
+          <Image
+            src={teletextPicture}
+            alt="Josh Tuddenham"
+            width={400}
+            height={400}
+            class="profile-ceefax hidden w-full h-full object-contain"
           />
         </div>
       </div>
     </section>
   </section>
 </div>
+
+<script>
+  const modal = document.getElementById("themeModal") as HTMLDialogElement | null;
+  document.getElementById("welcomeThemeBtn")?.addEventListener("click", () => modal?.showModal());
+</script>
