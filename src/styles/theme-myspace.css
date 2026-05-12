@@ -178,11 +178,6 @@
   border: 1px solid var(--ms-border) !important;
 }
 
-.theme-myspace .card-body {
-  border: none !important;
-  background: transparent !important;
-}
-
 /* ---- Buttons ---- */
 .theme-myspace button,
 .theme-myspace [role="button"],
