@@ -121,8 +121,12 @@
   display: none !important;
 }
 
-/* ---- Hide existing contact grid — replaced by MySpace contact box via JS ---- */
+/* ---- Contact section: hide grid and duplicate heading ---- */
 .theme-myspace #contact .grid {
+  display: none !important;
+}
+
+.theme-myspace #contact > div > h2 {
   display: none !important;
 }
 
