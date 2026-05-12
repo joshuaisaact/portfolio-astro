@@ -233,70 +233,6 @@ const {
             window.location.href = url.toString();
           });
 
-          // Pixelate and quantize images to 2-colour Ceefax palette (black + cyan)
-          document.querySelectorAll("img").forEach(function (img) {
-            if (img.classList.contains("profile-default") || img.classList.contains("profile-ceefax")) return;
-            var doPixelate = function () {
-              try {
-                var w = img.naturalWidth;
-                var h = img.naturalHeight;
-                if (!w || !h) return;
-                var factor = 12;
-                var sw = Math.max(Math.round(w / factor), 1);
-                var sh = Math.max(Math.round(h / factor), 1);
-                var c = document.createElement("canvas");
-                c.width = sw;
-                c.height = sh;
-                var ctx = c.getContext("2d");
-                if (!ctx) return;
-                ctx.imageSmoothingEnabled = false;
-                ctx.drawImage(img, 0, 0, sw, sh);
-                // Floyd-Steinberg dither to 2-colour Ceefax palette (black + cyan)
-                var px = ctx.getImageData(0, 0, sw, sh);
-                var d = px.data;
-                var lum = new Float32Array(sw * sh);
-                for (var i = 0; i < d.length; i += 4) {
-                  lum[i >> 2] = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
-                }
-                for (var y = 0; y < sh; y++) {
-                  for (var x = 0; x < sw; x++) {
-                    var idx = y * sw + x;
-                    var old = lum[idx];
-                    var nw = old > 127 ? 255 : 0;
-                    var err = old - nw;
-                    lum[idx] = nw;
-                    if (x + 1 < sw)            lum[idx + 1]      += err * 7 / 16;
-                    if (y + 1 < sh) {
-                      if (x > 0)               lum[idx + sw - 1] += err * 3 / 16;
-                                               lum[idx + sw]     += err * 5 / 16;
-                      if (x + 1 < sw)          lum[idx + sw + 1] += err * 1 / 16;
-                    }
-                  }
-                }
-                for (var i = 0; i < d.length; i += 4) {
-                  if (lum[i >> 2] > 127) {
-                    d[i] = 0; d[i + 1] = 255; d[i + 2] = 255; // cyan
-                  } else {
-                    d[i] = 0; d[i + 1] = 0; d[i + 2] = 0; // black
-                  }
-                  d[i + 3] = 255;
-                }
-                ctx.putImageData(px, 0, 0);
-                var c2 = document.createElement("canvas");
-                c2.width = w;
-                c2.height = h;
-                var ctx2 = c2.getContext("2d");
-                if (!ctx2) return;
-                ctx2.imageSmoothingEnabled = false;
-                ctx2.drawImage(c, 0, 0, w, h);
-                img.src = c2.toDataURL();
-                img.srcset = "";
-                img.classList.add("ceefax-pixelated");
-              } catch (e) {}
-            };
-            if (img.complete && img.naturalWidth) doPixelate();
-            else img.addEventListener("load", doPixelate);
-          });
         });
       }
       ceefaxInit();
@@ -306,4 +242,15 @@ const {
     <slot />
     <ThemeModal />
   </body>
+  <script>
+    if (new URLSearchParams(window.location.search).get('theme') === 'ceefax') {
+      import('../scripts/ceefaxDither').then(({ ceefaxDitherImages }) => {
+        if (document.readyState === 'loading') {
+          document.addEventListener('DOMContentLoaded', ceefaxDitherImages);
+        } else {
+          ceefaxDitherImages();
+        }
+      });
+    }
+  </script>
 </html>
