@@ -56,7 +56,6 @@
   min-height: 100vh;
   padding: 1em;
   letter-spacing: 0;
-  word-break: break-word;
   overflow-wrap: break-word;
   overflow-x: hidden;
 }
