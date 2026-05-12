@@ -60,7 +60,7 @@ const themes = [
             class="group flex flex-col rounded-lg border-2 border-gray-200 dark:border-gray-700 overflow-hidden cursor-pointer transition-colors hover:border-gray-400 dark:hover:border-gray-500 data-[active]:border-(--theme-5) data-[active]:dark:border-(--theme-5)"
           >
             <div class="w-full" set:html={preview} />
-            <span class="text-sm font-medium text-gray-700 dark:text-gray-300 px-3 py-2 text-left group-data-[active]:text-gray-900 group-data-[active]:dark:text-white">
+            <span class="text-base font-semibold text-gray-700 dark:text-gray-300 px-3 py-2 text-left group-data-[active]:text-gray-900 group-data-[active]:dark:text-white">
               {label}
             </span>
           </button>
@@ -120,9 +120,56 @@ const themes = [
       window.location.href = url.toString();
     });
 
+    function closeModal() {
+      modal.classList.add("modal-closing");
+      modal.addEventListener(
+        "animationend",
+        () => {
+          modal.classList.remove("modal-closing");
+          modal.close();
+        },
+        { once: true }
+      );
+    }
+
     // Close on backdrop click
     modal.addEventListener("click", (e) => {
-      if (e.target === modal) modal.close();
+      if (e.target === modal) closeModal();
+    });
+
+    // Intercept Escape key close
+    modal.addEventListener("cancel", (e) => {
+      e.preventDefault();
+      closeModal();
     });
   }
 </script>
+
+<style>
+  @keyframes modal-in {
+    from { opacity: 0; filter: blur(4px); transform: scale(0.97); }
+    to   { opacity: 1; filter: blur(0);   transform: scale(1); }
+  }
+
+  @keyframes modal-out {
+    from { opacity: 1; filter: blur(0);   transform: scale(1); }
+    to   { opacity: 0; filter: blur(6px); transform: scale(0.97); }
+  }
+
+  @keyframes backdrop-out {
+    from { background: rgb(0 0 0 / 0.5); backdrop-filter: blur(4px); }
+    to   { background: rgb(0 0 0 / 0);   backdrop-filter: blur(0); }
+  }
+
+  dialog[open] {
+    animation: modal-in 0.2s ease-out forwards;
+  }
+
+  dialog.modal-closing {
+    animation: modal-out 0.25s ease-in forwards;
+  }
+
+  dialog.modal-closing::backdrop {
+    animation: backdrop-out 0.25s ease-in forwards;
+  }
+</style>
