@@ -235,6 +235,7 @@ const {
 
           // Pixelate and quantize images to 2-colour Ceefax palette (black + cyan)
           document.querySelectorAll("img").forEach(function (img) {
+            if (img.classList.contains("profile-default") || img.classList.contains("profile-ceefax")) return;
             var doPixelate = function () {
               try {
                 var w = img.naturalWidth;
