@@ -92,6 +92,9 @@ const {
       html.theme-ceefax {
         background-color: #000000 !important;
       }
+      html.theme-myspace {
+        background-color: #d2d2d2 !important;
+      }
       body {
         background-color: inherit;
       }
@@ -115,10 +118,15 @@ const {
 
       function applyTheme() {
         var siteTheme = getSiteTheme();
-        document.documentElement.classList.remove("theme-ceefax");
+        document.documentElement.classList.remove("theme-ceefax", "theme-myspace");
         if (siteTheme === "ceefax") {
           document.documentElement.classList.add("dark", "theme-ceefax");
           document.documentElement.classList.remove("antialiased");
+          return;
+        }
+        if (siteTheme === "myspace") {
+          document.documentElement.classList.add("theme-myspace");
+          // No 'dark' class — MySpace default was light mode
           return;
         }
         var stored = localStorage?.getItem("theme") ?? "";
@@ -153,6 +161,150 @@ const {
         url.searchParams.set('theme', siteTheme);
         a.href = url.toString();
       });
+    }
+
+    // MySpace: inject 2-column profile layout
+    if (siteTheme === 'myspace') {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+      const moods = ['💻 shipping code', '☕ caffeinating', '📖 reading docs', '🐛 debugging'];
+      const mood = moods[Math.floor(Math.random() * moods.length)];
+
+      // Try to reuse profile pic from the page
+      const existingImg = document.querySelector<HTMLImageElement>('.profile-default');
+      const avatarHtml = existingImg?.src
+        ? `<img src="${existingImg.src}" class="ms-avatar-img" alt="Joshua Tuddenham">`
+        : `<div class="ms-avatar-placeholder">JT</div>`;
+
+      const friends = [
+        { text: 'T',  bg: '#000000', name: 'Tom' },
+        { text: 'JS', bg: '#c8a600', name: 'JavaScript' },
+        { text: 'TS', bg: '#2a5dad', name: 'TypeScript' },
+        { text: 'Rs', bg: '#b7410e', name: 'Rust' },
+      ];
+      const friendsHtml = friends.map(f =>
+        `<div class="ms-friend-item">
+          <div class="ms-friend-avatar" style="background:${f.bg}">${f.text}</div>
+          <div class="ms-friend-name">${f.name}</div>
+        </div>`
+      ).join('');
+
+      // ── Header ──────────────────────────────────────────────────────────
+      const msHeader = document.createElement('div');
+      msHeader.id = 'ms-header';
+      msHeader.innerHTML = `
+        <div class="ms-topbar">
+          <a href="/?theme=myspace" class="ms-logo-link">
+            <span class="ms-logo-my">my</span><span class="ms-logo-space">Space</span>
+          </a>
+          <div class="ms-search-bar">
+            <span class="ms-search-label">Search: </span>
+            <input type="text" class="ms-search-input" placeholder="People" />
+            <select class="ms-search-type">
+              <option>People</option><option>Web</option><option>Music</option>
+            </select>
+            <button class="ms-search-btn" type="button">Search</button>
+          </div>
+        </div>
+        <div class="ms-navbar">
+          <a href="/?theme=myspace">Home</a>
+          <span class="ms-nav-sep">|</span>
+          <a href="/blog?theme=myspace">Blog</a>
+          <span class="ms-nav-sep">|</span>
+          <a href="/projects?theme=myspace">Projects</a>
+          <span class="ms-nav-sep">|</span>
+          <span class="ms-nav-muted">Browse | Search | Invite | Mail | Favorites | Forum | Groups | Music</span>
+          <span class="ms-nav-sep">|</span>
+          <a href="#" id="ms-skin-btn">Change Skin</a>
+        </div>
+      `;
+      document.body.insertBefore(msHeader, document.body.firstChild);
+
+      document.getElementById('ms-skin-btn')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        (document.getElementById('themeModal') as HTMLDialogElement | null)?.showModal();
+      });
+
+      // ── Sidebar ─────────────────────────────────────────────────────────
+      const msSidebar = document.createElement('div');
+      msSidebar.id = 'ms-sidebar';
+      msSidebar.innerHTML = `
+        <div class="ms-box">
+          <div class="ms-box-header">Joshua Tuddenham</div>
+          <div class="ms-box-body">
+            ${avatarHtml}
+            <table class="ms-info-table">
+              <tr><td><span class="ms-profile-name">Joshua Tuddenham</span></td></tr>
+              <tr><td>London, UK</td></tr>
+              <tr><td><b>Last Login:</b> Today, ${timeStr}</td></tr>
+              <tr><td><b>Mood:</b> ${mood}</td></tr>
+              <tr><td><b>Member Since:</b> 2020</td></tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="ms-box">
+          <div class="ms-box-header ms-box-header-blue">Contacting Joshua</div>
+          <div class="ms-box-body">
+            <table class="ms-contact-table">
+              <tr>
+                <td><a href="mailto:joshuaisaact@gmail.com" class="ms-contact-btn">📧 Send Message</a></td>
+                <td><a href="#" class="ms-contact-btn">👥 Add to Friends</a></td>
+              </tr>
+              <tr>
+                <td><a href="#" class="ms-contact-btn">⭐ Add to Favorites</a></td>
+                <td><a href="#" class="ms-contact-btn">💬 Instant Message</a></td>
+              </tr>
+              <tr>
+                <td colspan="2"><a href="#" class="ms-contact-btn ms-block-btn">🚩 Block User</a></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+
+        <div class="ms-box">
+          <div class="ms-box-header">Joshua's Friend Space</div>
+          <div class="ms-box-body">
+            <div class="ms-friends-count">Josh has <b>128</b> friends.</div>
+            <div class="ms-friends-grid">${friendsHtml}</div>
+            <div class="ms-view-all"><a href="/?theme=myspace">View All of Josh's Friends</a></div>
+          </div>
+        </div>
+      `;
+      msHeader.after(msSidebar);
+
+      // ── Main (wrap existing content) ─────────────────────────────────────
+      const msMain = document.createElement('div');
+      msMain.id = 'ms-main';
+
+      const profileHeader = document.createElement('div');
+      profileHeader.className = 'ms-profile-header';
+      profileHeader.innerHTML = `
+        <span class="ms-profile-header-name">Joshua Tuddenham's Profile</span>
+        <span class="ms-profile-header-status">🟢 Online Now!</span>
+      `;
+      msMain.appendChild(profileHeader);
+
+      const injected = new Set(['ms-header', 'ms-sidebar']);
+      Array.from(document.body.children).forEach(child => {
+        if (!injected.has(child.id)) msMain.appendChild(child);
+      });
+      msSidebar.after(msMain);
+
+      // ── Footer ───────────────────────────────────────────────────────────
+      const msFooter = document.createElement('div');
+      msFooter.id = 'ms-footer';
+      msFooter.innerHTML = `
+        <span>© 2006 MySpace.com. All Rights Reserved.</span>
+        <div class="ms-footer-links">
+          <a href="#">Privacy</a>
+          <a href="#">Contact</a>
+          <a href="#">About</a>
+          <a href="#">Advertise</a>
+          <a href="#">Terms</a>
+        </div>
+      `;
+      document.body.appendChild(msFooter);
     }
 
     // Ceefax enhancements: header bar, scanlines, fastext, dithering
