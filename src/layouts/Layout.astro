@@ -176,15 +176,20 @@ const {
         ? `<img src="${existingImg.src}" class="ms-avatar-img" alt="Joshua Tuddenham">`
         : `<div class="ms-avatar-placeholder">JT</div>`;
 
+      const tomAvatarUrl = 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Myspace_-_Tom_Anderson.jpg/220px-Myspace_-_Tom_Anderson.jpg';
+
       const friends = [
-        { text: 'T',  bg: '#000000', name: 'Tom' },
+        { img: tomAvatarUrl,  name: 'Tom' },
         { text: 'JS', bg: '#c8a600', name: 'JavaScript' },
         { text: 'TS', bg: '#2a5dad', name: 'TypeScript' },
         { text: 'Rs', bg: '#b7410e', name: 'Rust' },
       ];
       const friendsHtml = friends.map(f =>
         `<div class="ms-friend-item">
-          <div class="ms-friend-avatar" style="background:${f.bg}">${f.text}</div>
+          ${'img' in f
+            ? `<img src="${f.img}" class="ms-friend-avatar-img" alt="${f.name}">`
+            : `<div class="ms-friend-avatar" style="background:${f.bg}">${f.text}</div>`
+          }
           <div class="ms-friend-name">${f.name}</div>
         </div>`
       ).join('');

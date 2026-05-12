@@ -525,6 +525,15 @@
   border: 1px solid var(--ms-border);
 }
 
+.theme-myspace .ms-friend-avatar-img {
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+  display: block;
+  margin: 0 auto 2px;
+  border: 1px solid var(--ms-border) !important;
+}
+
 .theme-myspace .ms-friend-name {
   font-size: 10px !important;
   color: var(--ms-link) !important;
