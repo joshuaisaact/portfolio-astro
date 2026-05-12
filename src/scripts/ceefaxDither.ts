@@ -1,6 +1,6 @@
 const SKIP_CLASSES = ['profile-default', 'profile-ceefax'];
 const PIXEL_FACTOR = 12;
-const DITHER_STRENGTH = 0.6;
+const DITHER_STRENGTH = 0.4;
 
 export function ceefaxDitherImages(): void {
   document.querySelectorAll('img').forEach((img) => {
