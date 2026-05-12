@@ -337,7 +337,8 @@ const {
             </table>
           </div>
         `;
-        contactSection.appendChild(msContactBox);
+        const region = contactSection.querySelector('[role="region"]') ?? contactSection;
+        region.appendChild(msContactBox);
 
         document.getElementById('ms-contact-block-btn')?.addEventListener('click', (e) => {
           e.preventDefault();
