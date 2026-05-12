@@ -22,10 +22,10 @@ skills:
 features:
   - "Declarative .rules DSL that compiles to independently verified Petri nets"
   - "Tool access control with sequencing, blocking, rate limits, and human approval gates"
-  - "Framework-agnostic gate with Vercel AI SDK adapter"
+  - "Framework-agnostic gate with adapters for major AI frameworks"
   - "Dot notation tool mapping for action-dispatch tools"
   - "Cross-domain composition where rules from different domains enforce without interference"
   - "Interactive net visualiser built with React and xyflow"
 ---
 
-PetriFlow is a safety layer for AI agents that uses Petri nets (not DAGs) as the core primitive. A declarative `.rules` DSL compiles each rule into a small, independently verified Petri net. At runtime, every tool call is checked against all nets via AND composition. Rules from different domains (file safety, deployment, messaging) compose automatically without interference. Includes a Vercel AI SDK adapter, an interactive visualiser, and four example agents with real tool implementations.
+PetriFlow is a safety layer for AI agents that uses Petri nets (not DAGs) as the core primitive. A declarative `.rules` DSL compiles each rule into a small, independently verified Petri net. At runtime, every tool call is checked against all nets via AND composition. Rules from different domains (file safety, deployment, messaging) compose automatically without interference. Includes adapters for major AI frameworks, an interactive visualiser, and four example agents with real tool implementations.
