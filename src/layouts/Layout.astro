@@ -227,6 +227,27 @@ const {
         (document.getElementById('themeModal') as HTMLDialogElement | null)?.showModal();
       });
 
+      document.getElementById('ms-btn-add')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        alert('Joshua Tuddenham has been added to your friends!\n\nDon\'t forget to add him to your Top 8.');
+      });
+      document.getElementById('ms-btn-fave')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        alert('Joshua Tuddenham has been added to your Favorites!');
+      });
+      document.getElementById('ms-btn-im')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        alert('josht is Away:\n\n"currently debugging. brb"');
+      });
+      document.getElementById('ms-btn-block')?.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (confirm('Are you sure you want to block Joshua Tuddenham?')) {
+          const url = new URL(window.location.href);
+          url.searchParams.delete('theme');
+          window.location.href = url.toString();
+        }
+      });
+
       // ── Sidebar ─────────────────────────────────────────────────────────
       const msSidebar = document.createElement('div');
       msSidebar.id = 'ms-sidebar';
@@ -248,13 +269,19 @@ const {
         <div class="ms-box">
           <div class="ms-box-header ms-box-header-blue">Contacting Joshua</div>
           <div class="ms-box-body">
-            <div>
-              <a href="mailto:joshuaisaact@gmail.com" class="ms-contact-btn">📧 Send Message</a>
-              <a href="#" class="ms-contact-btn">👥 Add to Friends</a>
-              <a href="#" class="ms-contact-btn">⭐ Add to Favorites</a>
-              <a href="#" class="ms-contact-btn">💬 Instant Message</a>
-              <a href="#" class="ms-contact-btn ms-block-btn">🚩 Block User</a>
-            </div>
+            <table class="ms-contact-table">
+              <tr>
+                <td><a href="mailto:joshuaisaact@gmail.com" class="ms-contact-btn">📧 Send Message</a></td>
+                <td><a href="#" class="ms-contact-btn" id="ms-btn-add">👥 Add to Friends</a></td>
+              </tr>
+              <tr>
+                <td><a href="#" class="ms-contact-btn" id="ms-btn-fave">⭐ Add to Favorites</a></td>
+                <td><a href="#" class="ms-contact-btn" id="ms-btn-im">💬 Instant Message</a></td>
+              </tr>
+              <tr>
+                <td colspan="2"><a href="#" class="ms-contact-btn ms-block-btn" id="ms-btn-block">🚩 Block User</a></td>
+              </tr>
+            </table>
           </div>
         </div>
 
