@@ -314,6 +314,41 @@ const {
       });
       msSidebar.after(msMain);
 
+      // ── Contact section → MySpace contact box ───────────────────────────
+      const contactSection = document.getElementById('contact');
+      if (contactSection) {
+        const msContactBox = document.createElement('div');
+        msContactBox.className = 'ms-box';
+        msContactBox.innerHTML = `
+          <div class="ms-box-header ms-box-header-blue">Contacting Joshua</div>
+          <div class="ms-box-body">
+            <table class="ms-contact-table">
+              <tr>
+                <td><a href="mailto:joshuaisaact@gmail.com" class="ms-contact-btn">📧 Send Message</a></td>
+                <td><a href="https://github.com/joshuaisaact" target="_blank" rel="noopener noreferrer" class="ms-contact-btn">🐙 GitHub</a></td>
+              </tr>
+              <tr>
+                <td><a href="https://www.linkedin.com/in/joshuatuddenham/" target="_blank" rel="noopener noreferrer" class="ms-contact-btn">💼 LinkedIn</a></td>
+                <td><a href="https://bsky.app/profile/joshtuddenham.dev" target="_blank" rel="noopener noreferrer" class="ms-contact-btn">🦋 Bluesky</a></td>
+              </tr>
+              <tr>
+                <td colspan="2"><a href="#" class="ms-contact-btn ms-block-btn" id="ms-contact-block-btn">🚩 Block User</a></td>
+              </tr>
+            </table>
+          </div>
+        `;
+        contactSection.appendChild(msContactBox);
+
+        document.getElementById('ms-contact-block-btn')?.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (confirm('Are you sure you want to block Joshua Tuddenham?')) {
+            const url = new URL(window.location.href);
+            url.searchParams.delete('theme');
+            window.location.href = url.toString();
+          }
+        });
+      }
+
       // ── Footer ───────────────────────────────────────────────────────────
       const msFooter = document.createElement('div');
       msFooter.id = 'ms-footer';

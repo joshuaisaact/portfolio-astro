@@ -121,6 +121,11 @@
   display: none !important;
 }
 
+/* ---- Hide existing contact grid — replaced by MySpace contact box via JS ---- */
+.theme-myspace #contact .grid {
+  display: none !important;
+}
+
 /* ---- Profile image: show default, hide teletext variant ---- */
 .theme-myspace .profile-ceefax { display: none !important; }
 .theme-myspace .profile-default { display: block !important; }
