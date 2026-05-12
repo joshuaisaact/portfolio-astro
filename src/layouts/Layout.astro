@@ -2,6 +2,7 @@
 import "../styles/global.css";
 import "@fontsource-variable/fraunces";
 import "@fontsource-variable/ibm-plex-sans";
+import ThemeModal from "../components/ThemeModal.astro";
 
 interface Props {
   title?: string;
@@ -284,5 +285,6 @@ const {
   </head>
   <body class="font-ibm-plex min-h-screen">
     <slot />
+    <ThemeModal />
   </body>
 </html>

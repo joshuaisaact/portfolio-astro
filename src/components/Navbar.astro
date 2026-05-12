@@ -9,23 +9,9 @@ const navLinks = [
   { href: "/", label: "About", id: "about" },
   { href: "/#contact", label: "Contact", id: "contact" },
 ];
-const socialLinks = [
-  {
-    href: "https://www.linkedin.com/in/joshuatuddenham/",
-    icon: "/media/nav/linkedin-original.svg",
-    label: "LinkedIn",
-  },
-  {
-    href: "https://github.com/joshuaisaact",
-    icon: "/media/nav/github.svg",
-    label: "GitHub",
-  },
-  {
-    href: "https://bsky.app/profile/joshtuddenham.dev",
-    icon: "/media/nav/bluesky.svg",
-    label: "Bluesky",
-  },
-];
+
+const beforeTheme = navLinks.slice(0, 3);
+const afterTheme = navLinks.slice(3);
 ---
 
 <header
@@ -51,7 +37,27 @@ const socialLinks = [
       {/* Desktop navigation */}
       <ul class="hidden items-center gap-8 md:flex">
         {
-          navLinks.map(({ href, label }) => (
+          beforeTheme.map(({ href, label }) => (
+            <li>
+              <a
+                href={href}
+                class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100 transition-colors"
+              >
+                {label}
+              </a>
+            </li>
+          ))
+        }
+        <li>
+          <button
+            id="themeModalBtn"
+            class="text-gray-600 hover:text-gray-900 dark:text-gray-300 dark:hover:text-gray-100 transition-colors"
+          >
+            Theme
+          </button>
+        </li>
+        {
+          afterTheme.map(({ href, label }) => (
             <li>
               <a
                 href={href}
@@ -64,13 +70,26 @@ const socialLinks = [
         }
       </ul>
 
-      {
-        /* Right side: socials (desktop only), theme toggle (always), hamburger (mobile only) */
-      }
       <div class="flex items-center gap-3 md:gap-6">
         <div class="hidden items-center gap-6 md:flex">
           {
-            socialLinks.map(({ href, icon, label }) => (
+            [
+              {
+                href: "https://www.linkedin.com/in/joshuatuddenham/",
+                icon: "/media/nav/linkedin-original.svg",
+                label: "LinkedIn",
+              },
+              {
+                href: "https://github.com/joshuaisaact",
+                icon: "/media/nav/github.svg",
+                label: "GitHub",
+              },
+              {
+                href: "https://bsky.app/profile/joshtuddenham.dev",
+                icon: "/media/nav/bluesky.svg",
+                label: "Bluesky",
+              },
+            ].map(({ href, icon, label }) => (
               <a
                 href={href}
                 target="_blank"
@@ -128,7 +147,27 @@ const socialLinks = [
       >
         <ul class="space-y-1">
           {
-            navLinks.map(({ href, label }) => (
+            beforeTheme.map(({ href, label }) => (
+              <li>
+                <a
+                  href={href}
+                  class="block px-3 py-2 rounded-md text-base text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-gray-100 transition-colors"
+                >
+                  {label}
+                </a>
+              </li>
+            ))
+          }
+          <li>
+            <button
+              id="themeModalBtnMobile"
+              class="block w-full text-left px-3 py-2 rounded-md text-base text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-200 dark:hover:bg-gray-800 dark:hover:text-gray-100 transition-colors"
+            >
+              Theme
+            </button>
+          </li>
+          {
+            afterTheme.map(({ href, label }) => (
               <li>
                 <a
                   href={href}
@@ -145,7 +184,23 @@ const socialLinks = [
           class="flex items-center gap-4 px-3 pt-3 border-t border-gray-200 dark:border-gray-800"
         >
           {
-            socialLinks.map(({ href, icon, label }) => (
+            [
+              {
+                href: "https://www.linkedin.com/in/joshuatuddenham/",
+                icon: "/media/nav/linkedin-original.svg",
+                label: "LinkedIn",
+              },
+              {
+                href: "https://github.com/joshuaisaact",
+                icon: "/media/nav/github.svg",
+                label: "GitHub",
+              },
+              {
+                href: "https://bsky.app/profile/joshtuddenham.dev",
+                icon: "/media/nav/bluesky.svg",
+                label: "Bluesky",
+              },
+            ].map(({ href, icon, label }) => (
               <a
                 href={href}
                 target="_blank"
@@ -169,8 +224,10 @@ const socialLinks = [
   </div>
 </header>
 
+
 <style>
   #mobileMenuPanel ul a,
+  #mobileMenuPanel ul button,
   #mobileMenuPanel [data-mobile-socials] {
     opacity: 0;
     transform: translateY(4px);
@@ -182,6 +239,7 @@ const socialLinks = [
   }
 
   #mobileMenuPanel[data-state="open"] ul a,
+  #mobileMenuPanel[data-state="open"] ul button,
   #mobileMenuPanel[data-state="open"] [data-mobile-socials] {
     opacity: 1;
     transform: translateY(0);
@@ -192,24 +250,33 @@ const socialLinks = [
       filter 300ms cubic-bezier(0.2, 0, 0, 1);
   }
 
-  #mobileMenuPanel[data-state="open"] ul li:nth-child(1) a {
+  #mobileMenuPanel[data-state="open"] ul li:nth-child(1) a,
+  #mobileMenuPanel[data-state="open"] ul li:nth-child(1) button {
     transition-delay: 60ms;
   }
-  #mobileMenuPanel[data-state="open"] ul li:nth-child(2) a {
+  #mobileMenuPanel[data-state="open"] ul li:nth-child(2) a,
+  #mobileMenuPanel[data-state="open"] ul li:nth-child(2) button {
     transition-delay: 110ms;
   }
-  #mobileMenuPanel[data-state="open"] ul li:nth-child(3) a {
+  #mobileMenuPanel[data-state="open"] ul li:nth-child(3) a,
+  #mobileMenuPanel[data-state="open"] ul li:nth-child(3) button {
     transition-delay: 160ms;
   }
-  #mobileMenuPanel[data-state="open"] ul li:nth-child(4) a {
+  #mobileMenuPanel[data-state="open"] ul li:nth-child(4) a,
+  #mobileMenuPanel[data-state="open"] ul li:nth-child(4) button {
     transition-delay: 210ms;
   }
-  #mobileMenuPanel[data-state="open"] [data-mobile-socials] {
+  #mobileMenuPanel[data-state="open"] ul li:nth-child(5) a,
+  #mobileMenuPanel[data-state="open"] ul li:nth-child(5) button {
     transition-delay: 260ms;
+  }
+  #mobileMenuPanel[data-state="open"] [data-mobile-socials] {
+    transition-delay: 310ms;
   }
 </style>
 
 <script>
+  // ---- Mobile menu ----
   const button = document.getElementById("mobileMenuToggle");
   const panel = document.getElementById("mobileMenuPanel");
 
@@ -248,4 +315,9 @@ const socialLinks = [
       a.addEventListener("click", close);
     });
   }
+
+  // ---- Theme modal ----
+  const modal = document.getElementById("themeModal") as HTMLDialogElement | null;
+  [document.getElementById("themeModalBtn"), document.getElementById("themeModalBtnMobile")]
+    .forEach((btn) => btn?.addEventListener("click", () => modal?.showModal()));
 </script>

@@ -1,0 +1,56 @@
+---
+const themes = [
+  { id: "default", label: "Default" },
+  { id: "ceefax", label: "Ceefax" },
+];
+---
+
+<dialog
+  id="themeModal"
+  class="m-auto p-0 rounded-xl shadow-2xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 backdrop:bg-black/50 backdrop:backdrop-blur-sm"
+>
+  <div class="p-4 w-44">
+    <p class="text-xs font-semibold uppercase tracking-wider text-gray-400 dark:text-gray-500 mb-3 px-1">
+      Theme
+    </p>
+    <div class="space-y-0.5">
+      {
+        themes.map(({ id, label }) => (
+          <button
+            data-nav-theme={id}
+            class="w-full text-left px-3 py-2 rounded-md text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors data-[active]:font-semibold data-[active]:text-gray-900 data-[active]:dark:text-white"
+          >
+            {label}
+          </button>
+        ))
+      }
+    </div>
+  </div>
+</dialog>
+
+<script>
+  const modal = document.getElementById("themeModal") as HTMLDialogElement | null;
+  if (modal) {
+    const current = new URLSearchParams(window.location.search).get("theme") ?? "default";
+    modal.querySelectorAll<HTMLButtonElement>("[data-nav-theme]").forEach((btn) => {
+      if (btn.dataset.navTheme === current) btn.dataset.active = "";
+    });
+
+    modal.addEventListener("click", (e) => {
+      if (e.target === modal) modal.close();
+    });
+
+    modal.querySelectorAll<HTMLButtonElement>("[data-nav-theme]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const selected = btn.dataset.navTheme ?? "default";
+        const url = new URL(window.location.href);
+        if (selected === "default") {
+          url.searchParams.delete("theme");
+        } else {
+          url.searchParams.set("theme", selected);
+        }
+        window.location.href = url.toString();
+      });
+    });
+  }
+</script>
