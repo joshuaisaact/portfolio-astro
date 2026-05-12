@@ -87,7 +87,9 @@ const themes = [
   const confirmBtn = document.getElementById("themeConfirmBtn");
 
   if (modal) {
-    const current = new URLSearchParams(window.location.search).get("theme") ?? "default";
+    const validThemes = themes.map((t) => t.id);
+    const raw = new URLSearchParams(window.location.search).get("theme") ?? "default";
+    const current = validThemes.includes(raw) ? raw : "default";
     let selected = current;
 
     const cards = modal.querySelectorAll("[data-nav-theme]");
