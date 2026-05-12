@@ -370,8 +370,7 @@
 }
 
 /* ---- Cards — cyan border, tight padding ---- */
-.theme-ceefax [class*="card"],
-.theme-ceefax [class*="Card"] {
+.theme-ceefax [class*="card"] {
   background: var(--ceefax-black) !important;
   border: 1px solid var(--ceefax-cyan) !important;
   padding: 0 !important;
@@ -422,11 +421,6 @@
   display: block !important;
 }
 
-.theme-ceefax img[class*="rounded-full"] {
-  border-radius: 0 !important;
-  border: 3px solid var(--ceefax-yellow) !important;
-}
-
 /* ---- Buttons ---- */
 .theme-ceefax button,
 .theme-ceefax [role="button"],
@@ -464,8 +458,6 @@
 .theme-ceefax hr {
   border: none !important;
   height: 20px;
-  line-height: inherit;
-  font-size: 20px;
   color: var(--ceefax-white);
   overflow: hidden;
   white-space: nowrap;
@@ -506,8 +498,7 @@
 }
 
 /* ---- Accent colour override ---- */
-.theme-ceefax .text-\(--theme-5\),
-.theme-ceefax [style*="--theme-5"] {
+.theme-ceefax .text-\(--theme-5\) {
   color: var(--ceefax-yellow) !important;
 }
 
@@ -585,35 +576,6 @@
 .theme-ceefax ::-webkit-scrollbar-thumb {
   background: var(--ceefax-blue);
 }
-
-/* ---- Theme switcher dropdown ---- */
-.theme-ceefax .theme-switcher button {
-  background: var(--ceefax-black) !important;
-  color: var(--ceefax-cyan) !important;
-  border: 1px solid var(--ceefax-cyan) !important;
-}
-
-.theme-ceefax .theme-switcher button:hover {
-  background: var(--ceefax-cyan) !important;
-  color: var(--ceefax-black) !important;
-}
-
-.theme-ceefax .theme-switcher button[data-active="true"] {
-  background: var(--ceefax-yellow) !important;
-  color: var(--ceefax-black) !important;
-  border-color: var(--ceefax-yellow) !important;
-}
-
-.theme-ceefax .theme-switcher [id="themeSwitcherMenu"] {
-  background: var(--ceefax-black) !important;
-  border: 1px solid var(--ceefax-white) !important;
-}
-
-.theme-ceefax .theme-switcher [id="themeSwitcherMenu"] button {
-  border: none !important;
-  border-bottom: 1px solid #333 !important;
-}
-
 
 /* ---- CRT scanline overlay ---- */
 @supports (background: repeating-linear-gradient(transparent 0 1px, rgba(0,0,0,0.15) 1px 3px)) {
