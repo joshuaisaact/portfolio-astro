@@ -45,7 +45,7 @@ const linkTarget = isMinimal && githubLink ? "_blank" : "_self";
   >
     {
       !isMinimal && (project.imageSrc || project.posterImage) && (
-        <div class="relative aspect-3/2 sm:aspect-4/3 overflow-hidden bg-gray-100 dark:bg-gray-800">
+        <div class="project-card-image relative aspect-3/2 sm:aspect-4/3 overflow-hidden bg-gray-100 dark:bg-gray-800">
           <Image
             src={project.imageSrc || project.posterImage!}
             alt={project.imageAlt || project.title}

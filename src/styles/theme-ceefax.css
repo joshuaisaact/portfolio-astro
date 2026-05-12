@@ -394,6 +394,11 @@
   display: none !important;
 }
 
+/* ---- Project card images ---- */
+.theme-ceefax .project-card-image {
+  display: none !important;
+}
+
 /* ---- Blog cards — tight teletext spacing ---- */
 .theme-ceefax [role="listitem"] ul {
   display: none !important;
