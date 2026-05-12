@@ -11,13 +11,6 @@ const { projects } = Astro.props;
 ---
 
 <section aria-label="Featured Projects Carousel" class="space-y-6 sm:space-y-8">
-  <div>
-    <p class="text-base sm:text-lg text-gray-700 dark:text-gray-300 leading-relaxed">
-      Side projects where I dig into whatever's caught my interest - AI agents,
-      systems programming, tools that solve problems I've actually had.
-    </p>
-  </div>
-
   <div class="embla relative" aria-roledescription="carousel">
     <!-- Carousel Viewport -->
     <div class="embla__viewport overflow-hidden py-2">
@@ -25,7 +18,8 @@ const { projects } = Astro.props;
         {
           projects.map((project, index) => (
             <div
-              class="embla__slide flex-[0_0_100%] md:flex-[0_0_calc(50%-0.5rem)] min-w-0"
+              class="embla__slide flex-[0_0_90%] md:flex-[0_0_calc(50%-0.5rem)] min-w-0 stagger-in"
+              data-stagger-delay={index * 100}
               role="listitem"
               aria-roledescription="slide"
               aria-label={`${index + 1} of ${projects.length}: ${project.title}`}
@@ -73,7 +67,7 @@ const { projects } = Astro.props;
 
     <!-- Dot Indicators -->
     <div
-      class="embla__dots flex justify-center gap-4 mt-4"
+      class="embla__dots flex justify-center gap-8 mt-4"
       role="tablist"
       aria-label="Slide navigation"
     >
@@ -82,7 +76,7 @@ const { projects } = Astro.props;
           <button
             type="button"
             class:list={[
-              "embla__dot relative w-2.5 h-2.5 rounded-full transition-colors duration-200 after:absolute after:top-1/2 after:left-1/2 after:w-8 after:h-8 after:-translate-1/2",
+              "embla__dot relative w-2.5 h-2.5 rounded-full transition-colors duration-200 after:absolute after:top-1/2 after:left-1/2 after:size-10 after:-translate-1/2 after:content-['']",
               index === 0
                 ? "bg-blue-600 dark:bg-blue-500"
                 : "bg-gray-300 dark:bg-gray-600 hover:bg-gray-400 dark:hover:bg-gray-500",

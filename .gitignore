@@ -25,6 +25,8 @@ pnpm-debug.log*
 
 # AI
 .claude
+.agents/
+.pi/
 
 # IDE
 .vscode

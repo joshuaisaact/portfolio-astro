@@ -10,10 +10,11 @@ import teletextPicture from "../assets/teletext.svg";
     aria-label="Introduction"
   >
     <section
-      class="grid grid-cols-1 lg:grid-cols-2 gap-8 justify-center lg:justify-items-end py-8 sm:py-12 md:py-16 lg:py-24 mx-0 sm:mx-4 lg:mx-8"
+      class="grid grid-cols-1 lg:grid-cols-2 gap-8 justify-center lg:justify-items-end lg:items-center py-8 sm:py-12 md:py-16 lg:py-24 mx-0 sm:mx-4 lg:mx-8"
     >
       <div
-        class="order-2 lg:order-1 p-2 sm:p-4 justify-self-center lg:justify-self-end space-y-6"
+        class="order-2 lg:order-1 p-2 sm:p-4 justify-self-center lg:justify-self-end space-y-6 stagger-in"
+        data-stagger-delay="0"
       >
         <div class="space-y-4">
           <h1
@@ -24,7 +25,7 @@ import teletextPicture from "../assets/teletext.svg";
           </h1>
         </div>
 
-        <div class="prose dark:prose-invert max-w-none space-y-4">
+        <div class="prose dark:prose-invert max-w-none">
           <p class="text-base sm:text-lg text-gray-700 dark:text-gray-300">
             I&apos;m a senior engineer at <a
               href="https://www.letsdothis.com/"
@@ -33,15 +34,9 @@ import teletextPicture from "../assets/teletext.svg";
               class="text-(--theme-5) hover:underline font-semibold"
               >Let&apos;s Do This</a
             >, where I build AI agents and platform features in TypeScript.
-            Outside work I write Zig, Go, and whatever else catches my interest.
-          </p>
-
-          <p class="text-base sm:text-lg text-gray-700 dark:text-gray-300">
-            I went from pitching portfolio managers to writing hash tables in Zig.
-          </p>
-
-          <p class="text-base sm:text-lg text-gray-700 dark:text-gray-300">
-            I write about engineering on my <a
+            Outside work I write Zig and Go on systems-level projects. In a past
+            life I sold AI software to hedge fund managers. I write
+            about engineering on my <a
               class="text-(--theme-5) hover:underline font-semibold"
               href="/blog">blog</a
             >.
@@ -87,9 +82,9 @@ import teletextPicture from "../assets/teletext.svg";
         </div>
       </div>
 
-      <div class="order-1 lg:order-2 flex justify-center items-start">
+      <div class="order-1 lg:order-2 flex justify-center items-start lg:justify-self-center stagger-in" data-stagger-delay="100">
         <div
-          class="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 lg:w-[400px] lg:h-[400px] shrink-0"
+          class="w-48 h-48 sm:w-64 sm:h-64 md:w-80 md:h-80 lg:w-80 lg:h-80 shrink-0"
         >
           <Image
             src={profilePicture}
@@ -98,7 +93,7 @@ import teletextPicture from "../assets/teletext.svg";
             height={400}
             loading="eager"
             fetchpriority="high"
-            class="profile-default w-full h-full rounded-full border-4 border-(--theme-5) cursor-pointer dark:brightness-90 object-cover"
+            class="profile-default w-full h-full rounded-full border-4 border-(--theme-5) dark:brightness-90 object-cover"
           />
           <Image
             src={teletextPicture}

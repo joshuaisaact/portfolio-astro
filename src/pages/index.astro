@@ -16,6 +16,7 @@ const allProjects = await getCollection("projects");
 const applicationProjects = allProjects
   .filter((p) => !p.data.projectType || p.data.projectType === "application")
   .sort((a, b) => (a.data.order ?? 999) - (b.data.order ?? 999))
+  .slice(0, 6)
   .map((p) => p.data);
 
 const utilityProjects = allProjects
@@ -26,9 +27,11 @@ const utilityProjects = allProjects
   .map((p) => p.data);
 
 const allPosts = await getCollection("blog");
-const blogPosts = allPosts.sort(
-  (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
-);
+const blogPosts = allPosts
+  .sort(
+    (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
+  )
+  .slice(0, 6);
 ---
 
 <a
@@ -38,7 +41,7 @@ const blogPosts = allPosts.sort(
   Skip to main content
 </a>
 
-<Layout>
+<Layout description="Senior engineer building AI agents and platform features in TypeScript. Side projects in Zig and Go. Blog posts on systems programming, AI tooling, and web performance.">
   <Navbar />
   <main
     id="main-content"
@@ -51,7 +54,7 @@ const blogPosts = allPosts.sort(
       <div class="mt-6 text-center">
         <a
           href="/blog"
-          class="inline-flex items-center justify-center gap-2 px-6 py-3 text-base font-medium text-white bg-(--theme-5) rounded-md shadow-sm hover:shadow-md hover:bg-(--theme-5)/90 active:scale-[0.96] transition-[background-color,box-shadow,scale] duration-200"
+          class="inline-flex items-center justify-center gap-2 px-6 py-3 text-base font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800 rounded-md hover:border-(--theme-5) hover:text-(--theme-5) dark:hover:border-(--theme-5) dark:hover:text-(--theme-5) active:scale-[0.96] transition-[border-color,color,scale] duration-200"
         >
           <span>View all posts</span>
           <ArrowRight class="w-4 h-4" />
@@ -63,7 +66,7 @@ const blogPosts = allPosts.sort(
       <div class="mt-6 text-center">
         <a
           href="/projects"
-          class="inline-flex items-center justify-center gap-2 px-6 py-3 text-base font-medium text-white bg-(--theme-5) rounded-md shadow-sm hover:shadow-md hover:bg-(--theme-5)/90 active:scale-[0.96] transition-[background-color,box-shadow,scale] duration-200"
+          class="inline-flex items-center justify-center gap-2 px-6 py-3 text-base font-medium text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-800 rounded-md hover:border-(--theme-5) hover:text-(--theme-5) dark:hover:border-(--theme-5) dark:hover:text-(--theme-5) active:scale-[0.96] transition-[border-color,color,scale] duration-200"
         >
           <span>View all projects</span>
           <ArrowRight class="w-4 h-4" />
@@ -85,3 +88,58 @@ const blogPosts = allPosts.sort(
     </footer>
   </main>
 </Layout>
+
+<style>
+  @keyframes stagger-fade-in {
+    from {
+      opacity: 0;
+      filter: blur(4px);
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      filter: blur(0);
+      transform: translateY(0);
+    }
+  }
+
+  :global(.stagger-ready) {
+    opacity: 0;
+  }
+
+  :global(.stagger-ready.is-visible) {
+    animation: stagger-fade-in 0.6s ease-out forwards;
+  }
+
+@media (prefers-reduced-motion: reduce) {
+    :global(.stagger-ready) {
+      opacity: 1;
+    }
+    :global(.stagger-ready.is-visible) {
+      animation: none;
+    }
+  }
+</style>
+
+<script>
+  const els = document.querySelectorAll<HTMLElement>('.stagger-in');
+
+  // Mark elements as ready (hidden) only when JS is running on the homepage
+  els.forEach((el) => el.classList.add('stagger-ready'));
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        const el = entry.target as HTMLElement;
+        const delay = parseInt(el.dataset.staggerDelay || '0', 10);
+        el.style.animationDelay = `${delay}ms`;
+        el.classList.add('is-visible');
+        observer.unobserve(el);
+      });
+    },
+    { threshold: 0.1 },
+  );
+
+  els.forEach((el) => observer.observe(el));
+</script>

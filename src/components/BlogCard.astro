@@ -27,16 +27,15 @@ const formatDate = (dateString: string) => {
 };
 ---
 
-<a href={`/blog/${slug}`} class="block h-full" role="listitem">
+<a href={`/blog/${slug}`} class="block h-full">
   <div
     class="group
         relative overflow-hidden
         bg-linear-to-b from-white to-gray-50
         dark:from-gray-800 dark:to-gray-850
-        rounded-lg shadow-sm
-        ring-1 ring-gray-900/5
-        transition-[box-shadow,transform] duration-300
-        hover:shadow-md hover:-translate-y-0.5 h-full flex flex-col"
+        rounded-lg shadow-(--shadow-card)
+        transition-[box-shadow] duration-300
+        hover:shadow-(--shadow-card-hover) h-full flex flex-col"
   >
     {metadata.featured_image && (
       <div
@@ -48,16 +47,13 @@ const formatDate = (dateString: string) => {
           width={800}
           height={600}
           loading={index < 6 ? "eager" : "lazy"}
-          class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
+          class="w-full h-full object-cover outline outline-1 -outline-offset-1 outline-black/10 dark:outline-white/10"
         />
       </div>
     )}
     <div class="p-4 sm:p-6">
       {/* Date */}
-      <time
-        datetime={metadata.date}
-        class="text-sm text-gray-600 dark:text-gray-400 mb-2 block"
-      >
+      <time datetime={metadata.date} class="sr-only">
         {formatDate(metadata.date)}
       </time>
 
