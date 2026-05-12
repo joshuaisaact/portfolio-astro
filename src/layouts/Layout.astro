@@ -222,7 +222,7 @@ const {
             '<a href="/?theme=ceefax">Home</a>' +
             '<a href="/blog?theme=ceefax">Blog</a>' +
             '<a href="/projects?theme=ceefax">Projects</a>' +
-            '<a href="#" id="ceefax-theme-btn">Default</a>';
+            '<a href="#" id="ceefax-theme-btn">Default Theme</a>';
           document.body.appendChild(ft);
           document.getElementById("ceefax-theme-btn").addEventListener("click", function (e) {
             e.preventDefault();
@@ -232,7 +232,7 @@ const {
             window.location.href = url.toString();
           });
 
-          // Pixelate images via canvas downscale
+          // Pixelate and quantize images to 2-colour Ceefax palette (black + cyan)
           document.querySelectorAll("img").forEach(function (img) {
             var doPixelate = function () {
               try {
@@ -249,6 +249,19 @@ const {
                 if (!ctx) return;
                 ctx.imageSmoothingEnabled = false;
                 ctx.drawImage(img, 0, 0, sw, sh);
+                // Quantize each block to black or cyan
+                var px = ctx.getImageData(0, 0, sw, sh);
+                var d = px.data;
+                for (var i = 0; i < d.length; i += 4) {
+                  var gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
+                  if (gray > 127) {
+                    d[i] = 0; d[i + 1] = 255; d[i + 2] = 255; // cyan
+                  } else {
+                    d[i] = 0; d[i + 1] = 0; d[i + 2] = 0; // black
+                  }
+                  d[i + 3] = 255;
+                }
+                ctx.putImageData(px, 0, 0);
                 var c2 = document.createElement("canvas");
                 c2.width = w;
                 c2.height = h;
