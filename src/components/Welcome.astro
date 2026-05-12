@@ -1,5 +1,6 @@
 ---
 import { Image } from "astro:assets";
+import { Palette } from "lucide-astro";
 import Button from "./Button.astro";
 import profilePicture from "../assets/focused.png";
 import teletextPicture from "../assets/teletext.svg";
@@ -46,6 +47,7 @@ import teletextPicture from "../assets/teletext.svg";
 
         <!-- Theme picker -->
         <Button id="welcomeThemeBtn" class="theme-switcher">
+          <Palette class="w-4 h-4" />
           Change Theme
         </Button>
       </div>
