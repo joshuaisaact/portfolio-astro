@@ -178,6 +178,12 @@
   border: 1px solid var(--ms-border) !important;
 }
 
+/* card-body matches [class*="card"] and gets a second border — kill it */
+.theme-myspace .card-body {
+  border: none !important;
+  background: var(--ms-content) !important;
+}
+
 /* ---- Buttons ---- */
 .theme-myspace button,
 .theme-myspace [role="button"],
