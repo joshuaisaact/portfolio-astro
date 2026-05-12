@@ -468,25 +468,26 @@
 }
 
 .theme-myspace .ms-contact-table td {
-  padding: 2px !important;
+  padding: 3px !important;
   background: var(--ms-content) !important;
 }
 
 .theme-myspace .ms-contact-btn {
   display: block;
-  font-size: 10px !important;
-  padding: 2px 4px !important;
+  font-size: 12px !important;
+  padding: 4px 6px !important;
   color: var(--ms-link) !important;
   text-decoration: none !important;
-  border: 1px solid var(--ms-border) !important;
-  background: #efefef !important;
+  border: 2px outset #dddddd !important;
+  background: #d4d0c8 !important;
   text-align: center;
   cursor: pointer;
   white-space: nowrap;
 }
 
 .theme-myspace .ms-contact-btn:hover {
-  background: #ddeeff !important;
+  border-style: inset !important;
+  background: #c4c0b8 !important;
   color: var(--ms-link) !important;
 }
 
