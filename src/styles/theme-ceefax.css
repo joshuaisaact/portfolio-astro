@@ -74,6 +74,7 @@
 .theme-ceefax #container section[aria-label="Introduction"] .prose p,
 .theme-ceefax #container section[aria-label="Introduction"] .prose p * {
   font-size: max(13px, 1.6vw) !important;
+  margin-top: 0 !important;
 }
 
 /* Outer section padding */
