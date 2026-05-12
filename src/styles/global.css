@@ -18,7 +18,7 @@
 }
 
 .dark {
-  --theme-5: #7ab3a0; /* Lighter, more saturated sage for dark backgrounds */
+  --theme-5: #5a9080; /* Sage, dark enough for white text contrast */
   --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.08);
   --shadow-card-hover: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 0 16px rgba(255, 255, 255, 0.03);
 }
