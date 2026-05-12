@@ -179,17 +179,14 @@ const {
       const tomAvatarUrl = 'https://i.insider.com/4efd9b8b69bedd682c000022?width=700&format=jpeg&auto=webp';
 
       const friends = [
-        { img: tomAvatarUrl,  name: 'Tom' },
-        { text: 'LP', bg: '#8b0000', name: 'Linkin Park' },
-        { text: 'SK', bg: '#e85d00', name: 'Slipknot' },
-        { text: 'SoaD', bg: '#2a0a0a', name: 'Sys. of a Down' },
+        { img: tomAvatarUrl, name: 'Tom' },
+        { img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d8/Linkin_Park_-_From_Zero_Lead_Press_Photo_-_James_Minchin_III.jpg/330px-Linkin_Park_-_From_Zero_Lead_Press_Photo_-_James_Minchin_III.jpg', name: 'Linkin Park' },
+        { img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/63/Limp_Bizkit_%28cropped%29.jpg/330px-Limp_Bizkit_%28cropped%29.jpg', name: 'Limp Bizkit' },
+        { img: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/16/Creed-2023.jpg/330px-Creed-2023.jpg', name: 'Creed' },
       ];
       const friendsHtml = friends.map(f =>
         `<div class="ms-friend-item">
-          ${'img' in f
-            ? `<img src="${f.img}" class="ms-friend-avatar-img" alt="${f.name}">`
-            : `<div class="ms-friend-avatar" style="background:${f.bg}">${f.text}</div>`
-          }
+          <img src="${f.img}" class="ms-friend-avatar-img" alt="${f.name}">
           <div class="ms-friend-name">${f.name}</div>
         </div>`
       ).join('');
