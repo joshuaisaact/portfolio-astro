@@ -73,6 +73,42 @@
   opacity: 1 !important;
 }
 
+/* ---- Carousels → static grid (MySpace had no such thing) ---- */
+.theme-myspace .embla,
+.theme-myspace .embla-blog {
+  position: static !important;
+}
+
+.theme-myspace .embla__viewport,
+.theme-myspace .embla-blog__viewport {
+  overflow: visible !important;
+}
+
+.theme-myspace .embla__container,
+.theme-myspace .embla-blog__container {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  flex: none !important;
+  gap: 4px !important;
+}
+
+.theme-myspace .embla__slide,
+.theme-myspace .embla-blog__slide {
+  flex: none !important;
+  min-width: 0 !important;
+  width: auto !important;
+}
+
+/* Hide prev/next buttons */
+.theme-myspace .embla__button,
+.theme-myspace .embla-blog__button,
+.theme-myspace [aria-label="Previous slide"],
+.theme-myspace [aria-label="Next slide"],
+.theme-myspace [aria-label="Previous post"],
+.theme-myspace [aria-label="Next post"] {
+  display: none !important;
+}
+
 /* ---- Background / gradient reset ---- */
 .theme-myspace,
 .theme-myspace.dark {
