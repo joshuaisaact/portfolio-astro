@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./theme-ceefax.css";
+@import "./theme-myspace.css";
 @plugin "@tailwindcss/typography";
 
 @variant dark (.dark &);

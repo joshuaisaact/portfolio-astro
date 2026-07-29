@@ -1,0 +1,662 @@
+/* ==========================================================================
+   MySpace Theme (circa 2004–2008)
+   Scoped entirely under .theme-myspace — zero cost when inactive.
+   Light mode. 2-column profile layout injected by JS in Layout.astro.
+   ========================================================================== */
+
+/* ---- Variables ---- */
+.theme-myspace {
+  --ms-bg:           #d2d2d2;
+  --ms-content:      #ffffff;
+  --ms-border:       #999999;
+  --ms-border-light: #cccccc;
+  --ms-link:         #003399;
+  --ms-link-hover:   #cc0000;
+  --ms-text:         #000000;
+  --ms-nav-dark:     #1a3a5c;
+  --ms-nav:          #3b5f82;
+  --ms-section-bg:   #c8d8e8;
+  --ms-contact-bg:   #5d8cb0;
+
+  background: var(--ms-bg) !important;
+  color: var(--ms-text);
+}
+
+/* ---- Arial for everything — no exceptions ---- */
+.theme-myspace,
+.theme-myspace *,
+.theme-myspace *::before,
+.theme-myspace *::after {
+  font-family: Arial, Helvetica, sans-serif !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  text-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+/* ---- Body: 2-column profile grid ---- */
+.theme-myspace body {
+  display: grid !important;
+  grid-template-areas:
+    "ms-hdr  ms-hdr"
+    "ms-sb   ms-main"
+    "ms-ft   ms-ft" !important;
+  grid-template-columns: 230px 1fr !important;
+  grid-template-rows: auto 1fr auto !important;
+  max-width: 800px !important;
+  margin: 0 auto !important;
+  background: var(--ms-bg) !important;
+  background-image: none !important;
+  gap: 4px !important;
+  padding: 4px 4px 0 !important;
+  min-height: 0 !important;
+}
+
+/* ---- Grid area assignments ---- */
+.theme-myspace #ms-header  { grid-area: ms-hdr; }
+.theme-myspace #ms-sidebar { grid-area: ms-sb; align-self: start; }
+.theme-myspace #ms-main    { grid-area: ms-main; min-width: 0; }
+.theme-myspace #ms-footer  { grid-area: ms-ft; }
+
+/* ---- Hide the site's own nav, header, footer — replaced by MySpace chrome ---- */
+.theme-myspace nav,
+.theme-myspace header {
+  display: none !important;
+}
+
+.theme-myspace footer {
+  display: none !important;
+}
+
+/* ---- Keep stagger-in elements visible — no opacity:0 hang ---- */
+.theme-myspace .stagger-ready {
+  opacity: 1 !important;
+}
+
+/* ---- Carousels → static grid (MySpace had no such thing) ---- */
+.theme-myspace .embla,
+.theme-myspace .embla-blog {
+  position: static !important;
+}
+
+.theme-myspace .embla__viewport,
+.theme-myspace .embla-blog__viewport {
+  overflow: visible !important;
+}
+
+.theme-myspace .embla__container,
+.theme-myspace .embla-blog__container {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  flex: none !important;
+  gap: 4px !important;
+}
+
+.theme-myspace .embla__slide,
+.theme-myspace .embla-blog__slide {
+  flex: none !important;
+  min-width: 0 !important;
+  width: auto !important;
+}
+
+/* Hide prev/next buttons */
+.theme-myspace .embla__button,
+.theme-myspace .embla-blog__button,
+.theme-myspace [aria-label="Previous slide"],
+.theme-myspace [aria-label="Next slide"],
+.theme-myspace [aria-label="Previous post"],
+.theme-myspace [aria-label="Next post"] {
+  display: none !important;
+}
+
+/* ---- Background / gradient reset ---- */
+.theme-myspace,
+.theme-myspace.dark {
+  background: var(--ms-bg) !important;
+  background-image: none !important;
+}
+
+/* ---- Remove all profile image duplicate in main ---- */
+.theme-myspace .welcome-image-col {
+  display: none !important;
+}
+
+/* ---- Contact section: hide grid and injected box header ---- */
+.theme-myspace #contact .grid {
+  display: none !important;
+}
+
+.theme-myspace #contact .ms-box-header {
+  display: none !important;
+}
+
+/* ---- Profile image: show default, hide teletext variant ---- */
+.theme-myspace .profile-ceefax { display: none !important; }
+.theme-myspace .profile-default { display: block !important; }
+
+/* ---- Links ---- */
+.theme-myspace a {
+  color: var(--ms-link) !important;
+  text-decoration: underline !important;
+}
+
+.theme-myspace a:hover,
+.theme-myspace a:focus {
+  color: var(--ms-link-hover) !important;
+}
+
+/* ---- Text ---- */
+.theme-myspace p,
+.theme-myspace li,
+.theme-myspace td,
+.theme-myspace th,
+.theme-myspace label,
+.theme-myspace span,
+.theme-myspace div {
+  color: var(--ms-text) !important;
+  font-size: 12px !important;
+}
+
+.theme-myspace time {
+  color: #666666 !important;
+  font-size: 11px !important;
+}
+
+/* ---- Headings: MySpace-style bold section labels ---- */
+.theme-myspace h1 {
+  font-size: 18px !important;
+  font-weight: bold !important;
+  color: var(--ms-text) !important;
+  background: var(--ms-section-bg) !important;
+  padding: 4px 8px !important;
+  margin: 0 0 6px !important;
+  border-bottom: 1px solid var(--ms-border) !important;
+  font-variation-settings: normal !important;
+}
+
+.theme-myspace h2 {
+  font-size: 14px !important;
+  font-weight: bold !important;
+  color: var(--ms-text) !important;
+  background: var(--ms-section-bg) !important;
+  padding: 3px 8px !important;
+  margin: 8px 0 4px !important;
+  border-bottom: 1px solid var(--ms-border) !important;
+  font-variation-settings: normal !important;
+}
+
+.theme-myspace h3 {
+  font-size: 13px !important;
+  font-weight: bold !important;
+  color: var(--ms-text) !important;
+  background: none !important;
+  margin: 6px 0 3px !important;
+}
+
+.theme-myspace h4,
+.theme-myspace h5,
+.theme-myspace h6 {
+  font-size: 12px !important;
+  font-weight: bold !important;
+  color: var(--ms-text) !important;
+  background: none !important;
+}
+
+/* ---- Images: plain thin border, no glow ---- */
+.theme-myspace img {
+  border: 1px solid var(--ms-border) !important;
+  box-shadow: none !important;
+}
+
+/* ---- Sections / articles: white boxes ---- */
+.theme-myspace section,
+.theme-myspace article {
+  background: var(--ms-content) !important;
+  border: 1px solid var(--ms-border) !important;
+  padding: 6px !important;
+  margin-bottom: 4px !important;
+}
+
+/* ---- Cards ---- */
+.theme-myspace [class*="card"] {
+  background: var(--ms-content) !important;
+  border: 1px solid var(--ms-border) !important;
+}
+
+/* card-body matches [class*="card"] and gets a second border — kill it */
+.theme-myspace .card-body {
+  border: none !important;
+  background: var(--ms-content) !important;
+}
+
+/* ---- Buttons ---- */
+.theme-myspace button,
+.theme-myspace [role="button"],
+.theme-myspace input[type="submit"] {
+  background: var(--ms-nav) !important;
+  color: #ffffff !important;
+  border: 1px solid #336699 !important;
+  font-size: 11px !important;
+  padding: 2px 8px !important;
+}
+
+.theme-myspace button:hover,
+.theme-myspace [role="button"]:hover {
+  background: #2a4f6e !important;
+}
+
+/* ---- Lists: default browser markers, no custom ★ ---- */
+.theme-myspace ul {
+  list-style: disc !important;
+  padding-left: 20px !important;
+}
+
+.theme-myspace ul li::before {
+  content: none !important;
+}
+
+.theme-myspace ol {
+  list-style: decimal !important;
+  padding-left: 20px !important;
+}
+
+/* ---- HR ---- */
+.theme-myspace hr {
+  border: none !important;
+  border-top: 1px solid var(--ms-border) !important;
+  margin: 8px 0 !important;
+}
+
+/* ---- Code ---- */
+.theme-myspace pre,
+.theme-myspace pre * {
+  background: #f0f0f0 !important;
+  border: 1px solid var(--ms-border-light) !important;
+  color: #000000 !important;
+  font-family: "Courier New", Courier, monospace !important;
+  font-size: 11px !important;
+}
+
+.theme-myspace code {
+  background: #f0f0f0 !important;
+  color: #000000 !important;
+  font-family: "Courier New", Courier, monospace !important;
+  font-size: 11px !important;
+  border: 1px solid var(--ms-border-light) !important;
+}
+
+/* ---- Blockquotes ---- */
+.theme-myspace blockquote {
+  border-left: 3px solid var(--ms-border) !important;
+  background: #f5f5f5 !important;
+  padding: 4px 8px !important;
+  margin: 6px 0 !important;
+}
+
+.theme-myspace blockquote p {
+  font-style: italic;
+}
+
+/* ---- Prose link overrides ---- */
+.theme-myspace .prose a:not(.not-prose a) {
+  color: var(--ms-link) !important;
+  text-decoration: underline !important;
+}
+
+.theme-myspace .prose a:not(.not-prose a):hover {
+  color: var(--ms-link-hover) !important;
+}
+
+/* ---- Tag pills / bg overrides ---- */
+.theme-myspace [class*="bg-"]:not(nav):not(header):not(footer):not(body) {
+  background: #e8e8e8 !important;
+  color: var(--ms-text) !important;
+}
+
+/* ---- Theme modal: force light styling since we're not in dark mode ---- */
+.theme-myspace #themeModal {
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid var(--ms-border) !important;
+}
+
+/* ---- Scrollbar ---- */
+.theme-myspace ::-webkit-scrollbar {
+  width: 12px;
+  background: #e0e0e0;
+}
+
+.theme-myspace ::-webkit-scrollbar-thumb {
+  background: #999999;
+  border: 1px solid #cccccc;
+}
+
+/* ---- Selection ---- */
+.theme-myspace ::selection {
+  background: #336699;
+  color: #ffffff;
+}
+
+/* =========================================================================
+   Injected MySpace chrome — JS creates these elements in Layout.astro
+   ========================================================================= */
+
+/* ---- #ms-header: blue topbar + nav strip ---- */
+.theme-myspace #ms-header {
+  background: var(--ms-nav-dark);
+}
+
+.theme-myspace #ms-header .ms-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  background: var(--ms-nav-dark);
+}
+
+.theme-myspace #ms-header .ms-logo-link {
+  text-decoration: none !important;
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.theme-myspace #ms-header .ms-logo-my {
+  font-size: 28px !important;
+  font-weight: bold !important;
+  font-style: italic;
+  color: #ffffff !important;
+  letter-spacing: -1px;
+}
+
+.theme-myspace #ms-header .ms-logo-space {
+  font-size: 20px !important;
+  font-weight: bold !important;
+  color: #aaccff !important;
+  letter-spacing: -0.5px;
+}
+
+.theme-myspace #ms-header .ms-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px !important;
+  color: #ffffff !important;
+}
+
+.theme-myspace #ms-header .ms-search-label {
+  color: #ccddee !important;
+  font-size: 11px !important;
+}
+
+.theme-myspace #ms-header .ms-search-input {
+  padding: 2px 4px !important;
+  font-size: 11px !important;
+  border: 1px solid #336699 !important;
+  width: 130px;
+  background: #ffffff !important;
+  color: #000000 !important;
+}
+
+.theme-myspace #ms-header .ms-search-type {
+  font-size: 11px !important;
+  padding: 1px !important;
+  background: #ffffff !important;
+  color: #000000 !important;
+  border: 1px solid #336699 !important;
+}
+
+.theme-myspace #ms-header .ms-search-btn {
+  font-size: 11px !important;
+  padding: 2px 6px !important;
+  background: #5580a4 !important;
+  color: #ffffff !important;
+  border: 1px solid #2a4a6a !important;
+}
+
+.theme-myspace #ms-header .ms-navbar {
+  background: var(--ms-nav);
+  padding: 4px 10px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.theme-myspace #ms-header .ms-navbar a {
+  color: #ffffff !important;
+  text-decoration: none !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
+}
+
+.theme-myspace #ms-header .ms-navbar a:hover {
+  color: #ffff99 !important;
+  text-decoration: underline !important;
+}
+
+.theme-myspace #ms-header .ms-nav-sep {
+  color: rgba(255, 255, 255, 0.4) !important;
+  font-size: 11px !important;
+}
+
+.theme-myspace #ms-header .ms-nav-muted {
+  color: rgba(255, 255, 255, 0.65) !important;
+  font-size: 11px !important;
+}
+
+/* ---- #ms-sidebar ---- */
+.theme-myspace .ms-box {
+  background: var(--ms-content);
+  border: 1px solid var(--ms-border);
+  margin-bottom: 4px;
+}
+
+.theme-myspace .ms-box-header {
+  background: var(--ms-section-bg);
+  color: #000000 !important;
+  font-size: 11px !important;
+  font-weight: bold !important;
+  padding: 3px 6px;
+  border-bottom: 1px solid var(--ms-border);
+}
+
+.theme-myspace .ms-box-header-blue {
+  background: var(--ms-contact-bg) !important;
+  color: #ffffff !important;
+}
+
+.theme-myspace .ms-box-body {
+  padding: 6px;
+  font-size: 11px !important;
+  color: var(--ms-text) !important;
+  background: var(--ms-content) !important;
+}
+
+.theme-myspace .ms-avatar-img {
+  width: 100%;
+  max-width: 210px;
+  display: block;
+  border: 1px solid var(--ms-border) !important;
+  margin-bottom: 6px;
+}
+
+.theme-myspace .ms-avatar-placeholder {
+  width: 100px;
+  height: 100px;
+  background: var(--ms-nav);
+  color: #ffffff !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px !important;
+  font-weight: bold !important;
+  border: 1px solid var(--ms-border);
+  margin-bottom: 6px;
+}
+
+.theme-myspace .ms-info-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.theme-myspace .ms-info-table td {
+  padding: 2px 0 !important;
+  font-size: 11px !important;
+  color: var(--ms-text) !important;
+}
+
+.theme-myspace .ms-profile-name {
+  font-size: 14px !important;
+  font-weight: bold !important;
+  color: #000000 !important;
+}
+
+/* ---- Contact buttons ---- */
+.theme-myspace .ms-contact-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.theme-myspace .ms-contact-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.theme-myspace .ms-contact-table td {
+  padding: 2px !important;
+  background: var(--ms-content) !important;
+}
+
+.theme-myspace .ms-contact-btn {
+  display: block;
+  font-size: 10px !important;
+  padding: 2px 4px !important;
+  color: var(--ms-link) !important;
+  text-decoration: none !important;
+  border: 1px solid var(--ms-border) !important;
+  background: #efefef !important;
+  text-align: center;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.theme-myspace .ms-contact-btn:hover {
+  background: #ddeeff !important;
+  color: var(--ms-link) !important;
+}
+
+.theme-myspace .ms-block-btn {
+  color: #cc0000 !important;
+}
+
+/* ---- Friends grid ---- */
+.theme-myspace .ms-friends-count {
+  font-size: 12px !important;
+  margin-bottom: 6px;
+  color: var(--ms-text) !important;
+}
+
+.theme-myspace .ms-friends-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.theme-myspace .ms-friend-item {
+  text-align: center;
+}
+
+.theme-myspace .ms-friend-avatar {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold !important;
+  font-size: 16px !important;
+  color: #ffffff !important;
+  border: 1px solid var(--ms-border);
+}
+
+.theme-myspace .ms-friend-avatar-img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  display: block;
+  margin: 0 auto 3px;
+  border: 1px solid var(--ms-border) !important;
+}
+
+.theme-myspace .ms-friend-name {
+  font-size: 12px !important;
+  color: var(--ms-link) !important;
+  text-decoration: underline;
+  cursor: pointer;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.theme-myspace .ms-view-all {
+  margin-top: 4px;
+  font-size: 10px !important;
+  text-align: center;
+}
+
+/* ---- #ms-main: profile content column ---- */
+.theme-myspace #ms-main {
+  background: var(--ms-content);
+  border: 1px solid var(--ms-border);
+  min-width: 0;
+}
+
+.theme-myspace .ms-profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: var(--ms-section-bg);
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--ms-border);
+}
+
+.theme-myspace .ms-profile-header-name {
+  font-size: 15px !important;
+  font-weight: bold !important;
+  color: #000000 !important;
+}
+
+.theme-myspace .ms-profile-header-status {
+  font-size: 11px !important;
+  color: #336600 !important;
+}
+
+/* ---- #ms-footer ---- */
+.theme-myspace #ms-footer {
+  background: var(--ms-nav-dark);
+  color: #aaaaaa !important;
+  font-size: 10px !important;
+  padding: 6px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.theme-myspace #ms-footer a {
+  color: #aaccff !important;
+  text-decoration: none !important;
+  font-size: 10px !important;
+}
+
+.theme-myspace #ms-footer a:hover {
+  text-decoration: underline !important;
+}
+
+.theme-myspace #ms-footer .ms-footer-links {
+  display: flex;
+  gap: 8px;
+}
